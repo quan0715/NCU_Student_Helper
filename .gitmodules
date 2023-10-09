@@ -1,0 +1,3 @@
+[submodule "hsr_crawler"]
+	path = hsr_crawler
+	url = git@github.com:an920107/hsr-crawler.git
