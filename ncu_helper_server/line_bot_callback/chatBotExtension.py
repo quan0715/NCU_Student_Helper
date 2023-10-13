@@ -8,7 +8,9 @@ from linebot.models import TextSendMessage, TemplateSendMessage, ButtonsTemplate
 
 def chat_status(status_id:str, default=False):
     """
-    use this as the decorator
+    use this as the decorator when you want your function to be a status of a chat bot.\
+    status_id: unique id for the state, can be used for debugging
+    default: set default state, first decorated is default if no function assigned
     """
     def wrapper(func):
         __statuses[status_id]=func
@@ -20,12 +22,21 @@ def chat_status(status_id:str, default=False):
     return wrapper
 
 def text(func):
+    """
+    wrap a function returning a string as legal chatBot returned message
+    """
     def wrapper(event):
         text = func(event)
         return TextSendMessage(text) if text else None
     return wrapper
 
 def button_group(title="", text="", default_text='default alt text'):
+    """
+    wrap a function returning a list of string as the button group text of chatbot
+    title: title of the button group
+    text: text of the button group
+    default_text: text showed outside chat room
+    """
     def outer(func):
         def wrapper(event):
             button_texts = func(event)
@@ -42,7 +53,11 @@ def button_group(title="", text="", default_text='default alt text'):
         return wrapper
     return outer
 
-def handle(event):
+def handle(event)->list:
+    """
+    return the result of the state flow
+    event: line chatbot event
+    """
     assert __default_status is not None
     try:
         user_id = event.source.user_id
@@ -66,6 +81,12 @@ def handle(event):
 
 
 def jump_to(func:callable, user_id, propagation=False):
+    """
+    link current status to next status, next status will be execute after current status return
+    func: status function you want to transfer to
+    user_id: line chatbot user_id
+    propagation: if set to True, transfer to the status with current event as input
+    """
     try:
         status_exists = ChatStatus.objects.filter(line_user_id=user_id)
         if not status_exists:
