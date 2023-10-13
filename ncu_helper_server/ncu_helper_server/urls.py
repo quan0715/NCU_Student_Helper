@@ -31,8 +31,9 @@ def flutter_redirect(request, resource):
 
 
 urlpatterns = [
-    path('view/', lambda r: flutter_redirect(r, 'index.html')),
+
     path('admin/', admin.site.urls),
-    path('view/<path:resource>', flutter_redirect),
     path('callback/', views.LineBotCallbackView.as_view()),
+    path('', lambda r: flutter_redirect(r, 'index.html')),
+    path('<path:resource>', flutter_redirect),
 ]
