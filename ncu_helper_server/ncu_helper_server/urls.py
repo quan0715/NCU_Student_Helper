@@ -19,16 +19,20 @@ from django.urls import path
 
 from django.urls import path
 from django.views.static import serve
+from line_bot_callback import views
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FLUTTER_WEB_APP = os.path.join(BASE_DIR, 'web')
 
+
 def flutter_redirect(request, resource):
     return serve(request, resource, FLUTTER_WEB_APP)
 
+
 urlpatterns = [
+    path('view/', lambda r: flutter_redirect(r, 'index.html')),
     path('admin/', admin.site.urls),
-    path('', lambda r: flutter_redirect(r, 'index.html')),
-    path('<path:resource>', flutter_redirect),
+    path('view/<path:resource>', flutter_redirect),
+    path('callback/', views.LineBotCallbackView.as_view()),
 ]
