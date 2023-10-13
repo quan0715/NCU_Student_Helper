@@ -12,13 +12,16 @@ from linebot.models import MessageEvent, TextSendMessage
 from concurrent.futures import ThreadPoolExecutor
 # Create your views here.
 
+import line_bot_callback.chatBotModel
+from line_bot_callback.chatBotExtension import handle
+
 
 class LineBotCallbackView(View):
     line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
     parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
     handler = WebhookHandler(settings.LINE_CHANNEL_SECRET)
     # server_url = "https://quan.squidspirit.com"
-    # threadPoolExecutor = ThreadPoolExecutor()
+    threadPoolExecutor = ThreadPoolExecutor()
 
     @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
@@ -45,15 +48,16 @@ class LineBotCallbackView(View):
 
     @handler.add(MessageEvent, message=TextSendMessage)
     def message_handler(self, event):
-        self.line_bot_api.reply_message(event.reply_token, event.message)
-        # def reply(event):
-        #     replies=handle(event)
-        #     for idx, reply in enumerate(replies):
-        #         if idx==len(replies)-1: break
-        #         self.line_bot_api.push_message(event.source.user_id, reply)
-        #     if len(replies):
-        #         self.line_bot_api.reply_message(event.reply_token, replies[-1])
-        # self.threadPoolExecutor.submit(reply, event)
+        print(event.source.user_id)
+        def reply(event):
+            replies=handle(event)
+            for idx, reply in enumerate(replies):
+                if idx==len(replies)-1: break
+                self.line_bot_api.push_message(event.source.user_id, reply)
+            if len(replies):
+                self.line_bot_api.reply_message(event.reply_token, replies[-1])
+
+        self.threadPoolExecutor.submit(reply, event)
 
     # @classmethod
     # def notion_auth_callback(cls, user_id):
