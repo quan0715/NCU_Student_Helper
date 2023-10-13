@@ -1,5 +1,5 @@
 """
-URL configuration for ncu_helper_server project.
+URL configuration for eeclass_setting project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -15,9 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+
+from django.urls import path
 from django.views.static import serve
-from line_bot_callback import views
+from eeclass_setting import views
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,10 +31,6 @@ def flutter_redirect(request, resource):
 
 
 urlpatterns = [
-    path('view/', lambda r: flutter_redirect(r, 'index.html')),
-    path('admin/', admin.site.urls),
-    path('view/<path:resource>', flutter_redirect),
-    path('callback/', views.LineBotCallbackView.as_view()),
-    path('notion/', include('notion_auth.urls')),
-    path('eeclass_api/', include('eeclass_setting.urls')),
+    path('get_account_password', views.get_account_password),
+    path('check_login', views.check_login),
 ]
