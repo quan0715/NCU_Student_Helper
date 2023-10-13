@@ -1,10 +1,10 @@
 # NCU STUDENT HELPER
 ---
 ### ABOUT US 關於我們
-代編輯
+待編輯
 
 ### 專案說明
-代編輯
+待編輯
 
 ### directory 說明
 
