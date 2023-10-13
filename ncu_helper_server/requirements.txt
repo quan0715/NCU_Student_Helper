@@ -11,6 +11,7 @@ certifi==2023.5.7
 cffi==1.16.0
 charset-normalizer==3.1.0
 click==8.1.7
+colorama==0.4.6
 cryptography==41.0.4
 dataclasses-json==0.6.1
 Django==4.2.2
@@ -60,6 +61,7 @@ tenacity==8.2.3
 tqdm==4.66.1
 typing-inspect==0.9.0
 typing_extensions==4.8.0
+tzdata==2023.3
 urllib3==1.26.16
 Werkzeug==3.0.0
 yarl==1.9.2

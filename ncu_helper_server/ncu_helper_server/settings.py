@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'line_bot_callback',
+    'notion_auth',
+    'eeclass_setting'
 ]
 
 MIDDLEWARE = [
@@ -125,10 +128,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# NOTION_OAUTH_CLIENT_ID = os.environ.get("NOTION_OAUTH_CLIENT_ID")
-# NOTION_OAUTH_SECRET_KEY = os.environ.get("NOTION_OAUTH_SECRET_KEY")
-# LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
-# LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
-LINE_CHANNEL_ACCESS_TOKEN = "MGWPDGAHGf4Z5k6R/4tMeWhQeCln2tjOdWkgLaS8l+3Tkxw2OjMv3XElUuiawNIQXPT1v+Di+XUPPRCnPhAOrlypwsAkVMub2lRdg3ubUB0ExZfvqZw6VLsbjQCe5bwTSo6GgUv2kM+pr02dt2R42gdB04t89/1O/w1cDnyilFU="
-LINE_CHANNEL_SECRET = "b6e007e5d2d50224f2ef43d6147aeb95"
+NOTION_OAUTH_CLIENT_ID = os.environ.get("NOTION_OAUTH_CLIENT_ID")
+NOTION_OAUTH_SECRET_KEY = os.environ.get("NOTION_OAUTH_SECRET_KEY")
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
+SERVER = os.environ.get("SERVER")
+# LINE_CHANNEL_ACCESS_TOKEN = "MGWPDGAHGf4Z5k6R/4tMeWhQeCln2tjOdWkgLaS8l+3Tkxw2OjMv3XElUuiawNIQXPT1v+Di+XUPPRCnPhAOrlypwsAkVMub2lRdg3ubUB0ExZfvqZw6VLsbjQCe5bwTSo6GgUv2kM+pr02dt2R42gdB04t89/1O/w1cDnyilFU="
+# LINE_CHANNEL_SECRET = "b6e007e5d2d50224f2ef43d6147aeb95"
 
