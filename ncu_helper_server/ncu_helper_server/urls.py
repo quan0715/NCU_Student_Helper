@@ -29,10 +29,26 @@ def flutter_redirect(request, resource):
 
 
 urlpatterns = [
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    path('view/', lambda r: flutter_redirect(r, 'index.html')),
+>>>>>>> 857f6dc (pull and merge)
+    path('admin/', admin.site.urls),
+    path('callback/', views.LineBotCallbackView.as_view()),
+    path('notion/', include('notion_auth.urls')),
+    path('eeclass_api/', include('eeclass_setting.urls')),
+<<<<<<< HEAD
+    path('', lambda r: flutter_redirect(r, 'index.html')),
+    path('<path:resource>', flutter_redirect),
+=======
+=======
     path('admin/', admin.site.urls),
     path('callback/', views.LineBotCallbackView.as_view()),
     path('notion/', include('notion_auth.urls')),
     path('eeclass_api/', include('eeclass_setting.urls')),
     path('', lambda r: flutter_redirect(r, 'index.html')),
     path('<path:resource>', flutter_redirect),
+>>>>>>> b9dd81e (first)
+>>>>>>> 857f6dc (pull and merge)
 ]
