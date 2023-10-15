@@ -17,24 +17,6 @@ def default_message(event):
 @chat_status("main menu")
 @text
 def main_menu(event):
-<<<<<<< HEAD
-    match event.message.text:
-        case 'Notion Oauth連線':
-            jump_to(oauth_connection, event.source.user_id, propagation=True)
-            return
-        case 'EECLASS帳號設定':
-            jump_to(set_eeclass_account, event.source.user_id)
-            return '請輸入你的EECLASS 帳號'
-        case 'EECLASS密碼設定':
-            jump_to(set_eeclass_password, event.source.user_id)
-            return '請輸入你的EECLASS 密碼'
-        case 'EECLASS連線測試':
-            jump_to(eeclass_login_test, event.source.user_id, True)
-            return
-        case _:
-            jump_to(default_message, event.source.user_id, True)
-            return '沒有此項指令'
-=======
     if event.message.text == 'Notion Oauth連線':
         jump_to(oauth_connection, event.source.user_id, propagation=True)
         return
@@ -50,7 +32,6 @@ def main_menu(event):
     else:
         jump_to(default_message, event.source.user_id, True)
         return '沒有此項指令'
->>>>>>> b9dd81e (first)
 
 
 import uuid

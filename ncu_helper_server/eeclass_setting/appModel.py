@@ -41,10 +41,7 @@ def save_user_data(user_id, account=None, password=None):
     """
     try:
         user, created = LineUser.objects.get_or_create(line_user_id=user_id)
-<<<<<<< HEAD
-=======
         print(user, account, password, created)
->>>>>>> b9dd81e (first)
         if account:
             user.eeclass_username=account
         if password:

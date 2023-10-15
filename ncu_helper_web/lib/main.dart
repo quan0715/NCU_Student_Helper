@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_line_liff/flutter_line_liff.dart';
+import 'package:ncu_helper/view/setting_page/oauth_redirect_page.dart';
 import 'package:ncu_helper/view/setting_page/setting_page_view.dart';
 
 void main() async{
@@ -29,6 +30,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const SettingPageView(),
+      routes: {
+        '': (context) => const SettingPageView(), // This is the default route.
+        '/setting': (context) => const SettingPageView(),
+        '/notion/redirect':(context) => const OauthRedirectPage(),
+      }
     );
   }
 }
