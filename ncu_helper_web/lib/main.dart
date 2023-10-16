@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '': (context) => const SettingPageView(), // This is the default route.
         '/setting': (context) => const SettingPageView(),
-        '/notion/redirect':(context) => const OauthRedirectPage(),
+        '/notion/auth_page':(context) => const OauthRedirectPage(),
       }
     );
   }

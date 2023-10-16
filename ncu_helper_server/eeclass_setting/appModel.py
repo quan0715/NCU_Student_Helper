@@ -49,3 +49,13 @@ def save_user_data(user_id, account=None, password=None):
         user.save()
     except Exception as e:
         print(e)
+        
+def get_oauth_data(user_id):
+    """
+    user_id: line_user_id\
+    returned value: ({access_token, duplicated_template_id}, founded})
+    """
+    if len(LineUser.objects.filter(line_user_id=user_id))==0:
+        return (None, False)
+    user = LineUser.objects.get(line_user_id=user_id)
+    return ({'access_token':user.notion_token, 'duplicated_template_id':user.eeclass_db_id}, True)

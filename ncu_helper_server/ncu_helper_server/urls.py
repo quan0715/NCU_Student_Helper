@@ -25,6 +25,8 @@ FLUTTER_WEB_APP = os.path.join(BASE_DIR, 'web')
 
 
 def flutter_redirect(request, resource):
+    print(request.path)
+    print(resource)
     return serve(request, resource, FLUTTER_WEB_APP)
 
 
