@@ -23,7 +23,7 @@ async def eeclass_pip_line(user: LineUser):
             return "login failed"
         reply_message: List[str] = []
         await bot.retrieve_all_course(check=True, refresh=True)
-        reply_message.append('\n'.join(str(c) for c in bot.courses_list))
+        # reply_message.append('\n'.join(str(c) for c in bot.courses_list))
         await bot.retrieve_all_bulletins()
         all_bulletins_detail = await bot.retrieve_all_bulletins_details()
         reply_message.append('\n'.join(f'公告：{str(b)}' for b in bot.bulletins_list))
@@ -39,7 +39,9 @@ async def eeclass_pip_line(user: LineUser):
         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, db)
         await update_all_material_info_to_notion_db(bot.materials_detail_list, db)
         # print('\n'.join(reply_message))
-        return '\n'.join(reply_message)
+        notion_db_url = f"https://www.notion.so/{user.eeclass_db_id.replace('-', '')}"
+        notion_message = f"已更新到Notion DB\n{notion_db_url}\n---\n"
+        return notion_message + '\n'.join(reply_message)
 
 
 # async def eeclass_test(account, password, user: LineUser):
