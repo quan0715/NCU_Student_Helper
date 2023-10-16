@@ -15,6 +15,7 @@ class UserModel{
     this.notionAuthToken = '',
   });
 
+
   set setStudentId(String studentId) => this.studentId = studentId;
   set setEeclassPassword(String eeclassPassword) => this.eeclassPassword = eeclassPassword;
   set setLineUserId(String lineUserId) => this.lineUserId = lineUserId;
