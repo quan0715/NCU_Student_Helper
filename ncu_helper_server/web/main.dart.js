@@ -72883,7 +72883,7 @@ A.d3().$1("LIFF init error: "+A.h(s.gfv(a))+", "+A.h(s.gj5(a))+", "+A.h(s.gt8(a)
 $S:150}
 A.Gn.prototype={
 L(a){var s=A.ank(null,A.aug(B.ac,B.dy),!0)
-return new A.vA(B.iU,A.av(["",new A.a0t(),"/setting",new A.a0u(),"/notion/auth_page",new A.a0v()],t.N,t.Ab),"Flutter Demo",s,null)}}
+return new A.vA(B.iU,A.av(["",new A.a0t(),"/setting",new A.a0u(),"/notion/auth_page",new A.a0v()],t.N,t.Ab),"NCU STUDENT HELPER",s,null)}}
 A.a0t.prototype={
 $1(a){return B.iU},
 $S:153}

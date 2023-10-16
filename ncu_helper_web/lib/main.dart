@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_line_liff/flutter_line_liff.dart';
+import 'package:ncu_helper/utils/server_config.dart';
 import 'package:ncu_helper/view/setting_page/oauth_redirect_page.dart';
 import 'package:ncu_helper/view/setting_page/setting_page_view.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterLineLiff().init(
-    config: Config(liffId: '2001049604-4ZDQX3MK'),
+    config: Config(liffId: ServerConfig.liffId),
     successCallback: () {
       debugPrint('LIFF init success.');
     },
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'NCU STUDENT HELPER',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,

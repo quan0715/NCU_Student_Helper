@@ -6,11 +6,11 @@ from django.urls import reverse
 
 
 class LineUser(models.Model):
-    line_user_id = models.CharField(max_length=255, unique=True)
-    notion_token = models.TextField(null=True, blank=True)
-    eeclass_db_id = models.CharField(max_length=255, blank=True, null=True)
-    eeclass_username = models.CharField(max_length=255, null='')
-    eeclass_password = models.CharField(max_length=255, null='')
+    line_user_id = models.CharField(max_length=255, unique=True, null=False, blank=False)
+    notion_token = models.TextField(max_length=255, blank=True, default='')
+    eeclass_db_id = models.TextField(max_length=255, blank=True, default='')
+    eeclass_username = models.CharField(max_length=255, default='')
+    eeclass_password = models.CharField(max_length=255, default='')
     
 
     class Meta:

@@ -14,22 +14,52 @@ async def eeclass_test_login(account, password):
         return await bot.login()
 
 
-async def eeclass_test(account, password, user: LineUser):
+async def eeclass_pip_line(user: LineUser):
+    # TODO: update new version pipline
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
-        bot = EEAsyncBot(session, account, password)
-        await bot.login()
+        bot = EEAsyncBot(session, user.eeclass_username, user.eeclass_password)
+        result = await bot.login()
+        if not result:
+            return "login failed"
+        reply_message: List[str] = []
         await bot.retrieve_all_course(check=True, refresh=True)
+        # reply_message.append('\n'.join(str(c) for c in bot.courses_list))
         await bot.retrieve_all_bulletins()
         all_bulletins_detail = await bot.retrieve_all_bulletins_details()
+        reply_message.append('\n'.join(f'公告：{str(b)}' for b in bot.bulletins_list))
         await bot.retrieve_all_homeworks()
         all_homework_detail = await bot.retrieve_all_homeworks_details()
+        reply_message.append('\n'.join(f'作業：{str(h)}' for h in bot.homeworks_list))
         await bot.retrieve_all_material()
         all_material_detail = await bot.retrieve_all_materials_details()
+        reply_message.append('\n'.join(f'教材：{str(m)}' for m in bot.material_list))
         notion_bot = Notion(user.notion_token)
         db = notion_bot.get_database(user.eeclass_db_id)
-        await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list , db)
+        await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list, db)
         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, db)
         await update_all_material_info_to_notion_db(bot.materials_detail_list, db)
+        # print('\n'.join(reply_message))
+        notion_db_url = f"https://www.notion.so/{user.eeclass_db_id.replace('-', '')}"
+        notion_message = f"已更新到Notion DB\n{notion_db_url}\n---\n"
+        return notion_message + '\n'.join(reply_message)
+
+
+# async def eeclass_test(account, password, user: LineUser):
+#     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+#         bot = EEAsyncBot(session, account, password)
+#         await bot.login()
+#         await bot.retrieve_all_course(check=True, refresh=True)
+#         await bot.retrieve_all_bulletins()
+#         all_bulletins_detail = await bot.retrieve_all_bulletins_details()
+#         await bot.retrieve_all_homeworks()
+#         all_homework_detail = await bot.retrieve_all_homeworks_details()
+#         await bot.retrieve_all_material()
+#         all_material_detail = await bot.retrieve_all_materials_details()
+#         notion_bot = Notion(user.notion_token)
+#         db = notion_bot.get_database(user.eeclass_db_id)
+#         await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list , db)
+#         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, db)
+#         await update_all_material_info_to_notion_db(bot.materials_detail_list, db)
 
 def builtin_in_notion_template(db: Database, target):
     return BaseObject(
@@ -109,21 +139,6 @@ def material_in_notion_template(db: Database, target):
 
         )
     )
-
-# def get_config():
-#     load_dotenv()
-#     auth = os.getenv("NOTION_AUTH")
-#     notion_bot = Notion(auth)
-#     db: Database = notion_bot.search("CONFIG")
-#     db_table = db.query_database_dataframe()
-#     table = {
-#          k: v for k, v in zip(db_table['KEY'], db_table['VALUE'])
-#     }
-#     return {
-#         "DATABASE_NAME": table['DATABASE_NAME'],
-#         "ACCOUNT": table['STUDENT_ID'],
-#         "PASSWORD": table['PASSWORD'],
-#     }
 
 # just for testing
 
