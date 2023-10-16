@@ -25,23 +25,16 @@ FLUTTER_WEB_APP = os.path.join(BASE_DIR, 'web')
 
 
 def flutter_redirect(request, resource):
+    print(request.path)
+    print(resource)
     return serve(request, resource, FLUTTER_WEB_APP)
 
 
 urlpatterns = [
-<<<<<<< HEAD
-    path('view/', lambda r: flutter_redirect(r, 'index.html')),
-    path('admin/', admin.site.urls),
-    path('view/<path:resource>', flutter_redirect),
-    path('callback/', views.LineBotCallbackView.as_view()),
-    path('notion/', include('notion_auth.urls')),
-    path('eeclass_api/', include('eeclass_setting.urls')),
-=======
     path('admin/', admin.site.urls),
     path('callback/', views.LineBotCallbackView.as_view()),
     path('notion/', include('notion_auth.urls')),
     path('eeclass_api/', include('eeclass_setting.urls')),
     path('', lambda r: flutter_redirect(r, 'index.html')),
     path('<path:resource>', flutter_redirect),
->>>>>>> b9dd81e (first)
 ]
