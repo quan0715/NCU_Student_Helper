@@ -34,12 +34,12 @@ async def eeclass_pipeline(user: LineUser):
         all_material_detail = await bot.retrieve_all_materials_details()
         reply_message.append('\n'.join(f'教材：{str(m)}' for m in bot.material_list))
         notion_bot = Notion(user.notion_token)
-        db = notion_bot.get_database(user.eeclass_db_id)
+        db = notion_bot.get_database(user.notion_template_id)
         await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list, db)
         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, db)
         await update_all_material_info_to_notion_db(bot.materials_detail_list, db)
         # print('\n'.join(reply_message))
-        notion_db_url = f"https://www.notion.so/{user.eeclass_db_id.replace('-', '')}"
+        notion_db_url = f"https://www.notion.so/{user.notion_template_id.replace('-', '')}"
         notion_message = f"已更新到Notion DB\n{notion_db_url}\n---\n"
         return notion_message + '\n'.join(reply_message)
 
@@ -56,7 +56,7 @@ async def eeclass_pipeline(user: LineUser):
 #         await bot.retrieve_all_material()
 #         all_material_detail = await bot.retrieve_all_materials_details()
 #         notion_bot = Notion(user.notion_token)
-#         db = notion_bot.get_database(user.eeclass_db_id)
+#         db = notion_bot.get_database(user.notion_template_id)
 #         await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list , db)
 #         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, db)
 #         await update_all_material_info_to_notion_db(bot.materials_detail_list, db)

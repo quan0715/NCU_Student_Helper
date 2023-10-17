@@ -29,8 +29,6 @@ def get_notion_oauth_data(request, *args, **kwargs):
         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
     return JsonResponse(data)
 
-
-
 @csrf_exempt
 def get_account_password(request, *args, **kwargs):
     if request.method!='GET':
