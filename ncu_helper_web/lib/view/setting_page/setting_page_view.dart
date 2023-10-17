@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ncu_helper/view/theme/theme.dart';
 import 'package:ncu_helper/view_model/setting_page_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingPageView extends StatefulWidget {
   const SettingPageView({Key? key}) : super(key: key);
@@ -188,27 +189,29 @@ class _SettingPageViewState extends State<SettingPageView> {
   }
 
   Widget _buildOAuthSettingForm(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        dataCard(
-          title: "Notion EECLASS TOKEN",
-          child: Row(
-            children: [
-              Expanded(child: Text("None")),
-            ],
-          )
-        ),
-        dataCard(
-          title: "Notion EECLASS db URL",
-          child: Row(
-            children: [
-              Expanded(child: Text("None")),
-            ],
-          )
-        ),
-      ],
+    return Consumer<SettingPageViewModel>(
+      builder: (context, viewModel, child) => Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          dataCard(
+            title: "Notion EECLASS TOKEN",
+            child: Row(
+              children: [
+                Expanded(child: Text(viewModel.notionAuthToken)),
+              ],
+            )
+          ),
+          dataCard(
+            title: "Notion EECLASS db URL",
+            child: Row(
+              children: [
+                Expanded(child: Text(viewModel.notionTemplateId)),
+              ],
+            )
+          ),
+        ],
+      ),
     );
   }
   
@@ -232,12 +235,15 @@ class _SettingPageViewState extends State<SettingPageView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Notion OAuth 設定", style: AppText.titleMedium(context)),
-                        stateWidget("未授權", AppColor.onErrorColor),
+                        viewModel.isNotionAuthSuccess
+                          ? stateWidget("已授權", AppColor.onSuccessColor)
+                          : stateWidget("未授權", AppColor.onErrorColor)
+                          
                       ],
                     ),
                     const Divider(),
                     _buildOAuthSettingForm(),
-                    viewButton("Notion OAuth 連線", (){})
+                    viewButton("Notion OAuth 連線", () async => viewModel.launchNotionOAuth())
                   ],
                 ),
               ),

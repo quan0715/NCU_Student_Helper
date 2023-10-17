@@ -7,17 +7,23 @@ import 'package:ncu_helper/model/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:ncu_helper/repositories/user_repository.dart';
 import 'package:ncu_helper/utils/server_config.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingPageViewModel extends ChangeNotifier{
   FlutterLineLiff liff = FlutterLineLiff();
   UserModel user = UserModel();
   String get lineUserName => user.lineUserName.isEmpty ? "尚未登入" : user.lineUserName;
   String get lineId => user.lineUserId.isEmpty ? "尚未登入" : user.lineUserId;
+  String get studentId => user.studentId.isEmpty ? "None" : user.studentId;
+  String get eeclassPassword => user.eeclassPassword.isEmpty ? "None" : user.eeclassPassword;
+  String get notionAuthToken => user.notionAuthToken.isEmpty ? "None" : user.notionAuthToken;
+  String get notionTemplateId => user.notionDatabaseId.isEmpty ? "None" : user.notionDatabaseId;
   bool _isLoading = false;
   bool _isEEclassConnectionSuccess = false;
 
   bool get isEEclassConnectionSuccess => _isEEclassConnectionSuccess;
   bool get isLineLoggedIn => liff.isLoggedIn;  
+  bool get isNotionAuthSuccess => user.notionAuthToken.isNotEmpty && user.notionDatabaseId.isNotEmpty;
   
   set isLoading(bool isLoading){
     _isLoading = isLoading;
@@ -33,6 +39,16 @@ class SettingPageViewModel extends ChangeNotifier{
 
   void setEEclassPassword(String eeclassPassword){
     user.eeclassPassword = eeclassPassword;
+    // notifyListeners();
+  }
+
+  void setNotionAuthToken(String notionAuthToken){
+    user.notionAuthToken = notionAuthToken;
+    // notifyListeners();
+  }
+
+  void setNotionTemplateId(String notionTemplateId){
+    user.notionDatabaseId  = notionTemplateId;
     // notifyListeners();
   }
 
@@ -71,7 +87,7 @@ class SettingPageViewModel extends ChangeNotifier{
     notifyListeners();
     liff.login(
       config: LoginConfig(  
-        redirectUri: ServerConfig.redirectURL
+        redirectUri: ServerConfig.hostBaseUrl
       ),
     );
     isLoading = false;
@@ -84,12 +100,18 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-      var result = await UserRepository().getUser(user.lineUserId);
+      var result = await UserRepository().getUserEeclassAccount(user.lineUserId);
       if(result != null){
         debugPrint("account: ${result.accountName}, password: ${result.accountPassword}");
         setStudentId(result.accountName);
         setEEclassPassword(result.accountPassword);
         await eeclassConnectionTest();
+      }
+      var notionData = await UserRepository().getUserNotionData(user.lineUserId);
+      if(notionData != null){
+        debugPrint("authToken: ${notionData.authToken}, copyTemplateIndex: ${notionData.copyTemplateIndex}");
+        setNotionAuthToken(notionData.authToken);
+        setNotionTemplateId(notionData.copyTemplateIndex);
       }
     }
     else{
@@ -103,11 +125,21 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     // if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-    var result = await UserRepository().getUser("U91c210fcea0952e4856265ea5f09571f");
-    if(result != null){
-      debugPrint("account: ${result.accountName}, password: ${result.accountPassword}");
-      setStudentId(result.accountName);
-      setEEclassPassword(result.accountPassword);
+    var eeclassAccount = await UserRepository().getUserEeclassAccount("U9bb9c1cdc6beb4cd5dd4f871602a6b8b");
+
+    if(eeclassAccount != null){
+      debugPrint("account: ${eeclassAccount.accountName}, password: ${eeclassAccount.accountPassword}");
+      setStudentId(eeclassAccount.accountName);
+      setEEclassPassword(eeclassAccount.accountPassword);
+    }
+    else{
+      debugPrint("line not logged in can't fetch user");
+    }
+    var notionData = await UserRepository().getUserNotionData("U9bb9c1cdc6beb4cd5dd4f871602a6b8b");
+    if(notionData != null){
+      debugPrint("authToken: ${notionData.authToken}, copyTemplateIndex: ${notionData.copyTemplateIndex}");
+      setNotionAuthToken(notionData.authToken);
+      setNotionTemplateId(notionData.copyTemplateIndex);
     }
     else{
       debugPrint("line not logged in can't fetch user");
@@ -115,6 +147,7 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = false;
     notifyListeners();
   }
+
 
   Future<void> eeclassConnectionTest() async{
     isLoading = true;
@@ -137,6 +170,37 @@ class SettingPageViewModel extends ChangeNotifier{
     notifyListeners();
   }
   
+  Future<void> launchNotionOAuth() async {
+    if(isLineLoggedIn && user.lineUserId.isNotEmpty){
+      if (!await launchUrl(
+        // Uri.parse(ServerConfig.notionAuthURL),
+        Uri.parse("${ServerConfig.serverBaseURL}/notion/auth?user_id=${user.lineUserId}"),
+        mode: LaunchMode.externalApplication,
+        // webOnlyWindowName: '_blank'
+        webOnlyWindowName: '_self'
+      )) {
+        throw Exception('Could not launch notionAuth');
+      }
+    }
+    else{
+      debugPrint("line not logged in can't fetch user");
+    }
+  }
+
+  Future<void> launchNotionOAuthTest() async {
+    String linUserId = "U9bb9c1cdc6beb4cd5dd4f871602a6b8b";
+    if (!await launchUrl(
+      // Uri.parse(ServerConfig.notionAuthURL),
+      Uri.parse(ServerConfig.serverBaseURL + "/notion/auth?user_id=$linUserId"),
+      mode: LaunchMode.externalApplication,
+      // webOnlyWindowName: '_blank'
+      // webOnlyWindowName: '_self'
+    )) {
+      throw Exception('Could not launch notionAuth');
+    }
+  }
+
+  
 
   Future<void> init() async{
     _isLoading = true;
@@ -145,6 +209,7 @@ class SettingPageViewModel extends ChangeNotifier{
     await updateLineInfo();
     debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
     await userInit();
+    // await userInitTest();
     _isLoading = false;
     notifyListeners();
   }

@@ -1,5 +1,11 @@
 from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing
-from eeclass_setting.appModel import save_user_data, check_login_success, find_account_password
+from typing import Tuple
+from eeclass_setting.models import LineUser
+from eeclass_setting.appModel import check_eeclass_update_pipeline, save_user_data, check_login_success, \
+    find_account_password, find_user_by_use_id
+import uuid
+from django.core.cache import cache
+
 
 @chat_status("default")
 @button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')
@@ -11,6 +17,7 @@ def default_message(event):
         'EECLASS密碼設定',
         'EECLASS連線測試'
     ]
+
 
 @chat_status("main menu")
 @text
@@ -33,8 +40,6 @@ def main_menu(event):
             return '沒有此項指令'
 
 
-import uuid
-from django.core.cache import cache
 @chat_status("reply oauth link")
 @text
 def oauth_connection(event):
@@ -44,7 +49,7 @@ def oauth_connection(event):
     message = f"請透過連結登入 {u}"
     jump_to(default_message, event.source.user_id)
     return message
-    
+
 
 @chat_status("set eeclass account")
 @text
@@ -55,6 +60,7 @@ def set_eeclass_account(event):
         print(e)
     jump_to(default_message, event.source.user_id, True)
     return f'已更新你的帳號為 {event.message.text}'
+
 
 @chat_status("set eeclass password")
 @text
@@ -67,10 +73,11 @@ def set_eeclass_password(event):
     jump_to(default_message, event.source.user_id, True)
     return f'已更新你的密碼為 {event.message.text}'
 
+
 @chat_status("test eeclass login")
 @text
 def eeclass_login_test(event):
-    jump_to(default_message, event.source.user_id, True)
+    jump_to(default_message, event.source.user_id)
     user_data, founded = find_account_password(event.source.user_id)
     if not founded:
         return '尚未設定帳號密碼'
@@ -79,4 +86,15 @@ def eeclass_login_test(event):
         return '帳號認證成功'
     else:
         return '帳號認證失敗，請重新設定帳號密碼'
-    
+
+
+@chat_status("eeclass update")
+@text
+def eeclass_update_test(event):
+    jump_to(default_message, event.source.user_id, False)
+    search_result:  Tuple[LineUser | None, bool] = find_user_by_use_id(event.source.user_id)
+    user, founded = search_result
+    if not founded:
+        return '尚未設定帳號密碼'
+    result = check_eeclass_update_pipeline(user)
+    return result
