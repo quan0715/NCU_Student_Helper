@@ -40,7 +40,7 @@ def main_menu(event):
         jump_to(eeclass_update_test, event.source.user_id, True)
         return 'eeclass update start'
     elif event.message.text == '設定頁面':
-        jump_to(eeclass_update_test, event.source.user_id, True)
+        # jump_to(eeclass_update_test, event.source.user_id, True)
         return 'https://liff.line.me/2001049604-4ZDQX3MK'
     else:
         # jump_to(default_message, event.source.user_id, True)
