@@ -19,16 +19,18 @@ jobs:
           channel: 'stable'
 
       - name: Change to Flutter project directory
-        run: cd ncu_helper_web
+        
         
       - name: Install dependencies
         run: flutter pub get
+        working-directory: ncu_helper_web
 
       - name: Build Flutter Web
         run: flutter build web
+        working-directory: ncu_helper_web
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: build/web
+          publish_dir: ncu_helper_web/build/web
