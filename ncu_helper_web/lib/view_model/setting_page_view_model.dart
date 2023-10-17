@@ -99,23 +99,28 @@ class SettingPageViewModel extends ChangeNotifier{
   Future<void> userInit() async{
     isLoading = true;
     notifyListeners();
-    if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-      var result = await UserRepository().getUserEeclassAccount(user.lineUserId);
-      if(result != null){
-        debugPrint("account: ${result.accountName}, password: ${result.accountPassword}");
-        setStudentId(result.accountName);
-        setEEclassPassword(result.accountPassword);
-        await eeclassConnectionTest();
+    try{
+      if(isLineLoggedIn && user.lineUserId.isNotEmpty){
+        var result = await UserRepository().getUserEeclassAccount(user.lineUserId);
+        if(result != null){
+          debugPrint("account: ${result.accountName}, password: ${result.accountPassword}");
+          setStudentId(result.accountName);
+          setEEclassPassword(result.accountPassword);
+          await eeclassConnectionTest();
+        }
+        var notionData = await UserRepository().getUserNotionData(user.lineUserId);
+        if(notionData != null){
+          debugPrint("authToken: ${notionData.authToken}, copyTemplateIndex: ${notionData.copyTemplateIndex}");
+          setNotionAuthToken(notionData.authToken);
+          setNotionTemplateId(notionData.copyTemplateIndex);
+        }
       }
-      var notionData = await UserRepository().getUserNotionData(user.lineUserId);
-      if(notionData != null){
-        debugPrint("authToken: ${notionData.authToken}, copyTemplateIndex: ${notionData.copyTemplateIndex}");
-        setNotionAuthToken(notionData.authToken);
-        setNotionTemplateId(notionData.copyTemplateIndex);
+      else{
+        debugPrint("line not logged in can't fetch user");
       }
     }
-    else{
-      debugPrint("line not logged in can't fetch user");
+    catch(error){
+      debugPrint("userInit error ${error.toString()}");
     }
     isLoading = false;
     notifyListeners();
