@@ -40,9 +40,13 @@ class UserRepository{
     debugPrint("lineUserId: $lineUserId");
     try{
       var result = await http.Client().get(
-        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId")
+        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId",),
+        headers: {
+          'ngrok-skip-browser-warning' : '8000',
+        }
       );
       if(result.statusCode == 200){
+        debugPrint(result.body);
         var data = jsonDecode(result.body);
         // debugPrint(data.toString());
         return EECLASSAccountEntity.fromJson(data);
@@ -88,9 +92,13 @@ class UserRepository{
     debugPrint("lineUserId: $lineUserId");
     try{
       var result = await http.Client().get(
-        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId")
+        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId"),
+        headers: {
+          'ngrok-skip-browser-warning' : '8000',
+        }
       );
       if(result.statusCode == 200){
+        debugPrint(result.body);
         var data = jsonDecode(result.body);
         return NotionDataEntity.fromJson(data);
       }

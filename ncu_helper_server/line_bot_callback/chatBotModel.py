@@ -1,6 +1,5 @@
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing
 from typing import Tuple
-
-from .chatBotExtension import chat_status, jump_to, text, button_group
 from eeclass_setting.models import LineUser
 from eeclass_setting.appModel import check_eeclass_update_pipeline, save_user_data, check_login_success, \
     find_account_password, find_user_by_use_id
@@ -8,8 +7,8 @@ import uuid
 from django.core.cache import cache
 
 
-@chat_status("eeclass update")
-@text
+@chat_status("default")
+@button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')
 def default_message(event):
     jump_to(main_menu, event.source.user_id)
     return [
@@ -24,38 +23,33 @@ def default_message(event):
 @chat_status("main menu")
 @text
 def main_menu(event):
-    # if event.message.text == 'Notion Oauth連線':
-    #     jump_to(oauth_connection, event.source.user_id, propagation=True)
-    #     return
-    if event.message.text == 'EECLASS帳號設定':
-        jump_to(set_eeclass_account, event.source.user_id)
-        return '請輸入你的EECLASS 帳號'
-    elif event.message.text == 'EECLASS密碼設定':
-        jump_to(set_eeclass_password, event.source.user_id)
-        return '請輸入你的EECLASS 密碼'
-    elif event.message.text == 'EECLASS連線測試':
-        jump_to(eeclass_login_test, event.source.user_id, True)
-        return
-    elif event.message.text == 'eeclass update':
-        jump_to(eeclass_update_test, event.source.user_id, True)
-        return 'eeclass update start'
-    elif event.message.text == '設定頁面':
-        # jump_to(eeclass_update_test, event.source.user_id, True)
-        return 'https://liff.line.me/2001049604-4ZDQX3MK'
-    else:
-        # jump_to(default_message, event.source.user_id, True)
-        return event.message.text
+    match event.message.text:
+        case 'Notion Oauth連線':
+            jump_to(oauth_connection, event.source.user_id, propagation=True)
+            return
+        case 'EECLASS帳號設定':
+            jump_to(set_eeclass_account, event.source.user_id)
+            return '請輸入你的EECLASS 帳號'
+        case 'EECLASS密碼設定':
+            jump_to(set_eeclass_password, event.source.user_id)
+            return '請輸入你的EECLASS 密碼'
+        case 'EECLASS連線測試':
+            jump_to(eeclass_login_test, event.source.user_id, True)
+            return
+        case _:
+            jump_to(default_message, event.source.user_id, True)
+            return '沒有此項指令'
 
 
-# @chat_status("reply oauth link")
-# @text
-# def oauth_connection(event):
-#     state = str(uuid.uuid4())
-#     cache.set(state, event.source.user_id, timeout=300)
-#     u = f"https://www.notion.so/install-integration?response_type=code&client_id=5f8acc7a-6c3a-4344-b9e7-3c63a8fad01d&redirect_uri=https%3A%2F%2Fquan.squidspirit.com%2Fnotion%2Fredirect%2F&owner=user&state={state}"
-#     message = f"請透過連結登入 {u}"
-#     jump_to(default_message, event.source.user_id)
-#     return message
+@chat_status("reply oauth link")
+@text
+def oauth_connection(event):
+    state = str(uuid.uuid4())
+    cache.set(state, event.source.user_id, timeout=300)
+    u = f"https://www.notion.so/install-integration?response_type=code&client_id=5f8acc7a-6c3a-4344-b9e7-3c63a8fad01d&redirect_uri=https%3A%2F%2Fquan.squidspirit.com%2Fnotion%2Fredirect%2F&owner=user&state={state}"
+    message = f"請透過連結登入 {u}"
+    jump_to(default_message, event.source.user_id)
+    return message
 
 
 @chat_status("set eeclass account")
