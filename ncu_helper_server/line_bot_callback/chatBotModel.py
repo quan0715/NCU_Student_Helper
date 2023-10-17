@@ -17,6 +17,7 @@ def default_message(event):
         'EECLASS帳號設定',
         'EECLASS密碼設定',
         'EECLASS連線測試'
+        '設定頁面'
     ]
 
 
@@ -38,6 +39,9 @@ def main_menu(event):
     elif event.message.text == 'eeclass update':
         jump_to(eeclass_update_test, event.source.user_id, True)
         return 'eeclass update start'
+    elif event.message.text == '設定頁面':
+        jump_to(eeclass_update_test, event.source.user_id, True)
+        return 'https://liff.line.me/2001049604-4ZDQX3MK'
     else:
         # jump_to(default_message, event.source.user_id, True)
         return event.message.text
