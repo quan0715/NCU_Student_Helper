@@ -27,9 +27,8 @@ class LineBotCallbackView(View):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        # if request.method == 'POST':
         import line_bot_callback.chatBotModel # this is necessary since otherwise function in chatBotModel will not be loaded
-
+        # you have to import this inside post method otherwise cycle import might happened
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
 
