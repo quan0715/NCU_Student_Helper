@@ -16,11 +16,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-<<<<<<< HEAD
-
-from django.urls import path
-=======
->>>>>>> b9dd81e (first)
 from django.views.static import serve
 from eeclass_setting import views
 import os
@@ -34,10 +29,6 @@ def flutter_redirect(request, resource):
 
 
 urlpatterns = [
-<<<<<<< HEAD
     path('get_account_password', views.get_account_password),
-=======
-    path('get_account_password', views.get_account_password,),
->>>>>>> b9dd81e (first)
     path('check_login', views.check_login),
 ]
