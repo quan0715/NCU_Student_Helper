@@ -33,6 +33,6 @@ urlpatterns = [
     path('callback/', views.LineBotCallbackView.as_view()),
     path('notion/', include('notion_auth.urls')),
     path('eeclass_api/', include('eeclass_setting.urls')),
-    path('', lambda r: flutter_redirect(r, 'index.html')),
-    path('<path:resource>', flutter_redirect),
+    # path('', lambda r: flutter_redirect(r, 'index.html')),
+    # path('<path:resource>', flutter_redirect),
 ]

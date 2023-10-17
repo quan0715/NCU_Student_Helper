@@ -16,52 +16,47 @@ import base64
 
 # server_url = 'quan.squidspirit.com'  # The URL of this server
 # redirect_uri = f"https://{server_url}/notion/redirect/"
-import os 
+import os
+
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 
 @csrf_exempt
 def notion_auth_start(request):
-    # client_id = settings.NOTION_OAUTH_CLIENT_ID
     line_use_id = request.GET.get('user_id')
     print(line_use_id)
-    NOTION_OAUTH_CLIENT_ID= settings.NOTION_OAUTH_CLIENT_ID
-    print(NOTION_OAUTH_CLIENT_ID)
-    # NOTION_OAUTH_SECRET_KEY="secret_oAy3uqO45KRMjxqerfuq00UWsR5meRW88yCmYgxaWyq"
-    REDIRECT_URI = settings.SERVER + "/notion/redirect"
-    AUTH_ENDPOINT = "https://api.notion.com/v1/oauth/authorize"
-    client = WebApplicationClient(NOTION_OAUTH_CLIENT_ID)
-    require_url = client.prepare_request_uri(AUTH_ENDPOINT, redirect_uri=REDIRECT_URI, state=line_use_id)
-    return redirect(require_url)
-  
+    notion_redirect_uri = settings.SERVER + "/notion/redirect"
+    notion_auth_endpoint = "https://api.notion.com/v1/oauth/authorize"
+    client = WebApplicationClient(settings.NOTION_OAUTH_CLIENT_ID)
+    return redirect(client.prepare_request_uri(notion_auth_endpoint, redirect_uri=notion_redirect_uri, state=line_use_id))
+
+
 def notion_auth_callback(request):
     url = request.get_full_path()
-    NOTION_OAUTH_CLIENT_ID= settings.NOTION_OAUTH_CLIENT_ID
-    NOTION_OAUTH_SECRET_KEY= settings.NOTION_OAUTH_SECRET_KEY
-    GET_TOKEN_ENDPOINT = 'https://api.notion.com/v1/oauth/token'
-    REDIRECT_URI = settings.SERVER + "/notion/redirect"
-    auth = HTTPBasicAuth(NOTION_OAUTH_CLIENT_ID, NOTION_OAUTH_SECRET_KEY)
-    client = WebApplicationClient(NOTION_OAUTH_CLIENT_ID)
+    notion_get_token_endpoint = 'https://api.notion.com/v1/oauth/token'
+    notion_redirect_uri = settings.SERVER + "/notion/redirect"
+    auth = HTTPBasicAuth(settings.NOTION_OAUTH_CLIENT_ID, settings.NOTION_OAUTH_SECRET_KEY)
+    client = WebApplicationClient(settings.NOTION_OAUTH_CLIENT_ID)
     try:
-        code = request.GET.get('code')
+        # code = request.GET.get('code')
         line_use_id = request.GET.get('state')
         print(line_use_id)
-        # code = client.parse_request_uri_response(settings.SERVER + url)  # Extracts the code from the url
-        token_request_params = client.prepare_token_request(GET_TOKEN_ENDPOINT, url, REDIRECT_URI)
-        response = re.post(token_request_params[0], headers=token_request_params[1], data=token_request_params[2], auth=auth)
+        token_request_params = client.prepare_token_request(notion_get_token_endpoint, url, notion_redirect_uri)
+        response = re.post(token_request_params[0], headers=token_request_params[1], data=token_request_params[2],
+                           auth=auth)
         data = response.json()
         print(data)
         access_token = data['access_token']
         duplicated_template_id = data['duplicated_template_id']
-        
+
         user, create = LineUser.objects.get_or_create(line_user_id=line_use_id)
-        
+
         user.notion_token = access_token
         user.eeclass_db_id = duplicated_template_id
         user.save()
-        
+
     except Exception as e:
         print(e)
         return HttpResponse('<div>something wrong QQQ</div>')
-    
-    return redirect(settings.SERVER)
 
+    return redirect(settings.WEB_SERVER)
