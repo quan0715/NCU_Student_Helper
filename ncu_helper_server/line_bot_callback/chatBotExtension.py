@@ -1,3 +1,4 @@
+from typing import Dict
 from .models import ChatStatus
 
 __statuses:dict[str, callable]={}
@@ -25,8 +26,8 @@ def text(func):
     """
     wrap a function returning a string as legal chatBot returned message
     """
-    def wrapper(event):
-        text = func(event)
+    def wrapper(*a, **b):
+        text = func(*a, **b)
         return TextSendMessage(text) if text else None
     return wrapper
 
@@ -38,8 +39,8 @@ def button_group(title="", text="", default_text='default alt text'):
     default_text: text showed outside chat room
     """
     def outer(func):
-        def wrapper(event):
-            button_texts = func(event)
+        def wrapper(*a, **b):
+            button_texts = func(*a, **b)
             if not button_texts: return None
             actions = [MessageAction(text, text) for text in button_texts]
             return TemplateSendMessage(
@@ -99,3 +100,9 @@ def jump_to(func:callable, user_id, propagation=False):
 
     except Exception as e:
         print(e)
+
+@chat_status('do nothing')
+def do_nothing(event):
+    """
+    use this when you want to stuck bot
+    """

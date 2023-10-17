@@ -21,7 +21,7 @@ pip install -r requirements.txt
   - method: POST
   - url\
         \$\{server\}/eeclass_api/check_login
-  - body(all required)\
+  - body(all required)
     - user_id: line user_id
     - account: eeclass username
     - password: eeclass password

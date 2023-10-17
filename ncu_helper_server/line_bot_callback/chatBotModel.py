@@ -1,7 +1,5 @@
-from .chatBotExtension import chat_status, jump_to, text, button_group
-from eeclass_setting.models import LineUser
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing
 from eeclass_setting.appModel import save_user_data, check_login_success, find_account_password
-
 
 @chat_status("default")
 @button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')

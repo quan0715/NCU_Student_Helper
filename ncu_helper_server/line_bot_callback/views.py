@@ -11,8 +11,6 @@ from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextSendMessage
 from concurrent.futures import ThreadPoolExecutor
 # Create your views here.
-
-import line_bot_callback.chatBotModel
 from line_bot_callback.chatBotExtension import handle
 
 
@@ -30,6 +28,8 @@ class LineBotCallbackView(View):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         # if request.method == 'POST':
+        import line_bot_callback.chatBotModel # this is necessary since otherwise function in chatBotModel will not be loaded
+
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
 
@@ -48,28 +48,13 @@ class LineBotCallbackView(View):
 
     @handler.add(MessageEvent, message=TextSendMessage)
     def message_handler(self, event):
-        print(event.source.user_id)
         def reply(event):
             replies=handle(event)
-            for idx, reply in enumerate(replies):
-                if idx==len(replies)-1: break
-                self.line_bot_api.push_message(event.source.user_id, reply)
-            if len(replies):
-                self.line_bot_api.reply_message(event.reply_token, replies[-1])
+            self.line_bot_api.reply_message(event.reply_token, replies)
 
         self.threadPoolExecutor.submit(reply, event)
 
-    # @classmethod
-    # def notion_auth_callback(cls, user_id):
-    #     class fake_source:
-    #         def __init__(self, user_id):
-    #             self.user_id=user_id
-    #
-    #     class fake_event:
-    #         def __init__(self, user_id):
-    #             self.source=fake_source(user_id)
-    #
-    #     cls.line_bot_api.push_message(user_id, TextSendMessage(text="與Notion連線成功"))
-    #     from .chatBotModel import default_message
-    #     cls.line_bot_api.push_message(user_id, default_message(fake_event(user_id)))
+    @classmethod
+    def push_message(cls, user_id, messages):
+        cls.line_bot_api.push_message(user_id, messages)
 
