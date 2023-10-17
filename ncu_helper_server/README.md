@@ -14,14 +14,14 @@ pip install -r requirements.txt
   - returned status
     - 200:\
       return json\
-      {"account":${user eeclss account}, "password":${user eeclass password}} 
+      {"account":\$\{user eeclss account\}, "password":\$\{user eeclass password\}\} 
     - 404: user not found
 
 - check if the account/password is valid to login eeclass
   - method: POST
   - url\
         \$\{server\}/eeclass_api/check_login
-  - body(all required)\
+  - body(all required)
     - user_id: line user_id
     - account: eeclass username
     - password: eeclass password
