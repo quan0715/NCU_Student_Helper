@@ -43,6 +43,7 @@ class UserRepository{
         Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId")
       );
       if(result.statusCode == 200){
+        debugPrint(result.body);
         var data = jsonDecode(result.body);
         // debugPrint(data.toString());
         return EECLASSAccountEntity.fromJson(data);
