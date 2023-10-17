@@ -23,7 +23,7 @@ jobs:
         working-directory: ncu_helper_web
 
       - name: Build Flutter Web
-        run: flutter build web
+        run: flutter build web --base-href=/NCU_Student_Helper/ --no-tree-shake-icons
         working-directory: ncu_helper_web
 
       - name: Deploy to GitHub Pages
