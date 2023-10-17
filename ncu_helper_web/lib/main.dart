@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_line_liff/flutter_line_liff.dart';
 import 'package:ncu_helper/view/setting_page/setting_page_view.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  FlutterLineLiff().init(
+  await FlutterLineLiff().init(
     config: Config(liffId: '2001049604-4ZDQX3MK'),
     successCallback: () {
       debugPrint('LIFF init success.');
