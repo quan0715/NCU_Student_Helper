@@ -11,13 +11,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v4
+      - name: Flutter action
+        uses: subosito/flutter-action@v2.11.0
         with:
-          flutter-version: stable
-
+          channel: 'stable'
+        
       - name: Install dependencies
         run: flutter pub get
 
@@ -28,4 +28,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ncu_helper_web/build/web
+          publish_dir: ./ncu_helper_web/build/web
