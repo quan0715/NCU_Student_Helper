@@ -14,7 +14,7 @@ async def eeclass_test_login(account, password):
         return await bot.login()
 
 
-async def eeclass_pip_line(user: LineUser):
+async def eeclass_pipeline(user: LineUser):
     # TODO: update new version pipline
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
         bot = EEAsyncBot(session, user.eeclass_username, user.eeclass_password)

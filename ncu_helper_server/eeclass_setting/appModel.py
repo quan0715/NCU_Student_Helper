@@ -26,7 +26,7 @@ def find_user_by_use_id(user_id: str) -> Tuple[LineUser | None, bool]:
 
 
 import asyncio
-from eeclass_setting.eeclass import eeclass_test_login, eeclass_pip_line
+from eeclass_setting.eeclass import eeclass_test_login, eeclass_pipeline
 
 
 def check_login_success(account: str, password: str) -> bool:
@@ -49,7 +49,7 @@ def check_login_success(account: str, password: str) -> bool:
     return login_success
 
 
-def check_eeclass_update_pip_line(user: LineUser) -> bool:
+def check_eeclass_update_pipeline(user: LineUser) -> bool:
     """
     account: eeclass account\
     password: eeclass password\
@@ -61,7 +61,7 @@ def check_eeclass_update_pip_line(user: LineUser) -> bool:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
     try:
-        task = loop.create_task(eeclass_pip_line(user))
+        task = loop.create_task(eeclass_pipeline(user))
         loop.run_until_complete(task)
         login_success = task.result()
     except Exception as e:

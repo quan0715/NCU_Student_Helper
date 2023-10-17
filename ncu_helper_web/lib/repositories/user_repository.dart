@@ -40,7 +40,7 @@ class UserRepository{
     debugPrint("lineUserId: $lineUserId");
     try{
       var result = await http.Client().get(
-        Uri.parse("${ServerConfig.baseURL}/eeclass_api/get_account_password?user_id=$lineUserId")
+        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId")
       );
       if(result.statusCode == 200){
         var data = jsonDecode(result.body);
@@ -61,7 +61,7 @@ class UserRepository{
   Future<bool> eeclassLoginValidation({required String lineUserId, required String account, required String password}) async {
     try{
       var result = await http.Client().post(
-        Uri.parse("${ServerConfig.baseURL}/eeclass_api/check_login"),
+        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/check_login"),
         encoding: Encoding.getByName("utf-8"),
         body: jsonEncode({
           "account": account,
@@ -88,7 +88,7 @@ class UserRepository{
     debugPrint("lineUserId: $lineUserId");
     try{
       var result = await http.Client().get(
-        Uri.parse("${ServerConfig.baseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId")
+        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId")
       );
       if(result.statusCode == 200){
         var data = jsonDecode(result.body);

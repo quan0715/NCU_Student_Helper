@@ -87,7 +87,7 @@ class SettingPageViewModel extends ChangeNotifier{
     notifyListeners();
     liff.login(
       config: LoginConfig(  
-        redirectUri: ServerConfig.redirectURL
+        redirectUri: ServerConfig.hostBaseUrl
       ),
     );
     isLoading = false;
@@ -125,12 +125,12 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     // if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-    var eelclassAccount = await UserRepository().getUserEeclassAccount("U9bb9c1cdc6beb4cd5dd4f871602a6b8b");
+    var eeclassAccount = await UserRepository().getUserEeclassAccount("U9bb9c1cdc6beb4cd5dd4f871602a6b8b");
 
-    if(eelclassAccount != null){
-      debugPrint("account: ${eelclassAccount.accountName}, password: ${eelclassAccount.accountPassword}");
-      setStudentId(eelclassAccount.accountName);
-      setEEclassPassword(eelclassAccount.accountPassword);
+    if(eeclassAccount != null){
+      debugPrint("account: ${eeclassAccount.accountName}, password: ${eeclassAccount.accountPassword}");
+      setStudentId(eeclassAccount.accountName);
+      setEEclassPassword(eeclassAccount.accountPassword);
     }
     else{
       debugPrint("line not logged in can't fetch user");
@@ -174,12 +174,12 @@ class SettingPageViewModel extends ChangeNotifier{
     if(isLineLoggedIn && user.lineUserId.isNotEmpty){
       if (!await launchUrl(
         // Uri.parse(ServerConfig.notionAuthURL),
-        Uri.parse("${ServerConfig.baseURL}/notion/auth?user_id=${user.lineUserId}"),
+        Uri.parse("${ServerConfig.serverBaseURL}/notion/auth?user_id=${user.lineUserId}"),
         mode: LaunchMode.externalApplication,
         // webOnlyWindowName: '_blank'
         webOnlyWindowName: '_self'
       )) {
-        throw Exception('Could not launch ${ServerConfig.notionAuthURL}');
+        throw Exception('Could not launch notionAuth');
       }
     }
     else{
@@ -191,12 +191,12 @@ class SettingPageViewModel extends ChangeNotifier{
     String linUserId = "U9bb9c1cdc6beb4cd5dd4f871602a6b8b";
     if (!await launchUrl(
       // Uri.parse(ServerConfig.notionAuthURL),
-      Uri.parse(ServerConfig.baseURL + "/notion/auth?user_id=$linUserId"),
+      Uri.parse(ServerConfig.serverBaseURL + "/notion/auth?user_id=$linUserId"),
       mode: LaunchMode.externalApplication,
       // webOnlyWindowName: '_blank'
       // webOnlyWindowName: '_self'
     )) {
-      throw Exception('Could not launch ${ServerConfig.notionAuthURL}');
+      throw Exception('Could not launch notionAuth');
     }
   }
 
