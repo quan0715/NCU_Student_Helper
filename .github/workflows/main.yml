@@ -17,10 +17,7 @@ jobs:
         uses: subosito/flutter-action@v2.11.0
         with:
           channel: 'stable'
-
-      - name: Change to Flutter project directory
-        
-        
+      
       - name: Install dependencies
         run: flutter pub get
         working-directory: ncu_helper_web
