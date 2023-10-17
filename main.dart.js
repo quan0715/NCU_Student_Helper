@@ -74589,7 +74589,7 @@ var $async$rd=A.Z(function(a,b){if(a===1)return A.V(b,r)
 while(true)switch(s){case 0:q.c=!0
 q.ac()
 q.ac()
-p={redirectUri:"https://utterly-legal-ewe.ngrok-free.app"}
+p={redirectUri:"https://quan0715.github.io/NCU_Student_Helper/"}
 $.j4().Pc(0,p)
 q.c=!1
 q.ac()
@@ -74666,7 +74666,7 @@ s=p.gl1(p)&&q.b.c.length!==0?2:4
 break
 case 2:s=5
 return A.a_(A.ajQ(A.eX("https://utterly-legal-ewe.ngrok-free.app/notion/auth?user_id="+q.b.c,0,null),B.Cu,"_self"),$async$wN)
-case 5:if(!b)throw A.c(A.c5("Could not launch https://api.notion.com/v1/oauth/authorize?client_id=40f0bb9f-a1f8-4055-ab11-ef0e46f73345&response_type=code&owner=user&redirect_uri=https%3A%2F%2Futterly-legal-ewe.ngrok-free.app%2Fnotion%2Fredirect"))
+case 5:if(!b)throw A.c(A.c5("Could not launch notionAuth"))
 s=3
 break
 case 4:A.d0().$1("line not logged in can't fetch user")
