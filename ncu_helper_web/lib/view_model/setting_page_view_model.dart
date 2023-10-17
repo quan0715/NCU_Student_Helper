@@ -18,12 +18,28 @@ class SettingPageViewModel extends ChangeNotifier{
   String get eeclassPassword => user.eeclassPassword.isEmpty ? "None" : user.eeclassPassword;
   String get notionAuthToken => user.notionAuthToken.isEmpty ? "None" : user.notionAuthToken;
   String get notionTemplateId => user.notionDatabaseId.isEmpty ? "None" : user.notionDatabaseId;
+
   bool _isLoading = false;
   bool _isEEclassConnectionSuccess = false;
-
+  // TODO: will be move to Entity
+  bool _isSchedulingModeOpen = false;
+  List<int> schedulingTimeOptions = [10, 20 , 30, 60,];
+  int _schedulingTimeOptionValue = 10;
+  int get schedulingTimeOption => _schedulingTimeOptionValue;
   bool get isEEclassConnectionSuccess => _isEEclassConnectionSuccess;
   bool get isLineLoggedIn => liff.isLoggedIn;  
   bool get isNotionAuthSuccess => user.notionAuthToken.isNotEmpty && user.notionDatabaseId.isNotEmpty;
+  bool get isSchedulingModeOpen => _isSchedulingModeOpen;
+
+  set isSchedulingModeOpen(bool isSchedulingModeOpen){
+    _isSchedulingModeOpen = isSchedulingModeOpen;
+    notifyListeners();
+  }
+
+  set schedulingTimeOption(int schedulingTimeOption){
+    _schedulingTimeOptionValue = schedulingTimeOption;
+    notifyListeners();
+  }
   
   set isLoading(bool isLoading){
     _isLoading = isLoading;
@@ -216,6 +232,21 @@ class SettingPageViewModel extends ChangeNotifier{
     await userInit();
     // await userInitTest();
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> onSchedulingSettingChange() async{
+    isLoading = true;
+    notifyListeners();
+    await Future.delayed(const Duration(seconds: 1));
+    debugPrint("update scheduling data");
+    try{
+      debugPrint("schedulingTimeOption: $schedulingTimeOption , isSchedulingModeOpen: $isSchedulingModeOpen");
+    } 
+    catch(error){
+      debugPrint("onSchedulingSettingChange error ${error.toString()}");
+    }
+    isLoading = false;
     notifyListeners();
   }
 

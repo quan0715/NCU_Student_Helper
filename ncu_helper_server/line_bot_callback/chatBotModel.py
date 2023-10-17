@@ -16,7 +16,6 @@ def default_message(event):
         'EECLASS帳號設定',
         'EECLASS密碼設定',
         'EECLASS連線測試'
-        '設定頁面'
     ]
 
 
