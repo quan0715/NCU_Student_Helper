@@ -52,7 +52,7 @@ def notion_auth_callback(request):
         user, create = LineUser.objects.get_or_create(line_user_id=line_use_id)
 
         user.notion_token = access_token
-        user.eeclass_db_id = duplicated_template_id
+        user.notion_template_id = duplicated_template_id
         user.save()
 
     except Exception as e:

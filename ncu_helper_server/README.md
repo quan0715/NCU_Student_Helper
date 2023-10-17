@@ -5,7 +5,7 @@ source venv/bi/activate
 pip install -r requirements.txt
 ```
 
-### eeclass api
+### line api
 
 - get account password by line user_id
   - method: GET
@@ -14,10 +14,17 @@ pip install -r requirements.txt
   - returned status
     - 200:\
       return json\
-      {"account":\$\{user eeclss account\}, "password":\$\{user eeclass password\}\} 
+      {\
+        "eeclass_account":\$\{user eeclss account\}, \
+        "eeclass_password":\$\{user eeclass password\},\
+        "notion_token":\$\{user notion token\}, \
+        "notion_template_id":\$\{user notion template id\}, \
+        "is_auto_update":\$\{is scheduling opened\}, \
+        "scheduling_time":\$\{user scheduling time\}\
+      } 
     - 404: user not found
 
-- check if the account/password is valid to login eeclass
+- check if the eeclass account/password is valid to login eeclass
   - method: POST
   - url\
         \$\{server\}/eeclass_api/check_login

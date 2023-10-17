@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'line_bot_callback',
     'notion_auth',
-    'eeclass_setting'
+    'eeclass_setting',
+    'scheduling'
 ]
 
 MIDDLEWARE = [
