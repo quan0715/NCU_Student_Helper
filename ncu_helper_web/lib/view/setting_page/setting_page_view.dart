@@ -221,7 +221,7 @@ class _SettingPageViewState extends State<SettingPageView> {
               ],
             )
           ),
-          viewButton("Notion OAuth 連線", () async => _launchNotionOAuth)
+          viewButton("Notion OAuth 連線", _launchNotionOAuth)
         ],
       ));
   }
