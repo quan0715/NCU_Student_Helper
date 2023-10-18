@@ -93,4 +93,4 @@ def get_oauth_data(user_id):
     if len(LineUser.objects.filter(line_user_id=user_id)) == 0:
         return (None, False)
     user = LineUser.objects.get(line_user_id=user_id)
-    return ({'access_token': user.notion_token, 'duplicated_template_id': user.notion_template_id}, True)
+    return {'access_token': user.notion_token, 'duplicated_template_id': user.notion_template_id}, True
