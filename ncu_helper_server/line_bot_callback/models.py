@@ -8,8 +8,6 @@ class ChatStatus(models.Model):
     line_user_id = models.CharField(max_length=255, unique=True)
     status = models.TextField(null=True, blank=True)
     propagation = models.BooleanField(null=False, blank=False, default=False)
-    # eeclass_username = models.CharField(max_length=255)
-    # eeclass_password = models.CharField(max_length=255)
 
     class Meta:
         ordering = ['-line_user_id']

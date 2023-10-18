@@ -22,7 +22,7 @@ def check_login(request, *args, **kwargs):
 
 @csrf_exempt
 def get_notion_oauth_data(request, *args, **kwargs):
-    if request.method!='GET':
+    if request.method != 'GET':
         return HttpResponse(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     data, founded = get_oauth_data(request.GET.get('user_id'))
     if not founded:
@@ -31,9 +31,10 @@ def get_notion_oauth_data(request, *args, **kwargs):
 
 @csrf_exempt
 def get_account_password(request, *args, **kwargs):
-    if request.method!='GET':
+    if request.method != 'GET':
         return HttpResponse(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     data, founded = find_account_password(request.GET.get('user_id'))
     if not founded:
         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
     return JsonResponse(data)
+

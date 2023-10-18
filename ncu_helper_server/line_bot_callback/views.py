@@ -50,7 +50,7 @@ class LineBotCallbackView(View):
         def reply(event):
             replies=handle(event)
             self.line_bot_api.reply_message(event.reply_token, replies)
-
+            
         self.threadPoolExecutor.submit(reply, event)
 
     @classmethod
