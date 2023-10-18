@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'line_bot_callback',
     'notion_auth',
-    'eeclass_setting'
+    'eeclass_setting',
+    'scheduling'
 ]
 
 MIDDLEWARE = [
