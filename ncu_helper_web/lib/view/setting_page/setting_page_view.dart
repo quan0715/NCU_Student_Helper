@@ -174,8 +174,6 @@ class _SettingPageViewState extends State<SettingPageView> {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
                     children: [
-                      const Icon(Icons.lock_clock),
-                      const SizedBox(width: 10,),
                       DropdownButton(
                         focusColor: Colors.transparent,
                         onChanged: (value) => viewModel.schedulingTimeOption = value!,
