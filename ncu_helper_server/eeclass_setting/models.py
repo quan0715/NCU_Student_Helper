@@ -1,10 +1,6 @@
 from django.db import models
 from django.urls import reverse
 
-
-# Create your models here.
-
-
 class LineUser(models.Model):
     line_user_id = models.CharField(max_length=255, unique=True, null=False, blank=False)
     notion_token = models.TextField(max_length=255, blank=True, default='')
