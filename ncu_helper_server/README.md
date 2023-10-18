@@ -15,6 +15,19 @@ pip install -r requirements.txt
     - 200:\
       return json\
       {\
+        "account":\$\{user eeclss account\}, \
+        "password":\$\{user eeclass password\},\
+      }
+    - 404: user not found
+
+- get data by line user_id
+  - method: GET
+  - url\
+      \$\{server\}/eeclass_api/get_data?user_id=\$\{line_user_id\}
+  - returned status
+    - 200:\
+      return json\
+      {\
         "eeclass_account":\$\{user eeclss account\}, \
         "eeclass_password":\$\{user eeclass password\},\
         "notion_token":\$\{user notion token\}, \
@@ -53,7 +66,8 @@ pip install -r requirements.txt
         \$\{server\}/scheduling/api/update
   - body(all required)
     - user_id: line user_id
-    - interval: update time(minute:int)
+    - is_auto_update: whether scheduling is active or not
+    - scheduling_time: update interval (minute:int)
   - returned status
     - 200: success
     - 401: fail

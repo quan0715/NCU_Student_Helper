@@ -2,7 +2,7 @@ from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothi
 from typing import Tuple
 from eeclass_setting.models import LineUser
 from eeclass_setting.appModel import check_eeclass_update_pipeline, save_user_data, check_login_success, \
-    find_account_password, find_user_by_use_id
+    find_account_password, find_user_by_user_id
 import uuid
 from django.core.cache import cache
 
@@ -92,7 +92,7 @@ def eeclass_login_test(event):
 @text
 def eeclass_update_test(event):
     jump_to(default_message, event.source.user_id, False)
-    search_result:  Tuple[LineUser | None, bool] = find_user_by_use_id(event.source.user_id)
+    search_result:  Tuple[LineUser | None, bool] = find_user_by_user_id(event.source.user_id)
     user, founded = search_result
     if not founded:
         return '尚未設定帳號密碼'

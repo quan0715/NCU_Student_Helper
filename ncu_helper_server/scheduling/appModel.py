@@ -13,17 +13,17 @@ def find_auto_scheduling(user_id: str) -> Tuple[Dict | None, bool]:
     user = SchedulingData.objects.get(line_user_id=user_id)
     return {'is_auto_update': user.is_auto_update, 'scheduling_time': user.scheduling_time}, True
 
-def update_schedule(user_id:str, interval: int):
+def update_schedule(user_id:str, interval: int, is_auto_scheduling:bool):
     # TODO update scheduling
     return True
 
-def save_user_data(user_id:str, interval: int=None, is_auto_scheduling:bool=None):
+def save_user_data(user_id:str, scheduling_time: int=None, is_auto_update:bool=None):
     try:
         user, created = SchedulingData.objects.get_or_create(line_user_id=user_id)
-        if is_auto_scheduling:
-            user.is_auto_scheduling = is_auto_scheduling
-        if interval:
-            user.interval = interval
+        if is_auto_update is not None:
+            user.is_auto_update = is_auto_update
+        if scheduling_time is not None:
+            user.scheduling_time = scheduling_time
         user.save()
     except Exception as e:
         print(e)
