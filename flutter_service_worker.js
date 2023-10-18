@@ -22,9 +22,9 @@ const RESOURCES = {"canvaskit/chromium/canvaskit.js": "96ae916cd2d1b7320fff853ee
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
-"index.html": "81ab82a1838bc838f661fbfffec0eb50",
-"/": "81ab82a1838bc838f661fbfffec0eb50",
-"main.dart.js": "9b015af7c9af1abefd74b6b129b8ddf2",
+"index.html": "cb7e7293379b475e698e1a2486f07e33",
+"/": "cb7e7293379b475e698e1a2486f07e33",
+"main.dart.js": "715953ca156263415bbba3611038f413",
 "flutter.js": "6fef97aeca90b426343ba6c5c9dc5d4a",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "manifest.json": "1d2a6132bd248c37b7f02662a6fffbd5"};
