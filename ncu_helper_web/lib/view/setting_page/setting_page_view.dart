@@ -174,8 +174,6 @@ class _SettingPageViewState extends State<SettingPageView> {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
                     children: [
-                      const Icon(Icons.lock_clock),
-                      const SizedBox(width: 10,),
                       DropdownButton(
                         focusColor: Colors.transparent,
                         onChanged: (value) => viewModel.schedulingTimeOption = value!,
@@ -221,7 +219,7 @@ class _SettingPageViewState extends State<SettingPageView> {
               ],
             )
           ),
-          viewButton("Notion OAuth 連線", () async => _launchNotionOAuth)
+          viewButton("Notion OAuth 連線", _launchNotionOAuth)
         ],
       ));
   }
