@@ -7,7 +7,7 @@ import uuid
 from django.core.cache import cache
 
 
-@chat_status("default")
+@chat_status("default", default=True)
 @button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')
 def default_message(event):
     jump_to(main_menu, event.source.user_id)
