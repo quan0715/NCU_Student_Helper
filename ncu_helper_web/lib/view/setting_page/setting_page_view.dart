@@ -263,7 +263,7 @@ class _SettingPageViewState extends State<SettingPageView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleFrame(),
-                _buildLineTestFrame(),
+                // _buildLineTestFrame(),
                 _buildEeclassSettingFrame(),
                 _buildOAuthFrame(),
                 _buildEeclassAndNotionUpdateSettingFrame(),

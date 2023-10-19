@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_line_liff/flutter_line_liff.dart';
 import 'package:ncu_helper/utils/server_config.dart';
+import 'package:ncu_helper/view/home_page/home_page_view.dart';
 import 'package:ncu_helper/view/setting_page/oauth_redirect_page.dart';
 import 'package:ncu_helper/view/setting_page/setting_page_view.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,10 +31,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
+        textTheme: GoogleFonts.notoSansTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
-      home: const SettingPageView(),
+      home: const HomePageView(),
       routes: {
-        '': (context) => const SettingPageView(), // This is the default route.
+        '': (context) => const HomePageView(), // This is the default route.
         '/setting': (context) => const SettingPageView(),
         '/notion/auth_page':(context) => const OauthRedirectPage(),
       }
