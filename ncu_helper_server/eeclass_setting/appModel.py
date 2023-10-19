@@ -13,8 +13,7 @@ def find_account_password(user_id: str) -> Tuple[Dict | None, bool]:
     user = LineUser.objects.get(line_user_id=user_id)
     return {'account': user.eeclass_username, 'password': user.eeclass_password}, True
 
-
-def find_user_by_use_id(user_id: str) -> Tuple[LineUser | None, bool]:
+def find_user_by_user_id(user_id: str) -> Tuple[LineUser | None, bool]:
     """
     user_id: line_user_id\
     returned value: ({account, password}, founded)

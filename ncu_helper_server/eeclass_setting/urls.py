@@ -30,6 +30,7 @@ def flutter_redirect(request, resource):
 
 urlpatterns = [
     path('get_account_password', views.get_account_password),
+    path('get_data', views.get_data),
     path('check_login', views.check_login),
     path('get_notion_oauth_data', views.get_notion_oauth_data),
 ]
