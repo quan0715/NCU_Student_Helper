@@ -14,7 +14,7 @@ class HomePageView extends StatelessWidget {
 
   Widget _getLogo(){
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 40),
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 40),
       child: Container(
         height: 250,
         width: 250,
@@ -75,6 +75,7 @@ class HomePageView extends StatelessWidget {
       // avatar: Text("#"),
       backgroundColor: color ?? AppColor.onSurfaceColor.withOpacity(0.1),
       labelStyle: const TextStyle(
+        fontSize: 12,
         color:AppColor.surfaceColor,
         fontWeight: FontWeight.bold,
       ),
@@ -83,6 +84,8 @@ class HomePageView extends StatelessWidget {
 
   Widget _getTagFrame(){
     return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      alignment: WrapAlignment.center,
       spacing: 5,
       runSpacing: 5,
       children: [
@@ -90,7 +93,7 @@ class HomePageView extends StatelessWidget {
         _getTag("訂高鐵票", color: AppColor.primaryColor.withOpacity(0.7)),
         _getTag("公車查詢"),
         _getTag("EECLASS", color: AppColor.primaryColor.withOpacity(0.7)),
-        // _getTag("課務資料查詢"),
+        //_getTag("課務資料查詢"),
         _getTag("NCU Wiki"),
         _getTag("校園大小事")
       ],
@@ -162,7 +165,7 @@ class HomePageView extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Spacer(),
+            const Spacer(),
             Text(" ${viewModel.loadingMessage}",
               style: const TextStyle(
                 fontSize: 12,
@@ -173,7 +176,7 @@ class HomePageView extends StatelessWidget {
             LinearProgressIndicator(
               valueColor: const AlwaysStoppedAnimation<Color>(AppColor.primaryColor),
               backgroundColor: AppColor.onSurfaceColor.withOpacity(0.1),),
-            Spacer(),
+            const Spacer(),
           ],
         )
     );
