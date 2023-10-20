@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_line_liff/flutter_line_liff.dart';
-import 'package:ncu_helper/model/user_model.dart';
+import 'package:ncu_helper/repositories/user_repository.dart';
 import 'package:ncu_helper/utils/server_config.dart';
 
 class HomePageViewModel extends ChangeNotifier {
@@ -14,19 +14,7 @@ class HomePageViewModel extends ChangeNotifier {
       notifyListeners();
     }
 
-    Future<bool> checkServerConnection() async{
-      // try{
-      //   final response = await http.get(Uri.parse('https://ncu-helper-server.herokuapp.com/'));
-      //   if(response.statusCode == 200){
-      //     return true;
-      //   }
-      //   return false;
-      // }catch(e){
-      //   return false;
-      // }
-      await Future.delayed(const Duration(seconds: 2));
-      return true;
-    }
+
 
     Future<void> lineLogin() async{
       isLoading = true;
@@ -40,23 +28,25 @@ class HomePageViewModel extends ChangeNotifier {
       notifyListeners();
     }
 
-
-
     Future<void> init() async{
       isLoading = true;
       loadingMessage = "Loading ...";
       notifyListeners();
       await Future.delayed(const Duration(seconds: 1));
+      
       loadingMessage = "正在初始化 line init ...";
       await liff.ready;
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 2));
-      loadingMessage = "正在測試連線穩定度 ...";
+      await Future.delayed(const Duration(seconds: 1));
+      loadingMessage = "連線 Server ..";
+      bool isConnective = await UserRepository().checkServerConnection();
+      loadingMessage = 
+      isConnective ? "連線成功" : "連線失敗，請重啟Server";
       notifyListeners();
-      await checkServerConnection();
-      isLoading = false;
+      isLoading = !isConnective;
       notifyListeners();
     }
+    
   // UserModel user = UserModel();
   // final _repository = Repository();
 

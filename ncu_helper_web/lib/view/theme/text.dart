@@ -25,19 +25,19 @@ class AppText{
       fontWeight: bold ? FontWeight.bold : FontWeight.normal,
     );
   }
-  static TextStyle bodyMedium(BuildContext context, {bool bold = true}){
+  static TextStyle bodyMedium(BuildContext context, {bool bold = false}){
     return Theme.of(context).textTheme.bodyMedium!.copyWith(
       fontFamily: "NotoSansTC",
       fontWeight: bold ? FontWeight.bold : FontWeight.normal,
     );
   }
-  static TextStyle bodySmall(BuildContext context, {bool bold = true}){
+  static TextStyle bodySmall(BuildContext context, {bool bold = false}){
     return Theme.of(context).textTheme.bodySmall!.copyWith(
       fontFamily: "NotoSansTC",
       fontWeight: bold ? FontWeight.bold : FontWeight.normal,
     );
   }
-  static TextStyle labelLarge(BuildContext context, {bool bold = true}){
+  static TextStyle labelLarge(BuildContext context, {bool bold = false}){
     return Theme.of(context).textTheme.labelLarge!.copyWith(
       fontFamily: "NotoSansTC",
       fontWeight: bold ? FontWeight.bold : FontWeight.normal,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_line_liff/flutter_line_liff.dart';
 import 'package:ncu_helper/model/user_model.dart';
 import 'package:ncu_helper/utils/server_config.dart';
 import 'package:http/http.dart' as http;
@@ -36,6 +37,24 @@ class NotionDataEntity {
 }
 
 class UserRepository{
+
+  Future<bool> checkServerConnection(){
+    debugPrint("check server connection");
+    try{
+      return http.Client().get(Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/check_connection")).then((response) {
+        if(response.statusCode == 200){
+          return true;
+        }
+        return false;
+      });
+    }
+    catch(e){
+      debugPrint(e.toString());
+      return Future.value(false);
+    }
+  }
+
+
   Future<EECLASSAccountEntity?> getUserEeclassAccount(String lineUserId) async {
     debugPrint("lineUserId: $lineUserId");
     try{
@@ -111,4 +130,68 @@ class UserRepository{
       throw Exception("get user unknown error ${e.toString()}");
     } 
   }
+
+  Future<UserModel?> getUserData(String lineUserId) async {
+    debugPrint("lineUserId: $lineUserId");
+    try{
+      // await FlutterLineLiff().ready;
+      // var lineProfile = await FlutterLineLiff().profile;
+      var result = await http.Client().get(
+        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_data?user_id=$lineUserId"),
+        headers: {
+          'ngrok-skip-browser-warning' : '8000',
+        }
+      );
+      if(result.statusCode == 200){
+        debugPrint(result.body);
+        var data = jsonDecode(result.body);
+        return UserModel(
+          eeclassPassword: data['eeclass_password'],
+          eeclassAccount: data['eeclass_account'],
+          notionAuthToken: data['notion_token'],
+          notionDatabaseId: data['notion_template_id'],
+        );
+      }
+      else if(result.statusCode == 404){
+        debugPrint("user not found");
+        return null;
+      }
+    } catch(e){
+      debugPrint(e.toString());
+      throw Exception("get user unknown error ${e.toString()}");
+    }
+    return null; 
+  }
+
+  // Future<UserModel?> getUserData(String lineUserId) async {
+  //   debugPrint("lineUserId: $lineUserId");
+  //   try{
+  //     // await FlutterLineLiff().ready;
+  //     // var lineProfile = await FlutterLineLiff().profile;
+  //     var result = await http.Client().get(
+  //       Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_data?user_id=$lineUserId"),
+  //       headers: {
+  //         'ngrok-skip-browser-warning' : '8000',
+  //       }
+  //     );
+  //     if(result.statusCode == 200){
+  //       debugPrint(result.body);
+  //       var data = jsonDecode(result.body);
+  //       return UserModel(
+  //         eeclassPassword: data['eeclass_password'],
+  //         eeclassAccount: data['eeclass_account'],
+  //         notionAuthToken: data['notion_token'],
+  //         notionDatabaseId: data['notion_template_id'],
+  //       );
+  //     }
+  //     else if(result.statusCode == 404){
+  //       debugPrint("user not found");
+  //       return null;
+  //     }
+  //   } catch(e){
+  //     debugPrint(e.toString());
+  //     throw Exception("get user unknown error ${e.toString()}");
+  //   }
+  //   return null; 
+  // }
 }

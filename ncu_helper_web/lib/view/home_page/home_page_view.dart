@@ -5,11 +5,19 @@ import 'package:ncu_helper/view/theme/color.dart';
 import 'package:ncu_helper/view_model/home_page_view_model.dart';
 import 'package:provider/provider.dart';
 
-class HomePageView extends StatelessWidget {
+class HomePageView extends StatefulWidget {
   const HomePageView({Key? key}) : super(key: key);
 
+  @override
+  State<HomePageView> createState() => _HomePageViewState();
+}
+
+class _HomePageViewState extends State<HomePageView> {
   void onLineLogin(BuildContext context) async{
-    await Provider.of<HomePageViewModel>(context, listen: false).lineLogin();
+    var viewModel = Provider.of<HomePageViewModel>(context, listen: false);
+    viewModel.isLineLoggedIn
+        ? Navigator.pushNamed(context, '/setting')
+        : await viewModel.lineLogin();
   }
 
   Widget _getLogo(){
@@ -73,9 +81,9 @@ class HomePageView extends StatelessWidget {
     return Chip(
       label: Text("#$text"),
       // avatar: Text("#"),
-      backgroundColor: color ?? AppColor.onSurfaceColor.withOpacity(0.1),
+      backgroundColor: color ?? AppColor.onSurfaceColor,
       labelStyle: const TextStyle(
-        fontSize: 12,
+        fontSize: 10,
         color:AppColor.surfaceColor,
         fontWeight: FontWeight.bold,
       ),
@@ -85,17 +93,18 @@ class HomePageView extends StatelessWidget {
   Widget _getTagFrame(){
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.center,
+      alignment: WrapAlignment.start,
       spacing: 5,
       runSpacing: 5,
       children: [
         _getTag("校園導覽"),
-        _getTag("訂高鐵票", color: AppColor.primaryColor.withOpacity(0.7)),
+        _getTag("訂高鐵票", color: AppColor.primaryColor),
         _getTag("公車查詢"),
-        _getTag("EECLASS", color: AppColor.primaryColor.withOpacity(0.7)),
-        //_getTag("課務資料查詢"),
+        _getTag("EECLASS", color: AppColor.primaryColor),
+        _getTag("Notion", color: AppColor.primaryColor),
         _getTag("NCU Wiki"),
-        _getTag("校園大小事")
+        _getTag("校園大小事"),
+        _getTag("汪汪", color: AppColor.primaryColor)
       ],
     );
   }
@@ -118,12 +127,9 @@ class HomePageView extends StatelessWidget {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                if(viewModel.isLineLoggedIn){
-                  Navigator.pushNamed(context, '/setting');
-                }else{
-                  onLineLogin(context);
-                }
-                
+                viewModel.isLineLoggedIn
+                 ? Navigator.pushNamed(context, '/setting')
+                 : onLineLogin(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor:  Colors.transparent,

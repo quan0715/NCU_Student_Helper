@@ -20,9 +20,9 @@ class SettingSection extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Card(
-          elevation: 1,
+          elevation: 0,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +55,7 @@ class SettingSection extends StatelessWidget{
                           status ?? const SizedBox.shrink(),
                         ],
                       ),
-                      // const Divider(),
+                      const Divider(),
                       ...children != null ? children! : [],
                     ],
                   ),
