@@ -6,6 +6,7 @@ class SchedulingData(models.Model):
     line_user_id = models.CharField(max_length=255, unique=True, null=False, blank=False)
     is_auto_update = models.BooleanField(null=False, blank=False, default=False)
     scheduling_time = models.IntegerField(null=False, blank=False, default=10)
+    TTT = models.IntegerField(null=False, blank=False, default=10)
 
     class Meta:
         ordering = ['-line_user_id']

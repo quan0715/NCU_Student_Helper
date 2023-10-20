@@ -35,6 +35,7 @@ class _SettingPageViewState extends State<SettingPageView> {
       required String initialValue,
       void Function(String)? onChanged,
       String? Function(String?)? validator,
+      bool obscureText = false,
     }){
       return DataDisplayCard.horizontal(
         title: title,
@@ -46,6 +47,7 @@ class _SettingPageViewState extends State<SettingPageView> {
             initialValue: initialValue,
             onChanged: onChanged,
             validator: validator,
+            obscureText: obscureText,
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(vertical: 5),
               isDense: true,
@@ -196,6 +198,7 @@ class _SettingPageViewState extends State<SettingPageView> {
                   pageTextFormFieldDataFrame(
                     title: "Password",
                     hintText:  "請輸入 EECLASS 密碼",
+                    obscureText: true,
                     initialValue: viewModel.user.eeclassPassword,
                     onChanged: (value) => viewModel.setEEclassPassword(value),
                     validator: (value) => value!.isEmpty ? "請輸入密碼" : null,
@@ -355,25 +358,6 @@ class _SettingPageViewState extends State<SettingPageView> {
                   ],
                 ),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 24),
-              //   child: PageViewDotIndicator(
-              //     currentItem: 1,
-              //     count: 2,
-              //     unselectedColor: AppColor.secondary(context),
-              //     selectedColor: AppColor.primaryColor,
-              //     duration: const Duration(milliseconds: 200),
-              //     boxShape: BoxShape.circle,
-              //     onItemClicked: (index) {
-              //       _pageController.animateToPage(
-              //         index,
-              //         duration: const Duration(milliseconds: 200),
-              //         curve: Curves.easeInOut,
-              //       );
-              //     },
-              //   ),
-              // ),
-              // const Spacer(),
             ],
             ),
         ),

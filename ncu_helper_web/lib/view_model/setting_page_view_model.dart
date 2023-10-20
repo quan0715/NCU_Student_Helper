@@ -36,7 +36,7 @@ class SettingPageViewModel extends ChangeNotifier{
   bool get isLoading => _isLoading;
   bool get isEEclassConnectionSuccess => _isEEclassConnectionSuccess;
   bool get isLineLoggedIn => FlutterLineLiff().isLoggedIn;  
-  bool get isNotionAuthSuccess => user.notionAuthToken.isNotEmpty && user.notionDatabaseId.isNotEmpty;
+  bool get isNotionAuthSuccess => user.notionAuthToken.isNotEmpty || user.notionDatabaseId.isNotEmpty;
 
   set currentPageIndex(int currentPageIndex){
     _currentPageIndex = currentPageIndex;
@@ -97,6 +97,7 @@ class SettingPageViewModel extends ChangeNotifier{
       setLineUserId(profile.userId);
       setLineUserName(profile.displayName);
       user.lineUserName = profile.displayName;
+
       debugPrint("lineUserName: $lineUserName");
       debugPrint("lineId: $lineId");
     }
@@ -119,6 +120,7 @@ class SettingPageViewModel extends ChangeNotifier{
         if(result != null){
           debugPrint("account: ${result.eeclassAccount}, password: ${result.eeclassPassword}");
           debugPrint("authToken: ${result.notionAuthToken }, copyTemplateIndex: ${result.notionDatabaseId}");
+          user.notionAuthToken = result.notionAuthToken;
           setNotionTemplateId(result.notionDatabaseId);
           setEeclassAccount(result.eeclassAccount);
           setEEclassPassword(result.eeclassPassword); 
@@ -194,6 +196,7 @@ class SettingPageViewModel extends ChangeNotifier{
 
   Future<void> init() async{
     _isLoading = true;
+    _currentPageIndex = 0;
     notifyListeners();
     try{
       await FlutterLineLiff().ready;
