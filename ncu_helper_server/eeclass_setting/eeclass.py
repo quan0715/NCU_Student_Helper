@@ -38,7 +38,6 @@ async def eeclass_pipeline(user: LineUser):
         await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list, db)
         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, db)
         await update_all_material_info_to_notion_db(bot.materials_detail_list, db)
-        # print('\n'.join(reply_message))
         notion_db_url = f"https://www.notion.so/{user.notion_template_id.replace('-', '')}"
         notion_message = f"已更新到Notion DB\n{notion_db_url}\n---\n"
         return notion_message + '\n'.join(reply_message)
@@ -152,7 +151,7 @@ async def update_all_homework_info_to_notion_db(homeworks: List[Dict], db: Datab
         tasks = []
         for r in homeworks:
             if r['ID'] not in object_index:
-                print(f"upload homework : {r['title']} to homework database")
+                # print(f"upload homework : {r['title']} to homework database")
                 tasks.append(db.async_post(homework_in_notion_template(db, r), session))
         await asyncio.gather(*tasks)
 
@@ -163,7 +162,7 @@ async def update_all_bulletin_info_to_notion_db(bulletins: List[Dict], db: Datab
         tasks = []
         for r in bulletins:
             if r['ID'] not in object_index:
-                print(f"upload bulletin : {r['title']} to bulletin database")
+                # print(f"upload bulletin : {r['title']} to bulletin database")
                 tasks.append(db.async_post(builtin_in_notion_template(db, r), session))
         await asyncio.gather(*tasks)
 
@@ -173,6 +172,6 @@ async def update_all_material_info_to_notion_db(materials: List[Dict], db: Datab
         tasks = []
         for r in materials:
             if r != None and r['ID'] not in object_index:
-                print(f"upload material : {r['title']} to material database")
+                # print(f"upload material : {r['title']} to material database")
                 tasks.append(db.async_post(material_in_notion_template(db, r), session))
         await asyncio.gather(*tasks)

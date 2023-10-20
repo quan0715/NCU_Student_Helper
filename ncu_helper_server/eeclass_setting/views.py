@@ -17,7 +17,8 @@ def check_login(request, *args, **kwargs):
             save_user_data(body['user_id'], body['account'], body['password'])
             return HttpResponse(status=status.HTTP_200_OK)
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
     return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
 
 @csrf_exempt
@@ -46,7 +47,7 @@ def get_data(request, *args, **kwargs):
     if not founded:
         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
     return JsonResponse({
-       "eeclass_account":user.eeclass_username,
+        "eeclass_account":user.eeclass_username,
         "eeclass_password":user.eeclass_password,
         "notion_token":user.notion_token,
         "notion_template_id":user.notion_template_id,

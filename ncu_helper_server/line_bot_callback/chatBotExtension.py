@@ -72,7 +72,6 @@ def handle(event)->list:
         replies = []
         while True:
             status = ChatStatus.objects.get(line_user_id=user_id).status
-            print(status)
             try:
                 reply = __statuses.get(status, __statuses[__default_status])(event)
             except Exception as e:
@@ -80,10 +79,10 @@ def handle(event)->list:
             if reply: replies.append(reply)
             if not ChatStatus.objects.get(line_user_id=user_id).propagation:
                 break
-        print(ChatStatus.objects.get(line_user_id=user_id).status)
         return replies
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
 
 
 def jump_to(func:callable, user_id, propagation=False):
@@ -104,7 +103,8 @@ def jump_to(func:callable, user_id, propagation=False):
         chat_status.save()
 
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
 
 @chat_status('do nothing')
 def do_nothing(event):

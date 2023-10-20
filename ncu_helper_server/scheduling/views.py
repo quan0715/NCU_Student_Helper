@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from scheduling.appModel import find_auto_scheduling, save_user_data, update_schedule
 from fastapi import status
 # Create your views here.
+
+
 @csrf_exempt
 def get_data(request, *args, **kwargs):
     if request.method!='GET':
@@ -26,5 +28,6 @@ def update_scheduling(request, *args, **kwargs):
                 return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return HttpResponse(status=status.HTTP_200_OK)
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
     return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)

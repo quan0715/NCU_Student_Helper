@@ -52,7 +52,6 @@ def update_eeclass(event):
     cb.push_message(event.source.user_id, text(lambda ev: '獲取資料中')(event))
     try:
         result = check_eeclass_update_pipeline(user)
-        print(result)
         jump_to(default_message, event.source.user_id, True)
         return result
     except Exception as e:
