@@ -207,7 +207,10 @@ class _SettingPageViewState extends State<SettingPageView> {
                 activeColor: AppColor.onSuccessColor,
                 inactiveThumbColor: AppColor.onWarningColor,
                 value: viewModel.isSchedulingModeOpen,
-                onChanged: (value) => viewModel.isSchedulingModeOpen = value,
+                onChanged: (value) => {
+                  viewModel.isSchedulingModeOpen = value,
+                  _onSchedulingSettingChange()
+                }
               ),
             ),
             DataDisplayCard.horizontal(
@@ -224,7 +227,10 @@ class _SettingPageViewState extends State<SettingPageView> {
                         dropdownColor: AppColor.secondary(context),
                         focusColor: Colors.transparent,
                         icon: const Icon(Icons.arrow_drop_down, color: AppColor.surfaceColor,),
-                        onChanged: (value) => viewModel.schedulingTimeOption = value!,
+                        onChanged: (value) => {
+                          viewModel.schedulingTimeOption = value!,
+                          _onSchedulingSettingChange()
+                        },
                         underline: Container(),
                         value: viewModel.schedulingTimeOption,
                         items: viewModel.schedulingTimeOptions.map(

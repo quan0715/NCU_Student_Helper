@@ -134,7 +134,7 @@ class SettingPageViewModel extends ChangeNotifier{
     debugPrint("eeclassConnectionTest");
     debugPrint("account: ${user.eeclassAccount}, password: ${user.eeclassPassword}, lineUserId: ${user.lineUserId}");
     // String linUserId = "U91c210fcea0952e4856265ea5f09571f";
-    if(testMode || (isLineLoggedIn && user.lineUserId.isNotEmpty)){
+    if(isLineLoggedIn && user.lineUserId.isNotEmpty){
 
       final result = await UserRepository().eeclassLoginValidation(
         account: user.eeclassAccount,
@@ -201,23 +201,54 @@ class SettingPageViewModel extends ChangeNotifier{
   Future<void> init() async{
     _isLoading = true;
     notifyListeners();
-    await liff.ready;
-    debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
-    await updateLineInfo();
-    await userInit();
-    await eeclassConnectionTest();
-    
+    try{
+      await liff.ready;
+      debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
+      await updateLineInfo();
+      await userInit();
+      await eeclassConnectionTest();
+      await getSchedulingData();
+    }
+    catch(error){
+      debugPrint(error.toString());
+    }
     _isLoading = false;
     notifyListeners();
   }
 
+  Future<void> getSchedulingData() async {
+    if(!isLineLoggedIn || user.lineUserId.isEmpty){
+      debugPrint("line not logged in can't fetch user");
+      return;
+    }
+    var data = await UserRepository().getSchedulingData(user.lineUserId);
+    debugPrint("is auto update: ${data.isAutoUpdate}");
+    debugPrint("scheduling time: ${data.schedulingTime}");
+    _isSchedulingModeOpen = data.isAutoUpdate;
+    _schedulingTimeOptionValue = data.schedulingTime;
+  }
   Future<void> onSchedulingSettingChange() async{
     isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(seconds: 1));
+    // await Future.delayed(const Duration(seconds: 1));
     debugPrint("update scheduling data");
     try{
       debugPrint("schedulingTimeOption: $schedulingTimeOption , isSchedulingModeOpen: $isSchedulingModeOpen");
+      if(isLineLoggedIn && user.lineUserId.isNotEmpty){
+        var result = await UserRepository().updateSchedulingData(lineUserId: user.lineUserId, entity: SchedulingDataEntity(
+          isAutoUpdate: isSchedulingModeOpen,
+          schedulingTime: schedulingTimeOption,
+        ));
+        if (result){
+          debugPrint("update scheduling data success");
+        }
+        else{
+          debugPrint("update scheduling data fail");
+        }
+      }
+      else{
+        debugPrint("line not logged in can't fetch user");
+      }
     } 
     catch(error){
       debugPrint("onSchedulingSettingChange error ${error.toString()}");

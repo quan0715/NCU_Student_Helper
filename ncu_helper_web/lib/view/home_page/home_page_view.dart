@@ -22,10 +22,10 @@ class _HomePageViewState extends State<HomePageView> {
 
   Widget _getLogo(){
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 40),
+      padding: const EdgeInsets.symmetric(vertical: 25, horizontal:30),
       child: Container(
-        height: 250,
-        width: 250,
+        height: 210,
+        width: 210,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(color: AppColor.onSurfaceColor, width: 2),
@@ -91,20 +91,25 @@ class _HomePageViewState extends State<HomePageView> {
   }
 
   Widget _getTagFrame(){
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.start,
-      spacing: 5,
-      runSpacing: 5,
+    return Row(
       children: [
-        _getTag("校園導覽"),
-        _getTag("訂高鐵票", color: AppColor.primaryColor),
-        _getTag("公車查詢"),
-        _getTag("EECLASS", color: AppColor.primaryColor),
-        _getTag("Notion", color: AppColor.primaryColor),
-        _getTag("NCU Wiki"),
-        _getTag("校園大小事"),
-        _getTag("汪汪", color: AppColor.primaryColor)
+        Expanded(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.start,
+            alignment: WrapAlignment.start,
+            spacing: 5,
+            runSpacing: 5,
+            children: [
+              _getTag("校園導覽"),
+              _getTag("EECLASS", color: AppColor.primaryColor),
+              _getTag("高鐵"),
+              _getTag("公車"),
+              _getTag("Notion", color: AppColor.primaryColor),
+              _getTag("NCU Wiki"),
+              _getTag("周邊美食")
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -191,23 +196,25 @@ class _HomePageViewState extends State<HomePageView> {
   Widget _buildBody(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _getLogo(),
-                _getTitle(),
-                _getTagFrame(),
-                Expanded(child: _actionFrame(context)),
-               
-              ],
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _getLogo(),
+                  _getTitle(),
+                  _getTagFrame(),
+                  Expanded(child: _actionFrame(context)),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
