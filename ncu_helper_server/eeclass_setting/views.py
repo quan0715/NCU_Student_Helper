@@ -17,7 +17,8 @@ def check_login(request, *args, **kwargs):
             save_user_data(body['user_id'], body['account'], body['password'])
             return HttpResponse(status=status.HTTP_200_OK)
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
     return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
 
 @csrf_exempt
