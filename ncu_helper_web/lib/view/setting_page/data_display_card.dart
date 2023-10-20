@@ -48,7 +48,8 @@ class DataDisplayCard extends StatelessWidget {
   Widget _getTitleWidget(BuildContext context){
     return Text(
       title,
-      style: AppText.labelMedium(context).copyWith(
+      style: AppText.labelLarge(context).copyWith(
+        fontWeight: FontWeight.bold,
         color: AppColor.primary(context),
       ),
     );
@@ -76,7 +77,7 @@ class DataDisplayCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _getTitleWidget(context),
-            SizedBox(width: 10,),
+            const SizedBox(width: 10,),
             child,
           ],
         ),

@@ -39,7 +39,7 @@ class _SettingPageViewState extends State<SettingPageView> {
                 flex: 2,
                 child: TextFormField(
                   textDirection: TextDirection.rtl,
-                  style: AppText.labelMedium(context).copyWith(color: AppColor.secondary(context)),
+                  style: AppText.labelLarge(context).copyWith(color: AppColor.secondary(context)),
                   initialValue: viewModel.user.eeclassAccount,
                   onChanged: (value) => viewModel.setStudentId(value),
                   decoration: const InputDecoration(
@@ -60,7 +60,7 @@ class _SettingPageViewState extends State<SettingPageView> {
                 flex: 2,
                 child: TextFormField(
                   textDirection: TextDirection.rtl,
-                  style: AppText.labelMedium(context).copyWith(color: AppColor.secondary(context)),
+                  style: AppText.labelLarge(context).copyWith(color: AppColor.secondary(context)),
                   initialValue: viewModel.user.eeclassPassword,
                   onChanged: (value) => viewModel.setEEclassPassword(value),
                   obscureText: true,
@@ -107,7 +107,7 @@ class _SettingPageViewState extends State<SettingPageView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(label, style: AppText.labelSmall(context)),
+                  Text(label, style: AppText.labelMedium(context)),
                   const Icon(Icons.arrow_right_alt, size: 20,),
                 ],
               ),
@@ -126,9 +126,9 @@ class _SettingPageViewState extends State<SettingPageView> {
   }
 
   Widget _buildTitleFrame(){
-    TextStyle titleStyle =  AppText.titleLarge(context).copyWith(color: AppColor.onSurface(context));
-    TextStyle titleStyleStrong = AppText.titleLarge(context).copyWith(color: AppColor.primary(context));
-    TextStyle contentStyle = AppText.bodySmall(context).copyWith(color: AppColor.secondary(context));
+    TextStyle titleStyle =  AppText.headLineSmall(context).copyWith(color: AppColor.onSurface(context));
+    TextStyle titleStyleStrong = AppText.headLineSmall(context).copyWith(color: AppColor.primary(context));
+    TextStyle contentStyle = AppText.bodyLarge(context).copyWith(color: AppColor.secondary(context));
     String name = viewModel.user.lineUserName;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -236,7 +236,7 @@ class _SettingPageViewState extends State<SettingPageView> {
                         underline: Container(),
                         value: viewModel.schedulingTimeOption,
                         items: viewModel.schedulingTimeOptions.map(
-                          (int time) =>  DropdownMenuItem(value: time, child: Text("$time min", style: AppText.labelSmall(context)))
+                          (int time) =>  DropdownMenuItem(value: time, child: Text("$time min", style: AppText.labelMedium(context)))
                         ).toList()
                       )
                     ],
