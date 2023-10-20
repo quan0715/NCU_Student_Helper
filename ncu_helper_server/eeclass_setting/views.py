@@ -41,7 +41,7 @@ def get_account_password(request, *args, **kwargs):
 
 @csrf_exempt
 def get_data(request, *args, **kwargs):
-    if request.method!='GET':
+    if request.method != 'GET':
         return HttpResponse(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     user, founded = find_user_by_user_id(request.GET.get('user_id'))
     if not founded:
@@ -52,3 +52,7 @@ def get_data(request, *args, **kwargs):
         "notion_token":user.notion_token,
         "notion_template_id":user.notion_template_id,
     })
+
+@csrf_exempt
+def check_connection(request):
+    return HttpResponse(status=status.HTTP_200_OK)

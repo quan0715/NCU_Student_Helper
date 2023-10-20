@@ -4,6 +4,9 @@ class AppColor{
   static const Color onSuccessColor = Color(0xFF4CAF50);
   static const Color onWarningColor = Color(0xFFFFC107);
   static const Color onErrorColor = Color(0xFFF44336);
+  static const Color surfaceColor = Color(0xFF2E2D2D);
+  static const Color primaryColor = Color(0xFFFFD464);
+  static const Color onSurfaceColor = Colors.white;
   static Color primary(BuildContext context) => Theme.of(context).colorScheme.primary; 
   static Color secondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
   static Color tertiary(BuildContext context) => Theme.of(context).colorScheme.tertiary;
