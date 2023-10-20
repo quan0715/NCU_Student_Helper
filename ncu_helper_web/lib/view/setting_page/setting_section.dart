@@ -45,7 +45,7 @@ class SettingSection extends StatelessWidget{
                                 Text(title, style: AppText.titleMedium(context).copyWith(color: AppColor.primary(context)),),
                                 subTitle != null ? Text(subTitle!,
                                 softWrap: true,
-                                style: AppText.bodySmall(context).copyWith(
+                                style: AppText.titleSmall(context).copyWith(
                                   fontWeight: FontWeight.normal,
                                   color: AppColor.secondary(context),
                                 ),) : const SizedBox.shrink(),

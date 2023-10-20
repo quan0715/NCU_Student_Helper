@@ -1,7 +1,7 @@
-import 'dart:js';
 
 import 'package:flutter/material.dart';
 import 'package:ncu_helper/view/theme/color.dart';
+import 'package:ncu_helper/view/theme/text.dart';
 import 'package:ncu_helper/view_model/home_page_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -39,10 +39,9 @@ class _HomePageViewState extends State<HomePageView> {
   }
 
   Widget _getTitle(){
-    TextStyle style = const TextStyle(
-      fontSize: 32,
+    TextStyle style = AppText.headLineMedium(context).copyWith(
       fontWeight: FontWeight.bold,
-      color: AppColor.onSurfaceColor,
+      color: AppColor.onSurfaceColor.withOpacity(0.7),
     );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
@@ -65,10 +64,10 @@ class _HomePageViewState extends State<HomePageView> {
                   ],
                 )
               ),
-              Text("Goldie 你的中央大學校園 AI 智慧助手", style: TextStyle(
+              Text("Goldie - 你的中央大學校園 AI 智慧助手", style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColor.onSurfaceColor.withOpacity(0.7),
+                color: AppColor.secondary(context)
               )),
             ],
           ),
@@ -83,7 +82,7 @@ class _HomePageViewState extends State<HomePageView> {
       // avatar: Text("#"),
       backgroundColor: color ?? AppColor.onSurfaceColor,
       labelStyle: const TextStyle(
-        fontSize: 10,
+        fontSize: 12,
         color:AppColor.surfaceColor,
         fontWeight: FontWeight.bold,
       ),
@@ -196,24 +195,26 @@ class _HomePageViewState extends State<HomePageView> {
   Widget _buildBody(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _getLogo(),
-                  _getTitle(),
-                  _getTagFrame(),
-                  Expanded(child: _actionFrame(context)),
-                ],
+      child: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _getLogo(),
+                    _getTitle(),
+                    _getTagFrame(),
+                    Expanded(child: _actionFrame(context)),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
