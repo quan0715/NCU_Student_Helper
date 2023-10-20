@@ -7,5 +7,5 @@ class SchedulingConfig(AppConfig):
 
     def ready(self):
         from .appModel import init_scheduler_tasks_from_db
-        init_scheduler_tasks_from_db()
+        # init_scheduler_tasks_from_db()
 

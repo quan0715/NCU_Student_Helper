@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'line_bot_callback',
     'notion_auth',
     'eeclass_setting',
-    'scheduling'
+    'scheduling',
+    'backenddb'
 ]
 
 MIDDLEWARE = [
