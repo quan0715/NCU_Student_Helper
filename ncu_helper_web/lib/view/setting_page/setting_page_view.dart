@@ -15,10 +15,10 @@ class SettingPageView extends StatefulWidget {
 class _SettingPageViewState extends State<SettingPageView> {
   SettingPageViewModel viewModel = SettingPageViewModel();
 
-  void _lineLogin() async => await viewModel.lineLogin();
   void _eeclassConnectionTest() async => await viewModel.eeclassConnectionTest();
   void _launchNotionOAuth() async => await viewModel.launchNotionOAuth();
   void _onSchedulingSettingChange() async => await viewModel.onSchedulingSettingChange();
+  void _launchNotionDBBrowser() async => await viewModel.launchNotionDB();
   
   Widget _buildAccountSettingForm(){
     return Consumer<SettingPageViewModel>(
@@ -27,35 +27,51 @@ class _SettingPageViewState extends State<SettingPageView> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DataDisplayCard(
-              title: "EECLASS Account",
-              child: TextFormField(
-                style: AppText.bodyMedium(context),
-                initialValue: viewModel.user.studentId,
-                onChanged: (value) => viewModel.setStudentId(value),
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 5),
-                  isDense: true,
-                  hintText: "請輸入 EECLASS 帳號",
-                  border: UnderlineInputBorder(
-                    // borderSide: BorderSide.none
+            DataDisplayCard.horizontal(
+              title: "連線狀態",
+              child: viewModel.isEEclassConnectionSuccess
+                ? StatusChip(label: "連線成功", color: AppColor.onSuccessColor)
+                : StatusChip(label: "連線失敗", color: AppColor.onErrorColor)
+            ),
+            DataDisplayCard.horizontal(
+              title: "Account",
+              child: Expanded(
+                flex: 2,
+                child: TextFormField(
+                  textDirection: TextDirection.rtl,
+                  style: AppText.labelMedium(context).copyWith(color: AppColor.secondary(context)),
+                  initialValue: viewModel.user.eeclassAccount,
+                  onChanged: (value) => viewModel.setStudentId(value),
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 5),
+                    isDense: true,
+                    hintText: "請輸入 EECLASS 帳號",
+                    hintTextDirection: TextDirection.rtl,
+                    border: UnderlineInputBorder(
+                      borderSide: BorderSide.none
+                    ),
                   ),
                 ),
               ),
             ),
-            DataDisplayCard(
-              title: "EECLASS Password",
-              child: TextFormField(
-                style: AppText.bodyMedium(context),
-                initialValue: viewModel.user.eeclassPassword,
-                onChanged: (value) => viewModel.setEEclassPassword(value),
-                obscureText: true,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 5),
-                  isDense: true,
-                  hintText: "請輸入 EECLASS 密碼",
-                  border: UnderlineInputBorder(
-                    // borderSide: BorderSide.none
+            DataDisplayCard.horizontal(
+              title: "Password",
+              child: Expanded(
+                flex: 2,
+                child: TextFormField(
+                  textDirection: TextDirection.rtl,
+                  style: AppText.labelMedium(context).copyWith(color: AppColor.secondary(context)),
+                  initialValue: viewModel.user.eeclassPassword,
+                  onChanged: (value) => viewModel.setEEclassPassword(value),
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 5),
+                    isDense: true,
+                    hintText: "請輸入 EECLASS 密碼",
+                    hintTextDirection: TextDirection.rtl,
+                    border: UnderlineInputBorder(
+                      borderSide: BorderSide.none
+                    ),
                   ),
                 ),
               ),
@@ -68,26 +84,34 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   Widget viewButton(String label, onPressed){
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: Row(
         children: [
           Expanded(
-            child: MaterialButton(
-              color: AppColor.primary(context),
-              textColor: AppColor.onPrimary(context),
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              onPressed: onPressed, 
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                elevation: 5,
+                backgroundColor:  AppColor.onSurface(context),
+                foregroundColor:  AppColor.surfaceColor,
+                textStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: AppColor.primary(context), width: 1) ,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(label, style: AppText.bodySmall(context).copyWith(color: AppColor.onPrimary(context),)),
+                  Text(label, style: AppText.labelSmall(context)),
                   const Icon(Icons.arrow_right_alt, size: 20,),
                 ],
               ),
-            ),
+            )
           ),
         ],
       ),
@@ -102,23 +126,24 @@ class _SettingPageViewState extends State<SettingPageView> {
   }
 
   Widget _buildTitleFrame(){
-    TextStyle titleStyle =  AppText.titleLarge(context);
+    TextStyle titleStyle =  AppText.titleLarge(context).copyWith(color: AppColor.onSurface(context));
     TextStyle titleStyleStrong = AppText.titleLarge(context).copyWith(color: AppColor.primary(context));
-    TextStyle contentStyle = AppText.titleSmall(context).copyWith(fontWeight: FontWeight.normal);
+    TextStyle contentStyle = AppText.bodySmall(context).copyWith(color: AppColor.secondary(context));
+    String name = viewModel.user.lineUserName;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           RichText(text:TextSpan(
             children: [
-              TextSpan(text: 'NCU', style: titleStyle),
-              TextSpan(text: ' EECLASS ', style: titleStyleStrong),
-              TextSpan(text: 'Helper', style: titleStyle),
+              TextSpan(text: 'Welcome back, ', style: titleStyle),
+              TextSpan(text: ' ${name} ', style: titleStyleStrong),
+              // TextSpan(text: 'Helper', style: titleStyle),
             ],
           )),
-          Text('歡迎來到 NCU EECLASS Helper 請照以下步驟來完成EECLASS設定', style: contentStyle)
+          Text('歡迎來到 NCU Student Helper Setting page 請完成EECLASS帳號連接以及Notion授權。', style: contentStyle)
         ],
       ),
     );        
@@ -130,19 +155,17 @@ class _SettingPageViewState extends State<SettingPageView> {
         // viewModel.eeclassConnectionTest();
         return SettingSection(
           title: "EECLASS 設定",
-          status: viewModel.isEEclassConnectionSuccess
-            ? StatusChip(label: "連線成功", color: AppColor.onSuccessColor)
-            : StatusChip(label: "連線失敗", color: AppColor.onErrorColor),
+          subTitle: "請輸入EECLASS帳號密碼，並確認連線狀態",
           children: [
             _buildAccountSettingForm(),
-            viewButton("EECLASS 連線測試", _eeclassConnectionTest)
+            viewButton("EECLASS 資料更新", _eeclassConnectionTest)
           ],
         );
       });
   }
 
   Widget _buildEeclassAndNotionUpdateSettingFrame(){
-    TextStyle menuLabelStyle =  AppText.bodySmall(context);
+    // TextStyle menuLabelStyle =  AppText.bodySmall(context);
     final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
@@ -158,29 +181,62 @@ class _SettingPageViewState extends State<SettingPageView> {
           subTitle: "設定排程時間與切換自動/手動更新",
           children: [
             DataDisplayCard.horizontal(
+              title: "連線狀態",
+              child: viewModel.isNotionAuthSuccess
+                ? StatusChip(label: "已授權", color: AppColor.onSuccessColor)
+                : StatusChip(label: "未授權", color: AppColor.onErrorColor),),
+          DataDisplayCard.horizontal(
+            title: "Notion EECLASS Page",
+            child: IconButton(
+              iconSize: 16,
+              icon: const Icon(Icons.open_in_new,),
+              onPressed: () async => {
+                if(viewModel.notionTemplateId != "None"){
+                  _launchNotionDBBrowser()
+                }else{
+                  // open snake bar
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("請先設定授權 Notion")))
+                }
+              },
+            ),
+            
+          ),
+          
+            DataDisplayCard.horizontal(
               title: "Auto Update 設定",
               child: Switch(
                 thumbIcon: thumbIcon,
                 activeColor: AppColor.onSuccessColor,
                 inactiveThumbColor: AppColor.onWarningColor,
                 value: viewModel.isSchedulingModeOpen,
-                onChanged: (value) => viewModel.isSchedulingModeOpen = value,
+                onChanged: (value) => {
+                  viewModel.isSchedulingModeOpen = value,
+                  _onSchedulingSettingChange()
+                }
               ),
             ),
             DataDisplayCard.horizontal(
-              title: "EECLASS / Notion 更新時間",
+              title: "排程更新時間",
               child: Card(
+                elevation: 1,
+                color: AppColor.secondary(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
                     children: [
                       DropdownButton(
+                        isDense: true,
+                        dropdownColor: AppColor.secondary(context),
                         focusColor: Colors.transparent,
-                        onChanged: (value) => viewModel.schedulingTimeOption = value!,
+                        icon: const Icon(Icons.arrow_drop_down, color: AppColor.surfaceColor,),
+                        onChanged: (value) => {
+                          viewModel.schedulingTimeOption = value!,
+                          _onSchedulingSettingChange()
+                        },
                         underline: Container(),
                         value: viewModel.schedulingTimeOption,
                         items: viewModel.schedulingTimeOptions.map(
-                          (int time) =>  DropdownMenuItem(value: time, child: Text("$time min", style: menuLabelStyle))
+                          (int time) =>  DropdownMenuItem(value: time, child: Text("$time min", style: AppText.labelSmall(context)))
                         ).toList()
                       )
                     ],
@@ -188,68 +244,12 @@ class _SettingPageViewState extends State<SettingPageView> {
                 ),
               )
             ), 
-            viewButton("更新資料", _onSchedulingSettingChange)
+            viewButton("Notion Oauth 登入", _launchNotionOAuth),
           ],
         );
       });
   }
   
-  Widget _buildOAuthFrame(){
-    return Consumer<SettingPageViewModel>(
-      builder: (context, viewModel, child) => SettingSection(
-        title: "Notion OAuth 設定",
-        status: viewModel.isNotionAuthSuccess
-          ? StatusChip(label: "已授權", color: AppColor.onSuccessColor)
-          : StatusChip(label: "未授權", color: AppColor.onErrorColor),
-
-        children: [
-          DataDisplayCard(
-            title: "Notion EECLASS TOKEN",
-            child: Row(
-              children: [
-                Expanded(child: Text(viewModel.notionAuthToken)),
-              ],
-            )
-          ),
-          DataDisplayCard(
-            title: "Notion EECLASS db URL",
-            child: Row(
-              children: [
-                Expanded(child: Text(viewModel.notionTemplateId)),
-              ],
-            )
-          ),
-          viewButton("Notion OAuth 連線", _launchNotionOAuth)
-        ],
-      ));
-  }
-
-  Widget _buildLineTestFrame(){
-    return Consumer<SettingPageViewModel>(
-      builder: (context, viewModel, child) => SettingSection(
-        title: "line login 測試",
-        subTitle: "如從外部網站進入，請先登入line，再進行設定",
-        status: viewModel.isLineLoggedIn 
-          ? StatusChip(label: "已登入", color: AppColor.onSuccessColor)
-          : StatusChip(label: "未登入", color: AppColor.onErrorColor),
-
-        children: [
-          DataDisplayCard(title: "line 使用者名稱", child: Row(
-            children: [
-              Expanded(child: Text(viewModel.lineUserName)),
-            ],
-          )),
-          DataDisplayCard(title: "line 使用者User Id", child: Row(
-            children: [
-              Expanded(child: Text(viewModel.lineId)),
-            ],
-          )),
-          viewButton("Line Login 測試", _lineLogin)
-        ],
-        
-      ));
-  }
-
   Widget pageBody(){
     return Consumer<SettingPageViewModel>(
       builder: (context, viewModel, child) => Scaffold(
@@ -263,9 +263,9 @@ class _SettingPageViewState extends State<SettingPageView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleFrame(),
-                _buildLineTestFrame(),
+                // _buildLineTestFrame(),
                 _buildEeclassSettingFrame(),
-                _buildOAuthFrame(),
+                // _buildOAuthFrame(),
                 _buildEeclassAndNotionUpdateSettingFrame(),
               ],
               ),

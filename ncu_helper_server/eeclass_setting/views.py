@@ -40,14 +40,18 @@ def get_account_password(request, *args, **kwargs):
 
 @csrf_exempt
 def get_data(request, *args, **kwargs):
-    if request.method!='GET':
+    if request.method != 'GET':
         return HttpResponse(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     user, founded = find_user_by_user_id(request.GET.get('user_id'))
     if not founded:
         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
     return JsonResponse({
-       "eeclass_account":user.eeclass_username,
+        "eeclass_account":user.eeclass_username,
         "eeclass_password":user.eeclass_password,
         "notion_token":user.notion_token,
         "notion_template_id":user.notion_template_id,
     })
+
+@csrf_exempt
+def check_connection(request):
+    return HttpResponse(status=status.HTTP_200_OK)

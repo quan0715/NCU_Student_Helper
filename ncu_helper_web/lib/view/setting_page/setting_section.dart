@@ -20,9 +20,9 @@ class SettingSection extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Card(
-          elevation: 1,
+          elevation: 0,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +42,7 @@ class SettingSection extends StatelessWidget{
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(title, style: AppText.titleMedium(context)),
+                                Text(title, style: AppText.titleMedium(context).copyWith(color: AppColor.primary(context)),),
                                 subTitle != null ? Text(subTitle!,
                                 softWrap: true,
                                 style: AppText.bodySmall(context).copyWith(

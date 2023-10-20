@@ -33,4 +33,5 @@ urlpatterns = [
     path('get_data', views.get_data),
     path('check_login', views.check_login),
     path('get_notion_oauth_data', views.get_notion_oauth_data),
+    path('check_connection', views.check_connection),
 ]

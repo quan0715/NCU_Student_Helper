@@ -21,6 +21,7 @@ def get_data(request, *args, **kwargs):
 def update_scheduling(request, *args, **kwargs):
     try:
         body = json.loads(request.body.decode('utf-8'))
+        print(body)
         if update_schedule(body['user_id'], body['scheduling_time'], body['is_auto_update']):
             if not save_user_data(body['user_id'], body['scheduling_time'], body['is_auto_update']):
                 return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

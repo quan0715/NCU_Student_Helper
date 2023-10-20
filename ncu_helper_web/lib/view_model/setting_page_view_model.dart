@@ -14,7 +14,7 @@ class SettingPageViewModel extends ChangeNotifier{
   UserModel user = UserModel();
   String get lineUserName => user.lineUserName.isEmpty ? "尚未登入" : user.lineUserName;
   String get lineId => user.lineUserId.isEmpty ? "尚未登入" : user.lineUserId;
-  String get studentId => user.studentId.isEmpty ? "None" : user.studentId;
+  String get studentId => user.eeclassAccount.isEmpty ? "None" : user.eeclassAccount;
   String get eeclassPassword => user.eeclassPassword.isEmpty ? "None" : user.eeclassPassword;
   String get notionAuthToken => user.notionAuthToken.isEmpty ? "None" : user.notionAuthToken;
   String get notionTemplateId => user.notionDatabaseId.isEmpty ? "None" : user.notionDatabaseId;
@@ -49,7 +49,7 @@ class SettingPageViewModel extends ChangeNotifier{
   bool get isLoading => _isLoading;
 
   void setStudentId(String studentId){
-    user.studentId = studentId;
+    user.eeclassAccount = studentId;
     // notifyListeners();
   }
 
@@ -98,37 +98,21 @@ class SettingPageViewModel extends ChangeNotifier{
 
   bool get checkAccountValidated => user.accountValidated();
 
-  Future<void> lineLogin() async{
-    isLoading = true;
-    notifyListeners();
-    liff.login(
-      config: LoginConfig(  
-        redirectUri: ServerConfig.hostBaseUrl
-      ),
-    );
-    isLoading = false;
-    notifyListeners();
-    await updateLineInfo();
-    await userInit();
-  }
-
-  Future<void> userInit() async{
+  Future<void> userInit({bool testMode = false}) async{
     isLoading = true;
     notifyListeners();
     try{
-      if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-        var result = await UserRepository().getUserEeclassAccount(user.lineUserId);
+      if(testMode || (isLineLoggedIn && user.lineUserId.isNotEmpty)){
+        String userId = testMode ? "U9bb9c1cdc6beb4cd5dd4f871602a6b8b" : user.lineUserId;
+        var result = await UserRepository().getUserData(userId);
         if(result != null){
-          debugPrint("account: ${result.accountName}, password: ${result.accountPassword}");
-          setStudentId(result.accountName);
-          setEEclassPassword(result.accountPassword);
-          await eeclassConnectionTest();
-        }
-        var notionData = await UserRepository().getUserNotionData(user.lineUserId);
-        if(notionData != null){
-          debugPrint("authToken: ${notionData.authToken}, copyTemplateIndex: ${notionData.copyTemplateIndex}");
-          setNotionAuthToken(notionData.authToken);
-          setNotionTemplateId(notionData.copyTemplateIndex);
+          debugPrint("account: ${result.eeclassAccount}, password: ${result.eeclassPassword}");
+          debugPrint("authToken: ${result.notionAuthToken }, copyTemplateIndex: ${result.notionDatabaseId}");
+          setNotionAuthToken(result.notionAuthToken);
+          setNotionTemplateId(result.notionDatabaseId);
+          setStudentId(result.eeclassAccount);
+          setEEclassPassword(result.eeclassPassword);
+          
         }
       }
       else{
@@ -142,45 +126,20 @@ class SettingPageViewModel extends ChangeNotifier{
     notifyListeners();
   }
 
-  Future<void> userInitTest() async{
-    isLoading = true;
-    notifyListeners();
-    // if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-    var eeclassAccount = await UserRepository().getUserEeclassAccount("U9bb9c1cdc6beb4cd5dd4f871602a6b8b");
-
-    if(eeclassAccount != null){
-      debugPrint("account: ${eeclassAccount.accountName}, password: ${eeclassAccount.accountPassword}");
-      setStudentId(eeclassAccount.accountName);
-      setEEclassPassword(eeclassAccount.accountPassword);
-    }
-    else{
-      debugPrint("line not logged in can't fetch user");
-    }
-    var notionData = await UserRepository().getUserNotionData("U9bb9c1cdc6beb4cd5dd4f871602a6b8b");
-    if(notionData != null){
-      debugPrint("authToken: ${notionData.authToken}, copyTemplateIndex: ${notionData.copyTemplateIndex}");
-      setNotionAuthToken(notionData.authToken);
-      setNotionTemplateId(notionData.copyTemplateIndex);
-    }
-    else{
-      debugPrint("line not logged in can't fetch user");
-    }
-    isLoading = false;
-    notifyListeners();
-  }
 
 
-  Future<void> eeclassConnectionTest() async{
+  Future<void> eeclassConnectionTest({bool testMode = false}) async{
     isLoading = true;
     notifyListeners();
     debugPrint("eeclassConnectionTest");
-    debugPrint("account: ${user.studentId}, password: ${user.eeclassPassword}, lineUserId: ${user.lineUserId}");
+    debugPrint("account: ${user.eeclassAccount}, password: ${user.eeclassPassword}, lineUserId: ${user.lineUserId}");
     // String linUserId = "U91c210fcea0952e4856265ea5f09571f";
     if(isLineLoggedIn && user.lineUserId.isNotEmpty){
+
       final result = await UserRepository().eeclassLoginValidation(
-        account: user.studentId,
+        account: user.eeclassAccount,
         password: user.eeclassPassword,
-        lineUserId: user.lineUserId
+        lineUserId: testMode ? "U9bb9c1cdc6beb4cd5dd4f871602a6b8b" :user.lineUserId 
         // lineUserId: "U91c210fcea0952e4856265ea5f09571f"
       );
     
@@ -208,6 +167,24 @@ class SettingPageViewModel extends ChangeNotifier{
     }
   }
 
+  Future<void> launchNotionDB() async {
+    if(user.notionDatabaseId.isNotEmpty){
+      String modifyIndex = user.notionDatabaseId.replaceAll('-', '');
+      String targetURL = "https://www.notion.so/${modifyIndex}";   
+      if (!await launchUrl(
+        Uri.parse(targetURL),
+        mode: LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank'
+        // webOnlyWindowName: '_self'
+      )) {
+        throw Exception('Could not launch notionAuth');
+      }
+    }
+    else{
+      debugPrint("line not logged in can't fetch user");
+    }
+  }
+
   Future<void> launchNotionOAuthTest() async {
     String linUserId = "U9bb9c1cdc6beb4cd5dd4f871602a6b8b";
     if (!await launchUrl(
@@ -221,27 +198,57 @@ class SettingPageViewModel extends ChangeNotifier{
     }
   }
 
-  
-
   Future<void> init() async{
     _isLoading = true;
     notifyListeners();
-    await liff.ready;
-    await updateLineInfo();
-    debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
-    await userInit();
-    // await userInitTest();
+    try{
+      await liff.ready;
+      debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
+      await updateLineInfo();
+      await userInit();
+      await eeclassConnectionTest();
+      await getSchedulingData();
+    }
+    catch(error){
+      debugPrint(error.toString());
+    }
     _isLoading = false;
     notifyListeners();
   }
 
+  Future<void> getSchedulingData() async {
+    if(!isLineLoggedIn || user.lineUserId.isEmpty){
+      debugPrint("line not logged in can't fetch user");
+      return;
+    }
+    var data = await UserRepository().getSchedulingData(user.lineUserId);
+    debugPrint("is auto update: ${data.isAutoUpdate}");
+    debugPrint("scheduling time: ${data.schedulingTime}");
+    _isSchedulingModeOpen = data.isAutoUpdate;
+    _schedulingTimeOptionValue = data.schedulingTime;
+  }
   Future<void> onSchedulingSettingChange() async{
     isLoading = true;
     notifyListeners();
-    await Future.delayed(const Duration(seconds: 1));
+    // await Future.delayed(const Duration(seconds: 1));
     debugPrint("update scheduling data");
     try{
       debugPrint("schedulingTimeOption: $schedulingTimeOption , isSchedulingModeOpen: $isSchedulingModeOpen");
+      if(isLineLoggedIn && user.lineUserId.isNotEmpty){
+        var result = await UserRepository().updateSchedulingData(lineUserId: user.lineUserId, entity: SchedulingDataEntity(
+          isAutoUpdate: isSchedulingModeOpen,
+          schedulingTime: schedulingTimeOption,
+        ));
+        if (result){
+          debugPrint("update scheduling data success");
+        }
+        else{
+          debugPrint("update scheduling data fail");
+        }
+      }
+      else{
+        debugPrint("line not logged in can't fetch user");
+      }
     } 
     catch(error){
       debugPrint("onSchedulingSettingChange error ${error.toString()}");

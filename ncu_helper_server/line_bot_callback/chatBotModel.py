@@ -5,6 +5,7 @@ from eeclass_setting.appModel import check_eeclass_update_pipeline, check_login_
     find_account_password, find_user_by_user_id
 from django.core.cache import cache
 from django.conf import settings
+from .views import LineBotCallbackView as cb
 
 
 @chat_status("default", default=True)
@@ -38,12 +39,12 @@ def main_menu(event):
 def set_data(event):
     jump_to(do_nothing, event.source.user_id)
     jump_to(default_message, event.source.user_id, True)
+#
 
-from .views import LineBotCallbackView as cb
 @chat_status("update eeclass")
 @text
 def update_eeclass(event):
-    jump_to(do_nothing, event.source.user_id)
+    print('update_eeclass')
     search_result:  Tuple[LineUser | None, bool] = find_user_by_user_id(event.source.user_id)
     user, founded = search_result
     if not founded:

@@ -58,6 +58,7 @@ class DataDisplayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 0),
       elevation: elevation,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -75,6 +76,7 @@ class DataDisplayCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _getTitleWidget(context),
+            SizedBox(width: 10,),
             child,
           ],
         ),
