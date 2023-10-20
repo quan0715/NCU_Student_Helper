@@ -24,7 +24,6 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 @csrf_exempt
 def notion_auth_start(request):
     line_use_id = request.GET.get('user_id')
-    print(line_use_id)
     notion_redirect_uri = settings.SERVER + "/notion/redirect"
     notion_auth_endpoint = "https://api.notion.com/v1/oauth/authorize"
     client = WebApplicationClient(settings.NOTION_OAUTH_CLIENT_ID)
@@ -40,12 +39,10 @@ def notion_auth_callback(request):
     try:
         # code = request.GET.get('code')
         line_use_id = request.GET.get('state')
-        print(line_use_id)
         token_request_params = client.prepare_token_request(notion_get_token_endpoint, url, notion_redirect_uri)
         response = re.post(token_request_params[0], headers=token_request_params[1], data=token_request_params[2],
                            auth=auth)
         data = response.json()
-        print(data)
         access_token = data['access_token']
         duplicated_template_id = data['duplicated_template_id']
 
@@ -56,7 +53,8 @@ def notion_auth_callback(request):
         user.save()
 
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
         return HttpResponse('<div>something wrong QQQ</div>')
 
     return redirect(settings.WEB_SERVER)
