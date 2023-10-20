@@ -102,9 +102,9 @@ class _SettingPageViewState extends State<SettingPageView> {
   }
 
   Widget _buildTitleFrame(){
-    TextStyle titleStyle =  AppText.titleLarge(context);
+    TextStyle titleStyle =  AppText.titleLarge(context).copyWith(color: AppColor.onSurface(context));
     TextStyle titleStyleStrong = AppText.titleLarge(context).copyWith(color: AppColor.primary(context));
-    TextStyle contentStyle = AppText.titleSmall(context).copyWith(fontWeight: FontWeight.normal);
+    TextStyle contentStyle = AppText.titleSmall(context).copyWith(fontWeight: FontWeight.normal, color: AppColor.onSurface(context));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
@@ -195,6 +195,7 @@ class _SettingPageViewState extends State<SettingPageView> {
   }
   
   Widget _buildOAuthFrame(){
+    TextStyle menuLabelStyle =  AppText.bodySmall(context).copyWith(color: AppColor.onSurface(context));
     return Consumer<SettingPageViewModel>(
       builder: (context, viewModel, child) => SettingSection(
         title: "Notion OAuth 設定",
@@ -207,7 +208,7 @@ class _SettingPageViewState extends State<SettingPageView> {
             title: "Notion EECLASS TOKEN",
             child: Row(
               children: [
-                Expanded(child: Text(viewModel.notionAuthToken)),
+                Expanded(child: Text(viewModel.notionAuthToken, style: menuLabelStyle)),
               ],
             )
           ),
@@ -215,7 +216,7 @@ class _SettingPageViewState extends State<SettingPageView> {
             title: "Notion EECLASS db URL",
             child: Row(
               children: [
-                Expanded(child: Text(viewModel.notionTemplateId)),
+                Expanded(child: Text(viewModel.notionTemplateId, style: menuLabelStyle)),
               ],
             )
           ),

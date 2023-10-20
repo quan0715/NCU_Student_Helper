@@ -42,7 +42,7 @@ class SettingSection extends StatelessWidget{
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(title, style: AppText.titleMedium(context)),
+                                Text(title, style: AppText.titleMedium(context).copyWith(color: AppColor.primary(context)),),
                                 subTitle != null ? Text(subTitle!,
                                 softWrap: true,
                                 style: AppText.bodySmall(context).copyWith(
@@ -55,7 +55,7 @@ class SettingSection extends StatelessWidget{
                           status ?? const SizedBox.shrink(),
                         ],
                       ),
-                      const Divider(),
+                      // const Divider(),
                       ...children != null ? children! : [],
                     ],
                   ),

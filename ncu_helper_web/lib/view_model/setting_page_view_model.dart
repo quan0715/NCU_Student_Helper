@@ -226,9 +226,9 @@ class SettingPageViewModel extends ChangeNotifier{
   Future<void> init() async{
     _isLoading = true;
     notifyListeners();
-    await liff.ready;
-    await updateLineInfo();
     debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
+    // await liff.ready;
+    await updateLineInfo();
     await userInit();
     // await userInitTest();
     _isLoading = false;
