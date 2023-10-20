@@ -35,6 +35,9 @@ def main_menu(event):
         case 'EECLASS連線測試':
             jump_to(eeclass_login_test, event.source.user_id, True)
             return
+        case 'eeclass update':
+            jump_to(eeclass_update, event.source.user_id, False)
+            return
         case _:
             jump_to(default_message, event.source.user_id, True)
             return '沒有此項指令'
@@ -90,7 +93,7 @@ def eeclass_login_test(event):
 
 @chat_status("eeclass update")
 @text
-def eeclass_update_test(event):
+def eeclass_update(event):
     jump_to(default_message, event.source.user_id, False)
     search_result:  Tuple[LineUser | None, bool] = find_user_by_user_id(event.source.user_id)
     user, founded = search_result
