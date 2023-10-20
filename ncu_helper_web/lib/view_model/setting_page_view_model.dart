@@ -1,43 +1,55 @@
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_line_liff/flutter_line_liff.dart';
 import 'package:ncu_helper/model/user_model.dart';
-import 'package:http/http.dart' as http;
 import 'package:ncu_helper/repositories/user_repository.dart';
 import 'package:ncu_helper/utils/server_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
+
 class SettingPageViewModel extends ChangeNotifier{
-  FlutterLineLiff liff = FlutterLineLiff();
   UserModel user = UserModel();
-  String get lineUserName => user.lineUserName.isEmpty ? "尚未登入" : user.lineUserName;
-  String get lineId => user.lineUserId.isEmpty ? "尚未登入" : user.lineUserId;
-  String get studentId => user.eeclassAccount.isEmpty ? "None" : user.eeclassAccount;
-  String get eeclassPassword => user.eeclassPassword.isEmpty ? "None" : user.eeclassPassword;
-  String get notionAuthToken => user.notionAuthToken.isEmpty ? "None" : user.notionAuthToken;
-  String get notionTemplateId => user.notionDatabaseId.isEmpty ? "None" : user.notionDatabaseId;
+  HSRUserEntity hsrUser = HSRUserEntity.defaultData();
+  SchedulingDataEntity schedulingData = SchedulingDataEntity.defaultData();
+
+  String get lineUserName => user.lineUserName;
+  String get lineId => user.lineUserId;
+  String get studentId => user.eeclassAccount;
+  String get eeclassPassword => user.eeclassPassword;
+  String get notionTemplateId => user.notionDatabaseId.isEmpty ? "/" : user.notionDatabaseId;
+  String get hsrPersonId => hsrUser.personId;
+  String get hsrEmail => hsrUser.email;
+  String get hsrPhone => hsrUser.phone;
+  bool get isSchedulingModeOpen => schedulingData.isAutoUpdate;
+  int get schedulingTimeOption => schedulingData.schedulingTime;
+
 
   bool _isLoading = false;
   bool _isEEclassConnectionSuccess = false;
-  // TODO: will be move to Entity
-  bool _isSchedulingModeOpen = false;
   List<int> schedulingTimeOptions = [10, 20 , 30, 60,];
-  int _schedulingTimeOptionValue = 10;
-  int get schedulingTimeOption => _schedulingTimeOptionValue;
-  bool get isEEclassConnectionSuccess => _isEEclassConnectionSuccess;
-  bool get isLineLoggedIn => liff.isLoggedIn;  
-  bool get isNotionAuthSuccess => user.notionAuthToken.isNotEmpty && user.notionDatabaseId.isNotEmpty;
-  bool get isSchedulingModeOpen => _isSchedulingModeOpen;
+  List<String> pageTitles = ["EECLASS", "Notion", "高鐵訂票"];
+  int _currentPageIndex = 0;
 
+  bool isCurrentPageIndex(int index) => _currentPageIndex == index;
+  int get currentPageIndex => _currentPageIndex;
+  bool get isLoading => _isLoading;
+  bool get isEEclassConnectionSuccess => _isEEclassConnectionSuccess;
+  bool get isLineLoggedIn => FlutterLineLiff().isLoggedIn;  
+  bool get isNotionAuthSuccess => user.notionAuthToken.isNotEmpty && user.notionDatabaseId.isNotEmpty;
+
+  set currentPageIndex(int currentPageIndex){
+    _currentPageIndex = currentPageIndex;
+    notifyListeners();
+  }
+  
   set isSchedulingModeOpen(bool isSchedulingModeOpen){
-    _isSchedulingModeOpen = isSchedulingModeOpen;
+    schedulingData.isAutoUpdate = isSchedulingModeOpen;
     notifyListeners();
   }
 
   set schedulingTimeOption(int schedulingTimeOption){
-    _schedulingTimeOptionValue = schedulingTimeOption;
+    schedulingData.schedulingTime = schedulingTimeOption;
     notifyListeners();
   }
   
@@ -46,9 +58,7 @@ class SettingPageViewModel extends ChangeNotifier{
     notifyListeners();
   }
 
-  bool get isLoading => _isLoading;
-
-  void setStudentId(String studentId){
+  void setEeclassAccount(String studentId){
     user.eeclassAccount = studentId;
     // notifyListeners();
   }
@@ -58,16 +68,17 @@ class SettingPageViewModel extends ChangeNotifier{
     // notifyListeners();
   }
 
-  void setNotionAuthToken(String notionAuthToken){
-    user.notionAuthToken = notionAuthToken;
-    // notifyListeners();
-  }
-
   void setNotionTemplateId(String notionTemplateId){
     user.notionDatabaseId  = notionTemplateId;
-    // notifyListeners();
+    notifyListeners();
   }
 
+  void setHsrData({String? hsrPersonId, String? hsrEmail, String? hsrPhone}){
+    hsrUser.personId = hsrPersonId ?? hsrUser.personId;
+    hsrUser.email = hsrEmail ?? hsrUser.email;
+    hsrUser.phone = hsrPhone ?? hsrUser.phone;
+  }
+  
   void setLineUserId(String lineUserId){
     user.lineUserId = lineUserId;
     notifyListeners();
@@ -78,11 +89,11 @@ class SettingPageViewModel extends ChangeNotifier{
     notifyListeners();
   }
   
-  Future<void> updateLineInfo () async {
+  Future<void> updateLineInfo() async {
     isLoading = true;
     notifyListeners();
     if(isLineLoggedIn){
-      var profile = await liff.profile ;
+      var profile = await FlutterLineLiff().profile ;
       setLineUserId(profile.userId);
       setLineUserName(profile.displayName);
       user.lineUserName = profile.displayName;
@@ -108,11 +119,9 @@ class SettingPageViewModel extends ChangeNotifier{
         if(result != null){
           debugPrint("account: ${result.eeclassAccount}, password: ${result.eeclassPassword}");
           debugPrint("authToken: ${result.notionAuthToken }, copyTemplateIndex: ${result.notionDatabaseId}");
-          setNotionAuthToken(result.notionAuthToken);
           setNotionTemplateId(result.notionDatabaseId);
-          setStudentId(result.eeclassAccount);
-          setEEclassPassword(result.eeclassPassword);
-          
+          setEeclassAccount(result.eeclassAccount);
+          setEEclassPassword(result.eeclassPassword); 
         }
       }
       else{
@@ -125,8 +134,6 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = false;
     notifyListeners();
   }
-
-
 
   Future<void> eeclassConnectionTest({bool testMode = false}) async{
     isLoading = true;
@@ -185,34 +192,32 @@ class SettingPageViewModel extends ChangeNotifier{
     }
   }
 
-  Future<void> launchNotionOAuthTest() async {
-    String linUserId = "U9bb9c1cdc6beb4cd5dd4f871602a6b8b";
-    if (!await launchUrl(
-      // Uri.parse(ServerConfig.notionAuthURL),
-      Uri.parse(ServerConfig.serverBaseURL + "/notion/auth?user_id=$linUserId"),
-      mode: LaunchMode.externalApplication,
-      // webOnlyWindowName: '_blank'
-      // webOnlyWindowName: '_self'
-    )) {
-      throw Exception('Could not launch notionAuth');
-    }
-  }
-
   Future<void> init() async{
     _isLoading = true;
     notifyListeners();
     try{
-      await liff.ready;
-      debugPrint('liff is ready, isLogin: ${liff.isLoggedIn}'); 
+      await FlutterLineLiff().ready;
+      debugPrint('liff is ready, isLogin: $isLineLoggedIn'); 
       await updateLineInfo();
       await userInit();
       await eeclassConnectionTest();
       await getSchedulingData();
+      await getHSRData();
     }
     catch(error){
       debugPrint(error.toString());
     }
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> getHSRData() async {
+    if(!isLineLoggedIn || user.lineUserId.isEmpty){
+      debugPrint("line not logged in can't fetch user");
+      return;
+    }
+    var data = await UserRepository().getHSRData(user.lineUserId);
+    hsrUser = data;
     notifyListeners();
   }
 
@@ -224,9 +229,18 @@ class SettingPageViewModel extends ChangeNotifier{
     var data = await UserRepository().getSchedulingData(user.lineUserId);
     debugPrint("is auto update: ${data.isAutoUpdate}");
     debugPrint("scheduling time: ${data.schedulingTime}");
-    _isSchedulingModeOpen = data.isAutoUpdate;
-    _schedulingTimeOptionValue = data.schedulingTime;
+    schedulingData = data;
+    notifyListeners();
   }
+
+  Future<void> onHSRDataSubmitted() async{
+    // print all
+    debugPrint("hsrPersonId: $hsrPersonId");
+    debugPrint("hsrEmail: $hsrEmail");
+    debugPrint("hsrPhone: $hsrPhone");
+    debugPrint("update data toServer");
+  }
+  
   Future<void> onSchedulingSettingChange() async{
     isLoading = true;
     notifyListeners();
@@ -239,12 +253,9 @@ class SettingPageViewModel extends ChangeNotifier{
           isAutoUpdate: isSchedulingModeOpen,
           schedulingTime: schedulingTimeOption,
         ));
-        if (result){
-          debugPrint("update scheduling data success");
-        }
-        else{
-          debugPrint("update scheduling data fail");
-        }
+        result
+          ? debugPrint("update scheduling data success")
+          : debugPrint("update scheduling data fail");
       }
       else{
         debugPrint("line not logged in can't fetch user");

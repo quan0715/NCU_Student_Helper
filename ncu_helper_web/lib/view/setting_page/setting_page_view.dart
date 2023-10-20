@@ -19,69 +19,48 @@ class _SettingPageViewState extends State<SettingPageView> {
   void _launchNotionOAuth() async => await viewModel.launchNotionOAuth();
   void _onSchedulingSettingChange() async => await viewModel.onSchedulingSettingChange();
   void _launchNotionDBBrowser() async => await viewModel.launchNotionDB();
-  
-  Widget _buildAccountSettingForm(){
-    return Consumer<SettingPageViewModel>(
-      builder: (context, viewModel, child) => Form(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DataDisplayCard.horizontal(
-              title: "連線狀態",
-              child: viewModel.isEEclassConnectionSuccess
-                ? StatusChip(label: "連線成功", color: AppColor.onSuccessColor)
-                : StatusChip(label: "連線失敗", color: AppColor.onErrorColor)
-            ),
-            DataDisplayCard.horizontal(
-              title: "Account",
-              child: Expanded(
-                flex: 2,
-                child: TextFormField(
-                  textDirection: TextDirection.rtl,
-                  style: AppText.labelLarge(context).copyWith(color: AppColor.secondary(context)),
-                  initialValue: viewModel.user.eeclassAccount,
-                  onChanged: (value) => viewModel.setStudentId(value),
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 5),
-                    isDense: true,
-                    hintText: "請輸入 EECLASS 帳號",
-                    hintTextDirection: TextDirection.rtl,
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide.none
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            DataDisplayCard.horizontal(
-              title: "Password",
-              child: Expanded(
-                flex: 2,
-                child: TextFormField(
-                  textDirection: TextDirection.rtl,
-                  style: AppText.labelLarge(context).copyWith(color: AppColor.secondary(context)),
-                  initialValue: viewModel.user.eeclassPassword,
-                  onChanged: (value) => viewModel.setEEclassPassword(value),
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 5),
-                    isDense: true,
-                    hintText: "請輸入 EECLASS 密碼",
-                    hintTextDirection: TextDirection.rtl,
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide.none
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        )
-      ),
-    );
+  void _onHSRDataSubmitted() async => await viewModel.onHSRDataSubmitted();
+
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    _pageController = PageController(initialPage: 0);
+    super.initState();
   }
 
+  Widget pageTextFormFieldDataFrame({
+      required String title,
+      required String hintText,
+      required String initialValue,
+      void Function(String)? onChanged,
+      String? Function(String?)? validator,
+    }){
+      return DataDisplayCard.horizontal(
+        title: title,
+        child: Expanded(
+          flex: 2,
+          child: TextFormField(
+            textDirection: TextDirection.rtl,
+            style: AppText.labelLarge(context).copyWith(color: AppColor.secondary(context)),
+            initialValue: initialValue,
+            onChanged: onChanged,
+            validator: validator,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(vertical: 5),
+              isDense: true,
+              hintText: hintText,
+              hintStyle: AppText.labelLarge(context).copyWith(color: AppColor.secondary(context).withOpacity(0.7)),
+              hintTextDirection: TextDirection.rtl,
+              border: const UnderlineInputBorder(
+                borderSide: BorderSide.none
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  
   Widget viewButton(String label, onPressed){
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -119,6 +98,49 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   }
 
+
+  Widget _buildHSRDataForm(){
+    return Consumer<SettingPageViewModel>(
+      builder: (context, viewModel, child) => SettingSection(
+          title: "高鐵訂票資料設定",
+          subTitle: "請依照指示輸入正式資料，幫助Goldie完成訂票程序",
+          children: [
+            Form(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  pageTextFormFieldDataFrame(
+                    title: "身份證字號（10碼）",
+                    hintText:  "輸入身份證字號",
+                    initialValue: viewModel.hsrPersonId,
+                    onChanged: (value) => viewModel.setHsrData(hsrPersonId: value),
+                    validator: (value) => value!.isEmpty ? "請勿留空" : null,
+                  ),
+                  pageTextFormFieldDataFrame(
+                    title: "電話號碼",
+                    hintText:  "輸入電話號碼",
+                    initialValue: viewModel.hsrPhone,
+                    onChanged: (value) => viewModel.setHsrData(hsrPhone: value),
+                    validator: (value) => value!.isEmpty ? "請勿留空" : null,
+                  ),
+                  pageTextFormFieldDataFrame(
+                    title: "電子郵件",
+                    hintText:  "輸入電子郵件",
+                    initialValue: viewModel.hsrEmail,
+                    onChanged: (value) => viewModel.setHsrData(hsrEmail: value),
+                    validator: (value) => value!.isEmpty ? "請勿留空" : null,
+                  ),
+                ],
+              )
+            ),
+            viewButton("訂票資料更新", _onHSRDataSubmitted)
+          ],
+        )
+      );
+  }
+  
+  
   Widget loadingWidget(){
     return const Center(
       child: CircularProgressIndicator(),
@@ -151,17 +173,42 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   Widget _buildEeclassSettingFrame(){
     return Consumer<SettingPageViewModel>(
-      builder: (context, viewModel, child){
-        // viewModel.eeclassConnectionTest();
-        return SettingSection(
+      builder: (context, viewModel, child) => SettingSection(
           title: "EECLASS 設定",
           subTitle: "請輸入EECLASS帳號密碼，並確認連線狀態",
           children: [
-            _buildAccountSettingForm(),
+            Form(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DataDisplayCard.horizontal(
+                    title: "連線狀態",
+                    child: viewModel.isEEclassConnectionSuccess
+                      ? StatusChip(label: "連線成功", color: AppColor.onSuccessColor)
+                      : StatusChip(label: "連線失敗", color: AppColor.onErrorColor)
+                  ),
+                  pageTextFormFieldDataFrame(
+                    title: "Account",
+                    hintText:  "請輸入 EECLASS 帳號",
+                    initialValue: viewModel.user.eeclassAccount,
+                    onChanged: (value) => viewModel.setEeclassAccount(value),
+                    validator: (value) => value!.isEmpty ? "請輸入帳號" : null,
+                  ),
+                  pageTextFormFieldDataFrame(
+                    title: "Password",
+                    hintText:  "請輸入 EECLASS 密碼",
+                    initialValue: viewModel.user.eeclassAccount,
+                    onChanged: (value) => viewModel.setEEclassPassword(value),
+                    validator: (value) => value!.isEmpty ? "請輸入密碼" : null,
+                  ),
+                ],
+              )
+            ),
             viewButton("EECLASS 資料更新", _eeclassConnectionTest)
           ],
-        );
-      });
+        )
+      );
   }
 
   Widget _buildEeclassAndNotionUpdateSettingFrame(){
@@ -250,6 +297,37 @@ class _SettingPageViewState extends State<SettingPageView> {
       });
   }
   
+  Widget _tabChip(String label, int index){
+    bool isSelected = viewModel.isCurrentPageIndex(index);
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: RawChip(
+        label: Text(label),
+        avatar: isSelected ? const Icon(Icons.label , color: AppColor.surfaceColor,) : null,
+        shape: const StadiumBorder(
+          // borderRadius: BorderRadius.circular(20),
+          side: BorderSide.none
+        ),
+        labelStyle: AppText.labelMedium(context).copyWith(color: isSelected ? AppColor.surfaceColor : AppColor.primary(context)),
+        backgroundColor: isSelected ? AppColor.primary(context) : AppColor.surface(context),
+        onSelected: (value) => {
+          // debugPrint("$index, selected = $value"),
+          viewModel.currentPageIndex = index,
+          _pageController..animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut)
+        },
+      ),
+    );
+  }
+
+  Widget _buildPageViewTab(){
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Row(
+        children: List.generate(viewModel.pageTitles.length, (index) => _tabChip(viewModel.pageTitles[index], index))
+      ),
+    );
+  }
+
   Widget pageBody(){
     return Consumer<SettingPageViewModel>(
       builder: (context, viewModel, child) => Scaffold(
@@ -257,19 +335,49 @@ class _SettingPageViewState extends State<SettingPageView> {
         viewModel.isLoading ? loadingWidget() :
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTitleFrame(),
-                // _buildLineTestFrame(),
-                _buildEeclassSettingFrame(),
-                // _buildOAuthFrame(),
-                _buildEeclassAndNotionUpdateSettingFrame(),
-              ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTitleFrame(),
+              _buildPageViewTab(),
+              Expanded(
+                child: PageView(
+                  onPageChanged: (index) => {
+                    viewModel.currentPageIndex = index,
+                    _pageController..animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut)
+                  },
+                  controller: _pageController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _buildEeclassSettingFrame(),
+                    _buildEeclassAndNotionUpdateSettingFrame(),
+                    _buildHSRDataForm(),
+                  ],
+                ),
               ),
-          ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 24),
+              //   child: PageViewDotIndicator(
+              //     currentItem: 1,
+              //     count: 2,
+              //     unselectedColor: AppColor.secondary(context),
+              //     selectedColor: AppColor.primaryColor,
+              //     duration: const Duration(milliseconds: 200),
+              //     boxShape: BoxShape.circle,
+              //     onItemClicked: (index) {
+              //       _pageController.animateToPage(
+              //         index,
+              //         duration: const Duration(milliseconds: 200),
+              //         curve: Curves.easeInOut,
+              //       );
+              //     },
+              //   ),
+              // ),
+              // const Spacer(),
+            ],
+            ),
         ),
       ));
   }
