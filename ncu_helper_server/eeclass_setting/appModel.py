@@ -59,13 +59,9 @@ def check_eeclass_update_pipeline(user: LineUser) -> bool:
     except:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-    try:
-        task = loop.create_task(eeclass_pipeline(user))
-        loop.run_until_complete(task)
-        login_success = task.result()
-    except Exception as e:
-        print(e)
-    return login_success
+    task = loop.create_task(eeclass_pipeline(user))
+    loop.run_until_complete(task)
+    return task.result()
 
 
 def save_user_data(user_id, account=None, password=None):

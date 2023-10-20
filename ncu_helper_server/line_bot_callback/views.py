@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from linebot import LineBotApi, WebhookParser, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextSendMessage
+from linebot.models import MessageEvent, TextSendMessage, FollowEvent
 from concurrent.futures import ThreadPoolExecutor
 # Create your views here.
 from line_bot_callback.chatBotExtension import handle
@@ -40,7 +40,7 @@ class LineBotCallbackView(View):
             return HttpResponseBadRequest()
 
         for event in events:
-            if isinstance(event, MessageEvent):
+            if isinstance(event, (MessageEvent, FollowEvent)):
                 self.message_handler(event)
 
         return HttpResponse()
@@ -50,9 +50,12 @@ class LineBotCallbackView(View):
         def reply(event):
             replies=handle(event)
             self.line_bot_api.reply_message(event.reply_token, replies)
+            # from chatBotExtension import jump_to
+            # from chatBotModel import default_message
+            # jump_to(default_message, event.source.user_id, False)
             
         self.threadPoolExecutor.submit(reply, event)
-
+    
     @classmethod
     def push_message(cls, user_id, messages):
         cls.line_bot_api.push_message(user_id, messages)

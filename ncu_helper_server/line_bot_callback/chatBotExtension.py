@@ -73,7 +73,10 @@ def handle(event)->list:
         while True:
             status = ChatStatus.objects.get(line_user_id=user_id).status
             print(status)
-            reply = __statuses.get(status, __statuses[__default_status])(event)
+            try:
+                reply = __statuses.get(status, __statuses[__default_status])(event)
+            except Exception as e:
+                reply = __statuses[__default_status](event)
             if reply: replies.append(reply)
             if not ChatStatus.objects.get(line_user_id=user_id).propagation:
                 break
