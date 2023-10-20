@@ -98,7 +98,6 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   }
 
-
   Widget _buildHSRDataForm(){
     return Consumer<SettingPageViewModel>(
       builder: (context, viewModel, child) => SettingSection(
@@ -139,7 +138,6 @@ class _SettingPageViewState extends State<SettingPageView> {
         )
       );
   }
-  
   
   Widget loadingWidget(){
     return const Center(
@@ -198,7 +196,7 @@ class _SettingPageViewState extends State<SettingPageView> {
                   pageTextFormFieldDataFrame(
                     title: "Password",
                     hintText:  "請輸入 EECLASS 密碼",
-                    initialValue: viewModel.user.eeclassAccount,
+                    initialValue: viewModel.user.eeclassPassword,
                     onChanged: (value) => viewModel.setEEclassPassword(value),
                     validator: (value) => value!.isEmpty ? "請輸入密碼" : null,
                   ),
@@ -303,7 +301,7 @@ class _SettingPageViewState extends State<SettingPageView> {
       padding: const EdgeInsets.all(4.0),
       child: RawChip(
         label: Text(label),
-        avatar: isSelected ? const Icon(Icons.label , color: AppColor.surfaceColor,) : null,
+        // avatar: isSelected ? const Icon(Icons.label , color: AppColor.surfaceColor,) : null,
         shape: const StadiumBorder(
           // borderRadius: BorderRadius.circular(20),
           side: BorderSide.none
@@ -331,8 +329,8 @@ class _SettingPageViewState extends State<SettingPageView> {
   Widget pageBody(){
     return Consumer<SettingPageViewModel>(
       builder: (context, viewModel, child) => Scaffold(
-        body: 
-        viewModel.isLoading ? loadingWidget() :
+        resizeToAvoidBottomInset : false,
+        body: viewModel.isLoading ? loadingWidget() :
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
           child: Column(
