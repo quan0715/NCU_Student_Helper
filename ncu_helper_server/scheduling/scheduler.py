@@ -33,7 +33,6 @@ class IntervalScheduler:
             self.__scheduler.resume_job(job_id)
         else:
             self.__scheduler.add_job(job, trigger='interval', seconds=interval, id=job_id)
-        job()
         
 
     def remove_job(self, user_id, job):
