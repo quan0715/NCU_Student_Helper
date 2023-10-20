@@ -76,3 +76,30 @@ pip install -r requirements.txt
   - returned status
     - 200: success
     - 401: fail
+
+- update hsr data
+  - method: POST
+  - url\
+        \$\{server\}/backenddb/HSR/save_data
+  - body(all required)
+    - user_id: line user_id
+    - id_card_number: id card number
+    - phone_number: phone number
+    - email: email
+  - returned status
+    - 200: success
+    - 401: fail
+  
+- get scheduling data
+  - method: GET
+  - url\
+      \$\{server\}/backenddb/HSR/get_data?user_id=\$\{line_user_id\}
+  - returned status
+    - 200:\
+      return json\
+      {\
+        "id_card_number":\$\{user id card number\},\
+        "phone_number":\$\{user phone number\},\
+        "email":\$\{user email\}\
+      }
+    - 404: user not found
