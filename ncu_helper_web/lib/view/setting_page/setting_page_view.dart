@@ -91,6 +91,7 @@ class _SettingPageViewState extends State<SettingPageView> {
             child: ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
+                elevation: 5,
                 backgroundColor:  AppColor.onSurface(context),
                 foregroundColor:  AppColor.surfaceColor,
                 textStyle: const TextStyle(
@@ -98,6 +99,7 @@ class _SettingPageViewState extends State<SettingPageView> {
                   fontWeight: FontWeight.bold,
                 ),
                 shape: RoundedRectangleBorder(
+                  side: BorderSide(color: AppColor.primary(context), width: 1) ,
                   borderRadius: BorderRadius.circular(5),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),

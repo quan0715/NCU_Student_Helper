@@ -14,7 +14,7 @@ class IntervalScheduler:
         self.__scheduler.start()
 
     def __get_job_id(self, user_id:str, job:callable):
-        return f'{user_id}_{job}'
+        return f'{user_id}'
 
     def pause(self):
         self.__scheduler.pause()
@@ -29,11 +29,11 @@ class IntervalScheduler:
         job_id = self.__get_job_id(user_id, job)
         if self.__scheduler.get_job(job_id):
             self.__scheduler.pause_job(job_id)
-            self.__scheduler.reschedule_job(job_id, trigger='interval', seconds=interval, id=job_id)
+            self.__scheduler.reschedule_job(job_id, trigger='interval', seconds=interval*60, id=job_id)
             self.__scheduler.resume_job(job_id)
         else:
-            self.__scheduler.add_job(job, trigger='interval', seconds=interval, id=job_id)
-        
+            self.__scheduler.add_job(job, trigger='interval', seconds=interval*60, id=job_id)
+        job()
 
     def remove_job(self, user_id, job):
         job_id = self.__get_job_id(user_id, job)

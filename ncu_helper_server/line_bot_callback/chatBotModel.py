@@ -41,8 +41,10 @@ def set_data(event):
     jump_to(default_message, event.source.user_id, True)
 #
 
-
+@chat_status("update eeclass")
+@text
 def update_eeclass(event):
+    print('update_eeclass')
     search_result:  Tuple[LineUser | None, bool] = find_user_by_user_id(event.source.user_id)
     user, founded = search_result
     if not founded:
