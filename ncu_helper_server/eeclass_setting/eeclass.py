@@ -11,7 +11,7 @@ from eeclass_bot.models.Bulletin import Bulletin
 from eeclass_bot.models.Homework import Homework
 from eeclass_bot.models.Material import Material
 
-from eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
+from line_bot_callback.eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
 from eeclass_setting.models import LineUser
 
 async def eeclass_test_login(account, password):
