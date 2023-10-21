@@ -12,7 +12,7 @@ def find_auto_scheduling(user_id: str) -> Tuple[Dict | None, bool]:
     if len(SchedulingData.objects.filter(line_user_id=user_id)) == 0:
         return None, False
     user = SchedulingData.objects.get(line_user_id=user_id)
-    return {'is_auto_update': user.is_auto_update, 'scheduling_time': user.scheduling_time}, True
+    return {'is_auto_update': user.is_auto_update, 'scheduling_time': user.scheduling_time // 60}, True
 
 
 def get_scheduling_task(user_id: str):
