@@ -35,6 +35,7 @@ class LangChainAgent:
             self.llm,
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
+            max_execution_time=15,
         )
     
     def add_tools(self, tool: BaseModel):
@@ -42,7 +43,7 @@ class LangChainAgent:
         self.__update_agent()
 
     def run(self, message)->str:
-        return self.agent.run(message)
+        return self.agent.run('#zh_tw\n'+message)
 
 __agent = LangChainAgent()
 def get_system_agent():
