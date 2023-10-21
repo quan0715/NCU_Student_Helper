@@ -223,8 +223,8 @@ class SettingPageViewModel extends ChangeNotifier{
   Future<void> getHSRData() async {
     if(lineLoginChecking){
       var result = await UserRepository().getHSRData(user.lineUserId);
+      
       hsrUser = result;
-      // await showLogMessage!("成功更新高鐵資料");
     }
     else{
       debugPrint("line not logged in can't fetch user");
@@ -268,6 +268,7 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     debugPrint("update scheduling data");
+    // await Future.delayed(Duration(seconds: 1));
     try{
       debugPrint("schedulingTimeOption: $schedulingTimeOption , isSchedulingModeOpen: $isSchedulingModeOpen");
       if(isLineLoggedIn && user.lineUserId.isNotEmpty){

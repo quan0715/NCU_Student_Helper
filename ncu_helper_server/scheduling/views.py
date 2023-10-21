@@ -17,6 +17,7 @@ def get_data(request, *args, **kwargs):
     data, founded = find_auto_scheduling(request.GET.get('user_id'))
     if not founded:
         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
+    print(data)
     return JsonResponse(data)
 
 @csrf_exempt

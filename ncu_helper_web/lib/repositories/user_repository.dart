@@ -105,33 +105,6 @@ class UserRepository{
     }
   }
 
-
-  // Future<EECLASSAccountEntity?> getUserEeclassAccount(String lineUserId) async {
-  //   debugPrint("lineUserId: $lineUserId");
-  //   try{
-  //     var result = await http.Client().get(
-  //       Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId",),
-  //       headers: {
-  //         'ngrok-skip-browser-warning' : '8000',
-  //       }
-  //     );
-  //     if(result.statusCode == 200){
-  //       debugPrint(result.body);
-  //       var data = jsonDecode(result.body);
-  //       // debugPrint(data.toString());
-  //       return EECLASSAccountEntity.fromJson(data);
-  //       // return UserModel.fromJson(data);
-  //     }
-  //     else if(result.statusCode == 404){
-  //       debugPrint("user not found");
-  //       return null;
-  //     }
-  //   } catch(e){
-  //     debugPrint(e.toString());
-  //     throw Exception("get user unknown error ${e.toString()}");
-  //   } 
-  // }
-
   Future<bool> eeclassLoginValidation({required String lineUserId, required String account, required String password}) async {
     try{
       var result = await http.Client().post(
@@ -158,35 +131,9 @@ class UserRepository{
     }
   }
 
-  // Future<NotionDataEntity?> getUserNotionData(String lineUserId) async {
-  //   debugPrint("lineUserId: $lineUserId");
-  //   try{
-  //     var result = await http.Client().get(
-  //       Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId"),
-  //       headers: {
-  //         'ngrok-skip-browser-warning' : '8000',
-  //       }
-  //     );
-  //     if(result.statusCode == 200){
-  //       debugPrint(result.body);
-  //       var data = jsonDecode(result.body);
-  //       return NotionDataEntity.fromJson(data);
-  //     }
-  //     else if(result.statusCode == 404){
-  //       debugPrint("user not found");
-  //       return null;
-  //     }
-  //   } catch(e){
-  //     debugPrint(e.toString());
-  //     throw Exception("get user unknown error ${e.toString()}");
-  //   } 
-  // }
-
   Future<UserModel?> getUserData(String lineUserId) async {
     debugPrint("lineUserId: $lineUserId");
     try{
-      // await FlutterLineLiff().ready;
-      // var lineProfile = await FlutterLineLiff().profile;
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_data?user_id=$lineUserId"),
         // headers: {
@@ -219,9 +166,6 @@ class UserRepository{
     try{
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/scheduling/api/get_data?user_id=$lineUserId"),
-        // headers: {
-        //   'ngrok-skip-browser-warning' : '8000',
-        // }
       );
       if(result.statusCode == 200){
         debugPrint(result.body);
