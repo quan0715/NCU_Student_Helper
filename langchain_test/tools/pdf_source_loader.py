@@ -9,7 +9,6 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.chains import RetrievalQA
 from dotenv import load_dotenv
 import os
-import openai
 import chromadb
 
 persistent_client = chromadb.PersistentClient()

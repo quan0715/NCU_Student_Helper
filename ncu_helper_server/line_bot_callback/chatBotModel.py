@@ -1,3 +1,4 @@
+from .ncu_wiki import getWikiChainLLM
 from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent
 from typing import Tuple
 from eeclass_setting.models import LineUser
@@ -15,29 +16,31 @@ def default_message(event):
     return [
         '資料設定',
         'EECLASS更新',
-        '高鐵查詢/訂票'
+        '交通查詢'
     ]
-
 
 @chat_status("main menu")
 @text
-@state_ai_agent(LangChainAgent())
-def main_menu(event, aiAgent: LangChainAgent):
+@state_ai_agent(getWikiChainLLM())
+# replace LangChainAgent by any agent you want to use
+def main_menu(event, aiAgent):
+    # aiAgent equal to parameter in @state_ai_agent
     match event.message.text:
         case '資料設定':
-            jump_to(set_data, event.source.user_id, propagation=True)
+            jump_to(default_message, event.source.user_id, propagation=True)
             return settings.FRONT_END_WEB_URL
         case 'EECLASS更新':
             jump_to(update_eeclass, event.source.user_id, True)
             return
-        case '高鐵查詢/訂票':
-            jump_to(hsr_util, event.source.user_id, False)
-            return "請問您想要訂哪一天什麼時間的高鐵票呢？"
+        case '交通查詢':
+            jump_to(traffic_message, event.source.user_id, True)
+            return
         case _:
             jump_to(do_nothing, event.source.user_id)
             try:
-                msg = aiAgent.run(event.message.text)
+                msg = aiAgent(event.message.text)['result']
                 jump_to(default_message, event.source.user_id, True)
+                # if you update aiAgent and method changed, update code here
                 return msg
             except:
                 import traceback
@@ -45,17 +48,31 @@ def main_menu(event, aiAgent: LangChainAgent):
                 jump_to(default_message, event.source.user_id, True)
                 return 'error occur by chatbot ai'
 
-    jump_to(main_menu, event.source.user_id, False)
-    return results.content
+@chat_status("traffic message")
+@button_group("通勤項目", "請選擇通勤項目", "通勤項目選單")
+def traffic_message(event):
+    jump_to(traffic_menu, event.source.user_id)
+    return [
+        '公車查詢',
+        '高鐵查詢/訂票',
+        '返回'
+    ]
 
-
-@chat_status("set_data")
+@chat_status("traffic_menu")
 @text
-def set_data(event):
-    jump_to(do_nothing, event.source.user_id)
-    jump_to(default_message, event.source.user_id, True)
-#
-
+def traffic_menu(event):
+    match event.message.text:
+        case '公車查詢':
+            jump_to(bus_util, event.source.user_id, False)
+            return "請問你想要查什麼公車呢？"
+        case '高鐵查詢/訂票':
+            jump_to(hsr_util, event.source.user_id, False)
+            return "請問您想要訂哪一天什麼時間的高鐵票呢？"
+        case '返回':
+            jump_to(default_message, event.source.user_id, True)
+            return
+        case _:
+            return '無此指令'
 
 @chat_status("update eeclass")
 @text
@@ -87,3 +104,16 @@ def hsr_util(event):
         agent = hsr_agent_pool_instance.add(event.source.user_id)
         agent.run("我要訂高鐵票")
     return agent.run(event.message.text)
+
+@chat_status("bus util")
+@text
+def bus_util(event):
+    # from . import busChatbot
+    # bus_agent_pool_instance = busChatbot.get_agent_pool_instance()
+    # agent = bus_agent_pool_instance.get(event.source.user_id)
+    # if agent is None:
+    #     agent = bus_agent_pool_instance.add(event.source.user_id)
+    #     agent.run("我要查詢公車")
+    # return agent.run(event.message.text)
+    jump_to(traffic_message, event.source.user_id, True)
+    return '請實作busChatbot功能'
