@@ -9,7 +9,7 @@ import 'package:ncu_helper/view/theme/color.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 void main() async {
-  setPathUrlStrategy();
+  // setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterLineLiff().init(
     config: Config(liffId: ServerConfig.liffId),
