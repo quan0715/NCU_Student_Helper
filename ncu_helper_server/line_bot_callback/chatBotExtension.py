@@ -6,12 +6,14 @@ __default_status:str|None=None
 __invert_status_map:[callable, str]={}
 
 from linebot.models import TextSendMessage, TemplateSendMessage, ButtonsTemplate, MessageAction
+from .langChainAgent import LangChainAgent
 
 def chat_status(status_id:str, default=False):
     """
     use this as the decorator when you want your function to be a status of a chat bot.\
     status_id: unique id for the state, can be used for debugging
     default: set default state, first decorated is default if no function assigned
+    aiAgent: if you want to use openAIAgent in the state, specify aiAgent and add it as the last param of the function
     """
     def wrapper(func):
         __statuses[status_id]=func
@@ -21,6 +23,18 @@ def chat_status(status_id:str, default=False):
             __default_status=status_id
         return func
     return wrapper
+
+def state_ai_agent(aiAgent:LangChainAgent):
+    """
+    pass aiAgent into decorated function as the last positional argument
+    """
+    def outer(func):
+        def wrapper(*a, **b):
+            return func(*a, aiAgent, **b)
+        return wrapper
+    return outer
+    
+
 
 def text(func):
     """
