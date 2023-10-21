@@ -1,34 +1,38 @@
-from datetime import datetime, timedelta
-from typing import Any, Optional, Type
+from datetime import datetime, date, time, timedelta
+from typing import Any, Coroutine, Optional, Type
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 
 
-class DateInput(BaseModel):
-    current: datetime = Field(
-        ...,
-        description="現在的日期時間，以 iso8601 的格式表示"
-    )
+class DateTimeInput(BaseModel):
+    current_date: date = Field(
+        description="Current date format as iso8601 which only contains date.")
+    current_time: time = Field(
+        description="Current time format as iso8601 which only contains time.")
     delta: timedelta = Field(
-        ...,
-        description="目標時間與現在時間的差，deltatime 以 iso8601 的格式表示"
-    )
+        description="The difference between target datetime and current datetime, format as iso8601 timedelta.")
 
 
-class CurrentDateTool(BaseTool):
-    name = "CurrentDateTool"
-    description = "直接取得現在的「日期」、「時間」與「星期」"
+class CurrentDateTimeTool(BaseTool):
+    name = "CurrentDateTimeTool"
+    description = "Useful to get the current date, time, and weekday."
     return_direct = False
 
     def _run(self, *args: Any, **kwargs: Any) -> str:
         return datetime.now().strftime("%c")
 
+    def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
+        raise Exception()
 
-class DateTool(BaseTool):
-    name = "DateTool"
-    description = "根據當前的 datetime，取得目標「日期」、「時間」與「星期」"
-    args_schema: Optional[Type[BaseModel]] = DateInput
+
+class DateTimeTool(BaseTool):
+    name = "DateTimeTool"
+    description = f"Useful to get desiring date, time, and weekday while current datetime is {datetime.now().strftime('%c')}"
+    args_schema: Optional[Type[BaseModel]] = DateTimeInput
     return_direct = False
 
-    def _run(self, current: datetime, delta: timedelta) -> str:
-        return (current + delta).strftime("%c")
+    def _run(self, current_date: date, current_time, delta: timedelta) -> str:
+        return (datetime.combine(current_date, current_time) + delta).strftime("%c")
+
+    def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
+        raise Exception()
