@@ -24,7 +24,7 @@ class LangChainAgent:
         self.tools = tools.copy()
         if openai_api_key is None:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
-                                  openai_api_key=settings.OPENAI_API_KEY)
+                                  openai_api_key=settings.OPEN_AI_API_KEY)
         else:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
                                   openai_api_key=openai_api_key)
@@ -45,6 +45,7 @@ class LangChainAgent:
             self.llm,
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
+            max_execution_time=15,
             agent_kwargs=self.agent_kwargs,
             memory=self.memory
         )
@@ -58,7 +59,7 @@ class LangChainAgent:
         self.__update_agent()
 
     def run(self, message) -> str:
-        return self.agent.run(message)
+        return self.agent.run('#zh_tw\n'+message)
 
 
 __agent = LangChainAgent()
