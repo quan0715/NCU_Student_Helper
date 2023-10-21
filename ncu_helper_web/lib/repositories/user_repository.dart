@@ -89,7 +89,6 @@ class NotionDataEntity {
 }
 
 class UserRepository{
-
   Future<bool> checkServerConnection(){
     debugPrint("check server connection");
     try{
@@ -190,9 +189,9 @@ class UserRepository{
       // var lineProfile = await FlutterLineLiff().profile;
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_data?user_id=$lineUserId"),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
+        // headers: {
+        //   'ngrok-skip-browser-warning' : '8000',
+        // }
       );
       if(result.statusCode == 200){
         debugPrint(result.body);
@@ -220,9 +219,9 @@ class UserRepository{
     try{
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/scheduling/api/get_data?user_id=$lineUserId"),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
+        // headers: {
+        //   'ngrok-skip-browser-warning' : '8000',
+        // }
       );
       if(result.statusCode == 200){
         debugPrint(result.body);
@@ -245,9 +244,9 @@ class UserRepository{
     try{
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/backenddb/HSR/get_data?user_id=$lineUserId"),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
+        // headers: {
+        //   'ngrok-skip-browser-warning' : '8000',
+        // }
       );
       if(result.statusCode == 200){
         debugPrint(result.body);

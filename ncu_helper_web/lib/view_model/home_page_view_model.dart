@@ -32,11 +32,11 @@ class HomePageViewModel extends ChangeNotifier {
       isLoading = true;
       loadingMessage = "Loading ...";
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(microseconds: 500));
       loadingMessage = "正在初始化 line init ...";
       await liff.ready;
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(microseconds: 500));
       loadingMessage = "連線 Server ..";
       bool isConnective = await UserRepository().checkServerConnection();
       loadingMessage = 

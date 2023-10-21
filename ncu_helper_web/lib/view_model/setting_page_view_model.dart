@@ -148,16 +148,18 @@ class SettingPageViewModel extends ChangeNotifier{
     debugPrint("account: ${user.eeclassAccount}, password: ${user.eeclassPassword}, lineUserId: ${user.lineUserId}");
     // String linUserId = "U91c210fcea0952e4856265ea5f09571f";
     if(isLineLoggedIn && user.lineUserId.isNotEmpty){
-
       final result = await UserRepository().eeclassLoginValidation(
         account: user.eeclassAccount,
         password: user.eeclassPassword,
         lineUserId: testMode ? "U9bb9c1cdc6beb4cd5dd4f871602a6b8b" :user.lineUserId 
-        // lineUserId: "U91c210fcea0952e4856265ea5f09571f"
       );
-    
       _isEEclassConnectionSuccess = result;
-      debugPrint(_isEEclassConnectionSuccess.toString());
+      if (result) {
+        await showLogMessage!("EECLASS 登入成功");
+      } else {
+        await showLogMessage!("EECLASS 登入失敗");
+      }
+      // debugPrint(_isEEclassConnectionSuccess.toString());
     }
     isLoading = false;
     notifyListeners();
@@ -194,7 +196,7 @@ class SettingPageViewModel extends ChangeNotifier{
       }
     }
     else{
-      debugPrint("line not logged in can't fetch user");
+      await showLogMessage!("請先授權 Notion");
     }
   }
 
@@ -222,7 +224,7 @@ class SettingPageViewModel extends ChangeNotifier{
     if(lineLoginChecking){
       var result = await UserRepository().getHSRData(user.lineUserId);
       hsrUser = result;
-      await showLogMessage!("成功更新高鐵資料");
+      // await showLogMessage!("成功更新高鐵資料");
     }
     else{
       debugPrint("line not logged in can't fetch user");
@@ -245,24 +247,26 @@ class SettingPageViewModel extends ChangeNotifier{
 
   Future<void> onHSRDataSubmitted() async{
     // print all
+    isLoading = true;
+    notifyListeners();
     debugPrint("hsrPersonId: $hsrPersonId");
     debugPrint("hsrEmail: $hsrEmail");
     debugPrint("hsrPhone: $hsrPhone");
     debugPrint("update data toServer");
     final result = await UserRepository().updateHSRData(
-      // lineUserId: user.lineUserId,
-      lineUserId: "U9bb9c1cdc6beb4cd5dd4f871602a6b8b",
+      lineUserId: user.lineUserId,
       entity: hsrUser
     );
     result 
       ? await showLogMessage!("成功更新高鐵資料")
       : await showLogMessage!("上傳失敗");
+    isLoading = false;
+    notifyListeners();
   }
   
   Future<void> onSchedulingSettingChange() async{
     isLoading = true;
     notifyListeners();
-    // await Future.delayed(const Duration(seconds: 1));
     debugPrint("update scheduling data");
     try{
       debugPrint("schedulingTimeOption: $schedulingTimeOption , isSchedulingModeOpen: $isSchedulingModeOpen");
