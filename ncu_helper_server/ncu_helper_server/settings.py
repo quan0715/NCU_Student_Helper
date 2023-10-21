@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'line_bot_callback',
     'notion_auth',
     'eeclass_setting',
-    'scheduling'
+    'scheduling',
+    'backenddb'
 ]
 
 MIDDLEWARE = [
@@ -139,6 +140,7 @@ NOTION_OAUTH_SECRET_KEY = os.getenv("NOTION_OAUTH_SECRET_KEY")
 NOTION_OAUTH_REDIRECT_URI = os.getenv("NOTION_OAUTH_REDIRECT_URI")
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
+FRONT_END_WEB_URL = os.getenv("FRONT_END_WEB_URL")
 
 SERVER = os.getenv("SERVER")
 WEB_SERVER = os.getenv("WEB_SERVER")

@@ -44,7 +44,9 @@ def check_login_success(account: str, password: str) -> bool:
         loop.run_until_complete(task)
         login_success = task.result()
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
+        return False
     return login_success
 
 
@@ -59,13 +61,9 @@ def check_eeclass_update_pipeline(user: LineUser) -> bool:
     except:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-    try:
-        task = loop.create_task(eeclass_pipeline(user))
-        loop.run_until_complete(task)
-        login_success = task.result()
-    except Exception as e:
-        print(e)
-    return login_success
+    task = loop.create_task(eeclass_pipeline(user))
+    loop.run_until_complete(task)
+    return task.result()
 
 
 def save_user_data(user_id, account=None, password=None):
@@ -82,7 +80,8 @@ def save_user_data(user_id, account=None, password=None):
             user.eeclass_password = password
         user.save()
     except Exception as e:
-        print(e)
+        import traceback
+        traceback.print_exc()
 
 
 def get_oauth_data(user_id):

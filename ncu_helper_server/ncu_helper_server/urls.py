@@ -34,6 +34,7 @@ urlpatterns = [
     path('notion/', include('notion_auth.urls')),
     path('eeclass_api/', include('eeclass_setting.urls')),
     path('scheduling/', include('scheduling.urls')),
+    path('backenddb/', include('backenddb.urls')),
     # path('', lambda r: flutter_redirect(r, 'index.html')),
     # path('<path:resource>', flutter_redirect),
 ]
