@@ -41,18 +41,6 @@ def main_menu(event, aiAgent:LangChainAgent):
                 return 'error occur by chatbot ai'
 
 
-
-
-@chat_status("langchain")
-@text
-def langchain(event):
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key=settings.OPEN_AI_API_KEY)
-    print(event.message.text)
-    prompt = ChatPromptTemplate.from_template("你是一個中央大學的AI學生助理，專門幫助學生解決各種疑難雜症，以下需要你幫忙解決關於 {topic} 的疑問")
-    chain = prompt | llm
-    results = chain.invoke({"topic": event.message.text})
-    print(results.content)
-
     jump_to(main_menu, event.source.user_id, False)
     return results.content
 
