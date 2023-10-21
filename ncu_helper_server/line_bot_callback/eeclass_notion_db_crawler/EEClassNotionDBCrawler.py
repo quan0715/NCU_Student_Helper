@@ -1,11 +1,15 @@
 from NotionBot import Notion
 from NotionBot.base import Database
 
+<<<<<<< HEAD
 <<<<<<< HEAD:ncu_helper_server/eeclass_notion_db_crawler/EEClassNotionDBCrawler.py
 from eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
 =======
 from line_bot_callback.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
 >>>>>>> dbbef9a955cb1142941e68d641f5899d50b08487:ncu_helper_server/line_bot_callback/eeclass_notion_db_crawler/EEClassNotionDBCrawler.py
+=======
+from ncu_helper_server.line_bot_callback.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
+>>>>>>> f59cbaa4b9fd4b8637bac22a99f8736db334a318
 
 
 class EEClassNotionDBCrawler:
@@ -19,20 +23,20 @@ class EEClassNotionDBCrawler:
         """
         self._notion = Notion(auth=auth)
         self._page = self._notion.get_page(page_id=page_id)
-        self._bulletinDB: Database | None = None
-        self._homeworkDB: Database | None = None
-        self._materialDB: Database | None = None
+        self.bulletinDB: Database | None = None
+        self.homeworkDB: Database | None = None
+        self.materialDB: Database | None = None
         for child in self._page.retrieve_children()['results']:
             if child['type'] == 'child_database':
                 database = self._notion.get_database(child['id'])
                 match child['child_database']['title']:
                     case 'EECLASS 公告':
-                        self._bulletinDB = database
+                        self.bulletinDB = database
                     case 'EECLASS 作業':
-                        self._homeworkDB = database
+                        self.homeworkDB = database
                     case 'EECLASS 教材':
-                        self._materialDB = database
-        if self._bulletinDB is None or self._homeworkDB is None or self._materialDB is None:
+                        self.materialDB = database
+        if self.bulletinDB is None or self.homeworkDB is None or self.materialDB is None:
             raise ValueError('Database 標題名稱錯誤')
 
     def _get_details(self, data: dict) -> dict:
@@ -49,7 +53,7 @@ class EEClassNotionDBCrawler:
 
     def get_bulletin(self) -> list[Bulletin]:
         bulletins = []
-        for data in self._bulletinDB.query():
+        for data in self.bulletinDB.query():
             bulletins.append(Bulletin(
                 announce_date=data['properties']['Announced_Date'],
                 content=data['properties']['Content']['rich_text'][0]['plain_text'],
@@ -66,7 +70,7 @@ class EEClassNotionDBCrawler:
 
     def get_homework(self) -> list[Homework]:
         homeworks = []
-        for data in self._homeworkDB.query():
+        for data in self.homeworkDB.query():
             homeworks.append(Homework(
                 content=data['properties']['Content']['rich_text'][0]['plain_text'],
                 course=data['properties']['Course']['select']['name'],
@@ -87,7 +91,7 @@ class EEClassNotionDBCrawler:
 
     def get_material(self) -> list[Material]:
         materials = []
-        for data in self._materialDB.query():
+        for data in self.materialDB.query():
             materials.append(Material(
                 announcer=data['properties']['Announcer']['rich_text'][0]['plain_text'],
                 content=data['properties']['Content']['rich_text'][0]['plain_text'],
@@ -110,5 +114,5 @@ class EEClassNotionDBCrawler:
     def get_all_courses(self) -> set[str]:
         return {
             data['properties']['Course']['select']['name']
-            for data in self._bulletinDB.query() + self._homeworkDB.query() + self._materialDB.query()
+            for data in self.bulletinDB.query() + self.homeworkDB.query() + self.materialDB.query()
         }
