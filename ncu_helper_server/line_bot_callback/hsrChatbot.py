@@ -1,3 +1,5 @@
+from .models import BasePool
+from .langChainAgent import LangChainAgent
 from datetime import datetime, date, time
 from enum import Enum
 from langchain.memory import ConversationBufferMemory
@@ -10,11 +12,13 @@ from typing import Coroutine, Optional, Type, Any
 from uuid import UUID
 import requests
 
+
 def set_exit_state(user_id: str) -> None:
     from .chatBotModel import default_message
     from .chatBotExtension import jump_to
     jump_to(default_message, user_id, True)
     get_agent_pool_instance().remove(user_id)
+
 
 def getExitTool(user_id: str):
     class ExitTool(BaseTool):
@@ -112,6 +116,7 @@ class HsrBookInput(BaseModel):
     # session_id: UUID = Field(
     #     description="session_id format as UUID you just got from `HSRSearchTool`")
 
+
 def getHsrBookTool(user_id: str):
     class HsrBookTool(BaseTool):
         name = "HSRBookTool"
@@ -143,31 +148,22 @@ def getHsrBookTool(user_id: str):
     return HsrBookTool()
 
 
-from .langChainAgent import LangChainAgent
-
-class HsrAgentPool:
+class HsrAgentPool(BasePool):
     def __init__(self) -> None:
-        self.pool: dict[str, LangChainAgent] = {}
         self.sessions: dict[str, UUID] = {}
-
-    def get(self, user_id: str) -> LangChainAgent | None:
-        return self.pool.get(user_id)
 
     def add(self, user_id: str) -> LangChainAgent:
         agent = self.pool[user_id] = LangChainAgent(
             tools=[
-                    getExitTool(user_id),
-                    getHsrSearchTool(user_id),
-                    getHsrBookTool(user_id)
-                ],
+                getExitTool(user_id),
+                getHsrSearchTool(user_id),
+                getHsrBookTool(user_id)
+            ],
             memory=ConversationBufferMemory(
                 memory_key="hsr", return_messages=True),
             timeout=-1
         )
         return agent
-
-    def remove(self, user_id: str) -> None:
-        self.pool.pop(user_id)
 
     def get_session_id(self, user_id: str) -> UUID:
         return self.sessions.get(user_id)
@@ -177,5 +173,7 @@ class HsrAgentPool:
 
 
 __hsr_agent_pool_instance = HsrAgentPool()
+
+
 def get_agent_pool_instance():
     return __hsr_agent_pool_instance
