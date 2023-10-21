@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'line_bot_callback',
+    'line_bot_callback.bus_api',
     'notion_auth',
     'eeclass_setting',
     'scheduling',
