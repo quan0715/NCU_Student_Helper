@@ -41,6 +41,8 @@ def main_menu(event, aiAgent:LangChainAgent):
                 return 'error occur by chatbot ai'
 
 
+    jump_to(main_menu, event.source.user_id, False)
+    return results.content
 
 
 @chat_status("set_data")

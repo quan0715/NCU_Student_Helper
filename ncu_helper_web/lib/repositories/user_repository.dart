@@ -1,10 +1,40 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_line_liff/flutter_line_liff.dart';
 import 'package:ncu_helper/model/user_model.dart';
 import 'package:ncu_helper/utils/server_config.dart';
 import 'package:http/http.dart' as http;
+
+class HSRUserEntity {
+  String personId;
+  String email;
+  String phone;
+  HSRUserEntity({
+    required this.personId,
+    required this.email,
+    required this.phone,
+  });
+  static HSRUserEntity fromJson(Map<String, dynamic> json) {
+    return HSRUserEntity(
+      personId: json['id_card_number'],
+      email: json['email'],
+      phone: json['phone_number'],
+    );
+  }
+   Map<String, dynamic> toJson() {
+    return {
+      "id_card_number": personId,
+      "email": email,
+      "phone_number": phone,
+    };
+  }
+  factory HSRUserEntity.defaultData(){
+    return HSRUserEntity(
+      personId: "",
+      email: "",
+      phone: "",
+    );
+  }
+}
 
 class EECLASSAccountEntity {
   final String accountName;
@@ -20,13 +50,11 @@ class EECLASSAccountEntity {
     );
   }
 }
-// "is_auto_update":${is scheduling opened},
-// "scheduling_time":${user scheduling time}
 
 class SchedulingDataEntity {
-  final bool isAutoUpdate;
-  final int schedulingTime;
-  const SchedulingDataEntity({
+  bool isAutoUpdate;
+  int schedulingTime;
+  SchedulingDataEntity({
     required this.isAutoUpdate,
     required this.schedulingTime,
   });
@@ -34,6 +62,13 @@ class SchedulingDataEntity {
     return SchedulingDataEntity(
       isAutoUpdate: json['is_auto_update'],
       schedulingTime: json['scheduling_time'],
+    );
+  }
+
+  factory SchedulingDataEntity.defaultData(){
+    return SchedulingDataEntity(
+      isAutoUpdate: false,
+      schedulingTime: 10,
     );
   }
 }
@@ -54,7 +89,6 @@ class NotionDataEntity {
 }
 
 class UserRepository{
-
   Future<bool> checkServerConnection(){
     debugPrint("check server connection");
     try{
@@ -72,31 +106,31 @@ class UserRepository{
   }
 
 
-  Future<EECLASSAccountEntity?> getUserEeclassAccount(String lineUserId) async {
-    debugPrint("lineUserId: $lineUserId");
-    try{
-      var result = await http.Client().get(
-        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId",),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
-      );
-      if(result.statusCode == 200){
-        debugPrint(result.body);
-        var data = jsonDecode(result.body);
-        // debugPrint(data.toString());
-        return EECLASSAccountEntity.fromJson(data);
-        // return UserModel.fromJson(data);
-      }
-      else if(result.statusCode == 404){
-        debugPrint("user not found");
-        return null;
-      }
-    } catch(e){
-      debugPrint(e.toString());
-      throw Exception("get user unknown error ${e.toString()}");
-    } 
-  }
+  // Future<EECLASSAccountEntity?> getUserEeclassAccount(String lineUserId) async {
+  //   debugPrint("lineUserId: $lineUserId");
+  //   try{
+  //     var result = await http.Client().get(
+  //       Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_account_password?user_id=$lineUserId",),
+  //       headers: {
+  //         'ngrok-skip-browser-warning' : '8000',
+  //       }
+  //     );
+  //     if(result.statusCode == 200){
+  //       debugPrint(result.body);
+  //       var data = jsonDecode(result.body);
+  //       // debugPrint(data.toString());
+  //       return EECLASSAccountEntity.fromJson(data);
+  //       // return UserModel.fromJson(data);
+  //     }
+  //     else if(result.statusCode == 404){
+  //       debugPrint("user not found");
+  //       return null;
+  //     }
+  //   } catch(e){
+  //     debugPrint(e.toString());
+  //     throw Exception("get user unknown error ${e.toString()}");
+  //   } 
+  // }
 
   Future<bool> eeclassLoginValidation({required String lineUserId, required String account, required String password}) async {
     try{
@@ -124,29 +158,29 @@ class UserRepository{
     }
   }
 
-  Future<NotionDataEntity?> getUserNotionData(String lineUserId) async {
-    debugPrint("lineUserId: $lineUserId");
-    try{
-      var result = await http.Client().get(
-        Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId"),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
-      );
-      if(result.statusCode == 200){
-        debugPrint(result.body);
-        var data = jsonDecode(result.body);
-        return NotionDataEntity.fromJson(data);
-      }
-      else if(result.statusCode == 404){
-        debugPrint("user not found");
-        return null;
-      }
-    } catch(e){
-      debugPrint(e.toString());
-      throw Exception("get user unknown error ${e.toString()}");
-    } 
-  }
+  // Future<NotionDataEntity?> getUserNotionData(String lineUserId) async {
+  //   debugPrint("lineUserId: $lineUserId");
+  //   try{
+  //     var result = await http.Client().get(
+  //       Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_notion_oauth_data?user_id=$lineUserId"),
+  //       headers: {
+  //         'ngrok-skip-browser-warning' : '8000',
+  //       }
+  //     );
+  //     if(result.statusCode == 200){
+  //       debugPrint(result.body);
+  //       var data = jsonDecode(result.body);
+  //       return NotionDataEntity.fromJson(data);
+  //     }
+  //     else if(result.statusCode == 404){
+  //       debugPrint("user not found");
+  //       return null;
+  //     }
+  //   } catch(e){
+  //     debugPrint(e.toString());
+  //     throw Exception("get user unknown error ${e.toString()}");
+  //   } 
+  // }
 
   Future<UserModel?> getUserData(String lineUserId) async {
     debugPrint("lineUserId: $lineUserId");
@@ -155,9 +189,9 @@ class UserRepository{
       // var lineProfile = await FlutterLineLiff().profile;
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/eeclass_api/get_data?user_id=$lineUserId"),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
+        // headers: {
+        //   'ngrok-skip-browser-warning' : '8000',
+        // }
       );
       if(result.statusCode == 200){
         debugPrint(result.body);
@@ -179,17 +213,15 @@ class UserRepository{
     }
     return null; 
   }
-
+  
   Future<SchedulingDataEntity> getSchedulingData(String lineUserId) async {
-    debugPrint("get scheduling data from lineUserId: $lineUserId");
+    // debugPrint("get scheduling data from lineUserId: $lineUserId");
     try{
-      // await FlutterLineLiff().ready;
-      // var lineProfile = await FlutterLineLiff().profile;
       var result = await http.Client().get(
         Uri.parse("${ServerConfig.serverBaseURL}/scheduling/api/get_data?user_id=$lineUserId"),
-        headers: {
-          'ngrok-skip-browser-warning' : '8000',
-        }
+        // headers: {
+        //   'ngrok-skip-browser-warning' : '8000',
+        // }
       );
       if(result.statusCode == 200){
         debugPrint(result.body);
@@ -198,19 +230,38 @@ class UserRepository{
       }
       else if(result.statusCode == 404){
         debugPrint("data not found");
-        return const SchedulingDataEntity(
-          isAutoUpdate: false,
-          schedulingTime: 10,
-        );
+        return SchedulingDataEntity.defaultData();
       }
     } catch(e){
       debugPrint(e.toString());
       throw Exception("get scheduling data unknown error ${e.toString()}");
     }
-    return const SchedulingDataEntity(
-      isAutoUpdate: false,
-      schedulingTime: 10,
-    );
+    return SchedulingDataEntity.defaultData();
+  }
+  
+  Future<HSRUserEntity> getHSRData(String lineUserId) async {
+    debugPrint("get hsr data from lineUserId: $lineUserId");
+    try{
+      var result = await http.Client().get(
+        Uri.parse("${ServerConfig.serverBaseURL}/backenddb/HSR/get_data?user_id=$lineUserId"),
+        // headers: {
+        //   'ngrok-skip-browser-warning' : '8000',
+        // }
+      );
+      if(result.statusCode == 200){
+        debugPrint(result.body);
+        var data = jsonDecode(result.body);
+        return HSRUserEntity.fromJson(data);
+      }
+      else if(result.statusCode == 404){
+        debugPrint("data not found");
+        return HSRUserEntity.defaultData();
+      }
+    } catch(e){
+      debugPrint(e.toString());
+      throw Exception("get hsr data unknown error ${e.toString()}");
+    }
+    return HSRUserEntity.defaultData();
   }
 
   Future<bool> updateSchedulingData({required String lineUserId,required SchedulingDataEntity entity}) async {
@@ -236,6 +287,28 @@ class UserRepository{
     }catch(e){
       debugPrint(e.toString());
       throw Exception("login validation unknown error ${e.toString()}");
+    }
+  }
+
+  Future<bool> updateHSRData({required String lineUserId,required HSRUserEntity entity}) async {
+    try{
+      var result = await http.Client().post(
+        Uri.parse("${ServerConfig.serverBaseURL}/backenddb/HSR/save_data"),
+        encoding: Encoding.getByName("utf-8"),
+        body: jsonEncode(entity.toJson()..addEntries({'user_id': lineUserId}.entries))
+      );
+      if (result.statusCode == 200){
+        return true;
+      }
+      else if(result.statusCode == 401){
+        return false;
+      }
+      else{
+        throw Exception("update HSR unknown error ${result.statusCode}");
+      }
+    }catch(e){
+      debugPrint(e.toString());
+      throw Exception("update HSR unknown error ${e.toString()}");
     }
   }
 }

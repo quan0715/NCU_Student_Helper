@@ -32,12 +32,11 @@ class HomePageViewModel extends ChangeNotifier {
       isLoading = true;
       loadingMessage = "Loading ...";
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 1));
-      
+      await Future.delayed(const Duration(microseconds: 500));
       loadingMessage = "正在初始化 line init ...";
       await liff.ready;
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(microseconds: 500));
       loadingMessage = "連線 Server ..";
       bool isConnective = await UserRepository().checkServerConnection();
       loadingMessage = 
@@ -46,15 +45,5 @@ class HomePageViewModel extends ChangeNotifier {
       isLoading = !isConnective;
       notifyListeners();
     }
-    
-  // UserModel user = UserModel();
-  // final _repository = Repository();
 
-  // List<Photo> _photos = [];
-  // List<Photo> get photos => _photos;
-
-  // Future<void> fetchPhotos() async {
-  //   _photos = await _repository.fetchPhotos();
-  //   notifyListeners();
-  // }
 }
