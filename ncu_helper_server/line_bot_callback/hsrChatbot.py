@@ -26,7 +26,7 @@ def getExitTool(user_id: str):
         # description = "Useful when user want to exit or break this conversation in any situation."
         description = """
         Useful in the situations below:
-        - The user has no high intention to book or search ticket. For example: '不訂了', '不查了'
+        - The user has no high intention to book or search ticket. For example: '不訂了', '不查了', '不想要'
         - The user want to break or exit this conversation.
         - The topic of the conversation isn't highly related to HSR(高鐵).
         """

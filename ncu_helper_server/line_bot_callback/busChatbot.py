@@ -70,7 +70,7 @@ class BusInfoTool(BaseTool):
         parser = EnumOutputParser(
             enum=Enum("StopEnum", {"u_" + str(uuid4()): x for x in stop_list}))
         try:
-            stop = str(parser.parse(stop))
+            stop = parser.parse(stop).value
         except:
             return "Error! The `stop` is not exist in `line`"
 
