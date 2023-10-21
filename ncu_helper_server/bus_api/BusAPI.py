@@ -9,7 +9,7 @@ class BusAPI:
     def get_bus_data(bus: str, direction: int) -> list[StopData]:
         """
         取得單向公車站牌資訊
-        :param bus: 172, 173, 或 5053
+        :param bus: 172, 173, 或 5035
         :param direction: 0 - 去程, 1 - 返程
         :return: 站牌資訊的串列
         """
@@ -24,7 +24,6 @@ class BusAPI:
         return [
             StopData(
                 stop_name=r['StopName']['Zh_tw'],
-                stop_sequence=i,
                 stop_status=r['StopStatus'],
                 next_bus_time=r['NextBusTime'],
             )
