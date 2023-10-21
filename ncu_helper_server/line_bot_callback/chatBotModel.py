@@ -1,16 +1,11 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-
-from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent
 from typing import Tuple
 from eeclass_setting.models import LineUser
-from eeclass_setting.appModel import check_eeclass_update_pipeline, check_login_success, \
-    find_account_password, find_user_by_user_id
+from eeclass_setting.appModel import check_eeclass_update_pipeline, find_user_by_user_id
 from django.core.cache import cache
 from django.conf import settings
 from .views import LineBotCallbackView as cb
-from langchain.llms import OpenAI
-
+from .langChainAgent import LangChainAgent
 
 @chat_status("default", default=True)
 @button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')
@@ -24,7 +19,8 @@ def default_message(event):
 
 @chat_status("main menu")
 @text
-def main_menu(event):
+@state_ai_agent(LangChainAgent())
+def main_menu(event, aiAgent:LangChainAgent):
     match event.message.text:
         case '資料設定':
             jump_to(set_data, event.source.user_id, propagation=True)
@@ -33,8 +29,17 @@ def main_menu(event):
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case _:
-            jump_to(langchain, event.source.user_id, True)
-            return
+            jump_to(do_nothing, event.source.user_id)
+            try:
+                msg = aiAgent.run(event.message.text)
+                jump_to(default_message, event.source.user_id, True)
+                return msg
+            except:
+                import traceback
+                traceback.print_exc()
+                jump_to(default_message, event.source.user_id, True)
+                return 'error occur by chatbot ai'
+
 
 
 
