@@ -21,11 +21,10 @@ class _SettingPageViewState extends State<SettingPageView> {
   void _launchNotionDBBrowser() async => await viewModel.launchNotionDB();
   void _onHSRDataSubmitted() async => await viewModel.onHSRDataSubmitted();
 
-  late final PageController _pageController;
+  late final PageController _pageController = PageController();
 
   @override
   void initState() {
-    _pageController = PageController();
     viewModel.showLogMessage = showLogMessage;
     super.initState();
   }
@@ -157,7 +156,7 @@ class _SettingPageViewState extends State<SettingPageView> {
     );
   }
 
-  Widget _buildTitleFrame(){
+  Widget _buildTitleFrame(String userName){
     TextStyle titleStyle =  AppText.headLineSmall(context).copyWith(color: AppColor.onSurface(context));
     TextStyle titleStyleStrong = AppText.headLineSmall(context).copyWith(color: AppColor.primary(context));
     TextStyle contentStyle = AppText.bodyLarge(context).copyWith(color: AppColor.secondary(context));
@@ -171,7 +170,7 @@ class _SettingPageViewState extends State<SettingPageView> {
           RichText(text:TextSpan(
             children: [
               TextSpan(text: 'Welcome back, ', style: titleStyle),
-              TextSpan(text: ' ${name} ', style: titleStyleStrong),
+              TextSpan(text: ' $userName ', style: titleStyleStrong),
               // TextSpan(text: 'Helper', style: titleStyle),
             ],
           )),
@@ -309,32 +308,36 @@ class _SettingPageViewState extends State<SettingPageView> {
   }
   
   Widget _tabChip(String label, int index){
-    bool isSelected = viewModel.isCurrentPageIndex(index);
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: RawChip(
-        label: Text(label),
-        // avatar: isSelected ? const Icon(Icons.label , color: AppColor.surfaceColor,) : null,
-        shape: const StadiumBorder(
-          // borderRadius: BorderRadius.circular(20),
-          side: BorderSide.none
+    
+    return Consumer<SettingPageViewModel>(
+      builder: (context, viewModel, child) => Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: RawChip(
+          label: Text(label),
+          // avatar: isSelected ? const Icon(Icons.label , color: AppColor.surfaceColor,) : null,
+          shape: const StadiumBorder(
+            // borderRadius: BorderRadius.circular(20),
+            side: BorderSide.none
+          ),
+          labelStyle: AppText.labelMedium(context).copyWith(color: viewModel.isCurrentPageIndex(index) ? AppColor.surfaceColor : AppColor.primary(context)),
+          backgroundColor: viewModel.isCurrentPageIndex(index) ? AppColor.primary(context) : AppColor.surface(context),
+          onSelected: (value) => {
+            // debugPrint("$index, selected = $value"),
+            viewModel.currentPageIndex = index,
+            _pageController..animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut)
+          },
         ),
-        labelStyle: AppText.labelMedium(context).copyWith(color: isSelected ? AppColor.surfaceColor : AppColor.primary(context)),
-        backgroundColor: isSelected ? AppColor.primary(context) : AppColor.surface(context),
-        onSelected: (value) => {
-          // debugPrint("$index, selected = $value"),
-          viewModel.currentPageIndex = index,
-          _pageController..animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut)
-        },
       ),
     );
   }
 
   Widget _buildPageViewTab(){
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Row(
-        children: List.generate(viewModel.pageTitles.length, (index) => _tabChip(viewModel.pageTitles[index], index))
+    return Consumer<SettingPageViewModel>(
+      builder: (context, viewModel, child) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        child: Row(
+          children: List.generate(viewModel.pageTitles.length, (index) => _tabChip(viewModel.pageTitles[index], index))
+        ),
       ),
     );
   }
@@ -350,15 +353,19 @@ class _SettingPageViewState extends State<SettingPageView> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTitleFrame(),
+              _buildTitleFrame(viewModel.lineUserName),
               _buildPageViewTab(),
               Expanded(
                 child: PageView(
                   onPageChanged: (index) => {
+                    debugPrint("page changed to $index"),
+                    _pageController..animateToPage(index, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut),
                     viewModel.currentPageIndex = index,
-                    _pageController..animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut)
                   },
                   controller: _pageController,
+                  //   viewModel.currentPageIndex = _pageController.page!.round();
+                  //   _pageController.animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut);
+                  // }),
                   physics: const AlwaysScrollableScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   children: [
