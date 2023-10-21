@@ -1,3 +1,4 @@
+from .ncu_wiki import getWikiChainLLM
 from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent
 from typing import Tuple
 from eeclass_setting.models import LineUser
@@ -21,9 +22,9 @@ def default_message(event):
 
 @chat_status("main menu")
 @text
-@state_ai_agent(LangChainAgent())
+@state_ai_agent(getWikiChainLLM())
 # replace LangChainAgent by any agent you want to use
-def main_menu(event, aiAgent: LangChainAgent):
+def main_menu(event, aiAgent):
     # aiAgent equal to parameter in @state_ai_agent
     match event.message.text:
         case '資料設定':
@@ -38,7 +39,7 @@ def main_menu(event, aiAgent: LangChainAgent):
         case _:
             jump_to(do_nothing, event.source.user_id)
             try:
-                msg = aiAgent.run(event.message.text)
+                msg = aiAgent(event.message.text)['result']
                 jump_to(default_message, event.source.user_id, True)
                 # if you update aiAgent and method changed, update code here
                 return msg
