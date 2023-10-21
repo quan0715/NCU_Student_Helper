@@ -14,7 +14,7 @@ def default_message(event):
     jump_to(main_menu, event.source.user_id)
     return [
         '資料設定',
-        'EECLASS更新',
+        'EECLASS查詢',
         '交通查詢'
     ]
 
@@ -28,7 +28,7 @@ def main_menu(event, aiAgent: LangChainAgent):
         case '資料設定':
             jump_to(default_message, event.source.user_id, propagation=True)
             return settings.FRONT_END_WEB_URL
-        case 'EECLASS更新':
+        case 'EECLASS查詢':
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case '交通查詢':
@@ -76,7 +76,6 @@ def traffic_menu(event):
 @chat_status("update eeclass")
 @text
 def update_eeclass(event):
-    print('update_eeclass')
     search_result:  Tuple[LineUser | None,
                           bool] = find_user_by_user_id(event.source.user_id)
     user, founded = search_result
@@ -86,7 +85,7 @@ def update_eeclass(event):
     cb.push_message(event.source.user_id, text(lambda ev: '獲取資料中')(event))
     try:
         result = check_eeclass_update_pipeline(user)
-        jump_to(default_message, event.source.user_id, True)
+        jump_to(eeclass_util, event.source.user_id, True)
         return result
     except Exception as e:
         jump_to(default_message, event.source.user_id, True)
@@ -103,6 +102,20 @@ def hsr_util(event):
         agent = hsr_agent_pool_instance.add(event.source.user_id)
         agent.run("我要訂高鐵票")
     return agent.run(event.message.text)
+
+
+@chat_status("eeclass util")
+@text
+def eeclass_util(event):
+    # from . import eeclassChatbot
+    # eeclass_agent_pool_instance = eeclassChatbot.get_agent_pool_instance()
+    # agent = eeclass_agent_pool_instance.get(event.source.user_id)
+    # if agent is None:
+    #     agent = eeclass_agent_pool_instance.add(event.source.user_id)
+    #     agent.run("我要知道eeclass更新了啥")
+    # return agent.run(event.message.text)
+    jump_to(default_message, event.source.user_id, True)
+    return '請實作eeclassChatBot'
 
 @chat_status("bus util")
 @text
