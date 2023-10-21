@@ -19,6 +19,7 @@ def default_message(event):
         '交通查詢'
     ]
 
+
 @chat_status("main menu")
 @text
 @state_ai_agent(getWikiChainLLM())
@@ -48,6 +49,7 @@ def main_menu(event, aiAgent):
                 jump_to(default_message, event.source.user_id, True)
                 return 'error occur by chatbot ai'
 
+
 @chat_status("traffic message")
 @button_group("通勤項目", "請選擇通勤項目", "通勤項目選單")
 def traffic_message(event):
@@ -58,6 +60,7 @@ def traffic_message(event):
         '返回'
     ]
 
+
 @chat_status("traffic_menu")
 @text
 def traffic_menu(event):
@@ -67,12 +70,16 @@ def traffic_menu(event):
             return "請問你想要查什麼公車呢？"
         case '高鐵查詢/訂票':
             jump_to(hsr_util, event.source.user_id, False)
-            return "請問您想要訂哪一天什麼時間的高鐵票呢？"
+            from backenddb.appModel import find_hsr_data
+            hsr_data, founded = find_hsr_data(event.source.user_id)
+            warning_msg = "" if founded else "（您還沒設定高鐵訂票所需的個人資訊喔！）"
+            return "請問您想要訂哪一天什麼時間的高鐵票呢？" + warning_msg
         case '返回':
             jump_to(default_message, event.source.user_id, True)
             return
         case _:
             return '無此指令'
+
 
 @chat_status("update eeclass")
 @text
@@ -105,15 +112,14 @@ def hsr_util(event):
         agent.run("我要訂高鐵票")
     return agent.run(event.message.text)
 
+
 @chat_status("bus util")
 @text
 def bus_util(event):
-    # from . import busChatbot
-    # bus_agent_pool_instance = busChatbot.get_agent_pool_instance()
-    # agent = bus_agent_pool_instance.get(event.source.user_id)
-    # if agent is None:
-    #     agent = bus_agent_pool_instance.add(event.source.user_id)
-    #     agent.run("我要查詢公車")
-    # return agent.run(event.message.text)
-    jump_to(traffic_message, event.source.user_id, True)
-    return '請實作busChatbot功能'
+    from . import busChatbot
+    bus_agent_pool_instance = busChatbot.get_agent_pool_instance()
+    agent = bus_agent_pool_instance.get(event.source.user_id)
+    if agent is None:
+        agent = bus_agent_pool_instance.add(event.source.user_id)
+        agent.run("我要查詢公車")
+    return agent.run(event.message.text)

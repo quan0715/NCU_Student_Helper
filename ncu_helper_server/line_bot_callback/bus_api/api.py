@@ -1,7 +1,7 @@
 import requests
 
-from ncu_helper_server.bus_api.Auth import Auth
-from ncu_helper_server.bus_api.StopData import StopData
+from .auth import Auth
+from .stop_data import StopData
 
 
 class BusAPI:
@@ -20,7 +20,8 @@ class BusAPI:
             "$orderby": "StopSequence",
             "$format": "JSON"
         }
-        response = requests.get(api_url, params=params, headers=Auth.get_headers()).json()
+        response = requests.get(api_url, params=params,
+                                headers=Auth.get_headers()).json()
         return [
             StopData(
                 stop_name=r['StopName']['Zh_tw'],
@@ -37,7 +38,8 @@ class BusAPI:
         :param bus: 132 或 133
         :return: 站牌資訊的串列
         """
-        data = BusAPI._get_one_way_bus_data(bus, 0) + BusAPI._get_one_way_bus_data(bus, 1)[1:]
+        data = BusAPI._get_one_way_bus_data(
+            bus, 0) + BusAPI._get_one_way_bus_data(bus, 1)[1:]
         return data
 
     @staticmethod
