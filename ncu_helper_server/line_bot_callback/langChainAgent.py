@@ -1,12 +1,13 @@
 from typing import Any, List
-from dotenv import load_dotenv
+from django.conf import settings
 from langchain.agents import initialize_agent, AgentType
 from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts import MessagesPlaceholder
 from langchain.tools import BaseTool
 
 from pydantic import BaseModel
 
-# load_dotenv()
 
 class DefaultTool(BaseTool):
     name = "DefaultTool"
@@ -16,16 +17,25 @@ class DefaultTool(BaseTool):
     def _run(self, *args: Any, **kwargs: Any) -> str:
         print('你在使用白癡回答器')
         return '此問題不在我的能力範圍內'
-    
+
+
 class LangChainAgent:
-    def __init__(self, tools:List[BaseModel] = [], openai_api_key=None) -> None:
+    def __init__(self, tools: List[BaseModel] = [], memory: ConversationBufferMemory = None, openai_api_key=None) -> None:
         self.tools = tools.copy()
         if openai_api_key is None:
-            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key="123")
+            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
+                                  openai_api_key=settings.OPENAI_API_KEY)
         else:
-            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key="123")
-        if len(tools)==0: 
+            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
+                                  openai_api_key=openai_api_key)
+        if len(tools) == 0:
             self.tools.append(DefaultTool())
+
+        self.memory = memory
+        self.agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name=self.memory.memory_key)]
+        } if self.memory is not None else None
+
         self.agent = None
         self.__update_agent()
 
@@ -35,15 +45,24 @@ class LangChainAgent:
             self.llm,
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
+            agent_kwargs=self.agent_kwargs,
+            memory=self.memory
         )
-    
-    def add_tools(self, tool: BaseModel):
+
+    def add_tool(self, tool: BaseTool):
         self.tools.append(tool)
         self.__update_agent()
 
-    def run(self, message)->str:
+    def add_all_tools(self, tools: list[BaseTool]):
+        self.tools.extend(tools)
+        self.__update_agent()
+
+    def run(self, message) -> str:
         return self.agent.run(message)
 
+
 __agent = LangChainAgent()
+
+
 def get_system_agent():
     return __agent
