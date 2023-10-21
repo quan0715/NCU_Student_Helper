@@ -268,6 +268,7 @@ class SettingPageViewModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     debugPrint("update scheduling data");
+    // await Future.delayed(Duration(seconds: 1));
     try{
       debugPrint("schedulingTimeOption: $schedulingTimeOption , isSchedulingModeOpen: $isSchedulingModeOpen");
       if(isLineLoggedIn && user.lineUserId.isNotEmpty){
