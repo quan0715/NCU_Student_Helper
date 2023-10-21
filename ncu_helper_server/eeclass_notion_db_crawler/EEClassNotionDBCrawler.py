@@ -1,7 +1,7 @@
 from NotionBot import Notion
 from NotionBot.base import Database
 
-from eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
+from ncu_helper_server.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
 
 
 class EEClassNotionDBCrawler:
@@ -73,7 +73,7 @@ class EEClassNotionDBCrawler:
                 status=data['properties']['Status']['select']['name'],
                 submission=data['properties']['Submission']['number'],
                 title=data['properties']['Title']['title'][0]['plain_text'],
-                user_status=data['properties']['User Status']['status']['name'],
+                user_status=data['properties']['User_Status']['status']['name'],
                 read_check=data['properties']['read_check']['checkbox'],
                 created_time=data['properties']['建立時間']['created_time'],
                 last_edited_time=data['properties']['更新時間']['last_edited_time'],
@@ -104,4 +104,7 @@ class EEClassNotionDBCrawler:
         return materials
 
     def get_all_courses(self) -> set[str]:
-        pass
+        return {
+            data['properties']['Course']['select']['name']
+            for data in self._bulletinDB.query() + self._homeworkDB.query() + self._materialDB.query()
+        }
