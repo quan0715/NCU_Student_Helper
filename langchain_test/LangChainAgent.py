@@ -42,7 +42,7 @@ class LangChainAgent:
         self.__update_agent()
 
     def run(self, message)->str:
-        return self.agent.run(message)
+        return self.agent.run('(請使用繁體中文回答)\n'+message)
 
 
 agent = LangChainAgent()
