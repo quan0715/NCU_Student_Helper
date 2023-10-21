@@ -2,27 +2,35 @@ from datetime import datetime, date, time
 from enum import Enum
 from langchain.memory import ConversationBufferMemory
 from langchain.tools import BaseTool
+
+from langchain.output_parsers import ListOutputParser
+
 from pydantic import BaseModel, Field, field_validator
 from typing import Coroutine, Optional, Type, Any
 from uuid import UUID
 import requests
 
+def set_exit_state(user_id: str) -> None:
+    from .chatBotModel import default_message
+    from .chatBotExtension import jump_to
+    jump_to(default_message, user_id, True)
+    get_agent_pool_instance().remove(user_id)
 
+def getExitTool(user_id: str):
+    class ExitTool(BaseTool):
+        name = "ExitTool"
+        # description = "Useful when user want to exit or break this conversation in any situation."
+        description = """
+        Useful in the situations below:
+        - The user has no high intention to book or search ticket. For example: '不訂了', '不查了'
+        - The user want to break or exit this conversation.
+        - The topic of the conversation isn't highly related to HSR(高鐵).
+        """
 
-class ExitTool(BaseTool):
-    name = "ExitTool"
-    description = "Useful when user want to exit or break this conversation in any."
-
-    def __init__(self, line_id: str) -> None:
-        super().__init__(self)
-        self.line_id = line_id
-
-    def _run(self, *args: Any, **kwargs: Any) -> str:
-        from .chatBotModel import default_message
-        from .chatBotExtension import jump_to
-        jump_to(default_message, self.line_id)
-        hsr_agent_pool_instance.remove(self.line_id)
-        return "The process exited successfully."
+        def _run(self, *args: Any, **kwargs: Any) -> str:
+            set_exit_state(user_id)
+            return "The process exited successfully."
+    return ExitTool()
 
 
 class Station(str, Enum):
@@ -60,44 +68,42 @@ class HsrSearchInput(BaseModel):
         return value
 
 
-class HsrSearchTool(BaseTool):
-    name = "HSRSearchTool"
-    # description = f"Useful to get the HSR(高鐵) timetable. You have to ask the user '你想要搭乘的日期和時間' and '你的出發站和抵達站'. Also, you will get a session_id for booking HSR(高鐵) ticket, it is pretty important. Current time is {datetime.now().strftime('%c')}"
-    description = f"Useful to get the HSR(高鐵) timetable. You have to ask the user '你想要搭乘的日期和時間', '你的出發站和抵達站', and '成人和學生票的數量', and then you will get a timetable for booking HSR(高鐵) ticket. Current time is {datetime.now().strftime('%c')}"
-    args_schema: Optional[Type[BaseModel]] = HsrSearchInput
+def getHsrSearchTool(user_id: str):
+    class HsrSearchTool(BaseTool):
+        name = "HSRSearchTool"
+        # description = f"Useful to get the HSR(高鐵) timetable. You have to ask the user '你想要搭乘的日期和時間' and '你的出發站和抵達站'. Also, you will get a session_id for booking HSR(高鐵) ticket, it is pretty important. Current time is {datetime.now().strftime('%c')}"
+        description = f"Useful to get the HSR(高鐵) timetable. You have to ask the user '你想要搭乘的日期和時間', '你的出發站和抵達站', and '成人和學生票的數量', and then you will get a timetable for booking HSR(高鐵) ticket. Current time is {datetime.now().strftime('%c')}"
+        args_schema: Optional[Type[BaseModel]] = HsrSearchInput
 
-    def __init__(self, line_id: str) -> None:
-        super().__init__(self)
-        self.line_id = line_id
+        def _run(self, departure_date: date, departure_time: time, station_from: Station, station_to: Station, adult_count: int, student_count: int) -> str:
+            if station_from == Station.other or station_to == Station.other:
+                return f"Error! The `station_from` or `station_to` is not found, it should be in {list(map(lambda x: x.value, Station))}"
 
-    def _run(self, departure_date: date, departure_time: time, station_from: Station, station_to: Station, adult_count: int, student_count: int) -> str:
-        if station_from == Station.other or station_to == Station.other:
-            return f"Error! The `station_from` or `station_to` is not found, it should be in {list(map(lambda x: x.value, Station))}"
+            request = requests.get(
+                "https://api.squidspirit.com/hsr/search",
+                json={
+                    "station_from": station_from.value,
+                    "station_to": station_to.value,
+                    "adult_count": adult_count,
+                    "child_count": 0,
+                    "heart_count": 0,
+                    "elder_count": 0,
+                    "student_count": student_count,
+                    "departure": datetime.combine(departure_date, departure_time).isoformat()
+                }
+            )
 
-        request = requests.get(
-            "https://api.squidspirit.com/hsr/search",
-            json={
-                "station_from": station_from.value,
-                "station_to": station_to.value,
-                "adult_count": adult_count,
-                "child_count": 0,
-                "heart_count": 0,
-                "elder_count": 0,
-                "student_count": student_count,
-                "departure": datetime.combine(departure_date, departure_time).isoformat()
-            }
-        )
+            if request.status_code != 200:
+                return request.json()
 
-        if request.status_code != 200:
-            return request.json()
+            get_agent_pool_instance().set_session_id(
+                user_id, request.json()['session_id'])
+            # return f"The session_id is '{request.json()['session_id']}' (You must remember it); the timetable is {request.json()['data']}"
+            return f"The timetable is {request.json()['data']}"
 
-        hsr_agent_pool_instance.set_session_id(
-            self.line_id, request.json()['session_id'])
-        # return f"The session_id is '{request.json()['session_id']}' (You must remember it); the timetable is {request.json()['data']}"
-        return f"The timetable is {request.json()['data']}"
-
-    def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
-        raise Exception()
+        def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
+            raise Exception()
+    return HsrSearchTool()
 
 
 class HsrBookInput(BaseModel):
@@ -106,38 +112,35 @@ class HsrBookInput(BaseModel):
     # session_id: UUID = Field(
     #     description="session_id format as UUID you just got from `HSRSearchTool`")
 
+def getHsrBookTool(user_id: str):
+    class HsrBookTool(BaseTool):
+        name = "HSRBookTool"
+        # description = "Useful to book HSR(高鐵) ticket. If you don't konw the timetable and session_id, use `HSRSearchTool` first."
+        description = "Useful to book HSR(高鐵) ticket, and it will return a booking information screenshot url. If you don't konw the timetable, use `HSRSearchTool` first."
+        args_schema: Optional[Type[BaseModel]] = HsrBookInput
 
-class HsrBookTool(BaseTool):
-    name = "HSRBookTool"
-    # description = "Useful to book HSR(高鐵) ticket. If you don't konw the timetable and session_id, use `HSRSearchTool` first."
-    description = "Useful to book HSR(高鐵) ticket, and it will return a booking information screenshot url. If you don't konw the timetable, use `HSRSearchTool` first."
-    args_schema: Optional[Type[BaseModel]] = HsrBookInput
+        # def _run(self, index: int, session_id: UUID) -> Any:
+        def _run(self, index: int) -> Any:
+            session_id = get_agent_pool_instance().get_session_id(user_id)
+            request = requests.post(
+                f"https://api.squidspirit.com/hsr/book/{session_id}",
+                json={
+                    "selected_index": index,
+                    "id_card_number": "id_card_number",
+                    "phone": "phone",
+                    "email": "email",
+                    "debug": True,
+                }
+            )
 
-    def __init__(self, line_id: str) -> None:
-        super().__init__(self)
-        self.line_id = line_id
+            if request.status_code != 200:
+                return request.json()
+            set_exit_state(user_id)
+            return f"The booking information screenshot url is {request.json()['data']}, the user can go to pay bill for it."
 
-    # def _run(self, index: int, session_id: UUID) -> Any:
-    def _run(self, index: int) -> Any:
-
-        session_id = hsr_agent_pool_instance.set_session_id(self.line_id)
-        request = requests.post(
-            f"https://api.squidspirit.com/hsr/book/{session_id}",
-            json={
-                "selected_index": index,
-                "id_card_number": "id_card_number",
-                "phone": "phone",
-                "email": "email",
-                "debug": True,
-            }
-        )
-
-        if request.status_code != 200:
-            return request.json()
-        return f"The booking information screenshot url is {request.json()['data']}, the user can go to pay bill for it."
-
-    def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
-        raise Exception()
+        def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
+            raise Exception()
+    return HsrBookTool()
 
 
 from .langChainAgent import LangChainAgent
@@ -147,28 +150,32 @@ class HsrAgentPool:
         self.pool: dict[str, LangChainAgent] = {}
         self.sessions: dict[str, UUID] = {}
 
-    def get(self, line_id: str) -> LangChainAgent | None:
-        return self.pool.get(line_id)
+    def get(self, user_id: str) -> LangChainAgent | None:
+        return self.pool.get(user_id)
 
-    def add(self, line_id: str) -> LangChainAgent:
-        agent = self.pool[line_id] = LangChainAgent(
+    def add(self, user_id: str) -> LangChainAgent:
+        agent = self.pool[user_id] = LangChainAgent(
             tools=[
-                ExitTool(line_id),
-                HsrSearchTool(line_id),
-                HsrBookTool(line_id)],
+                    getExitTool(user_id),
+                    getHsrSearchTool(user_id),
+                    getHsrBookTool(user_id)
+                ],
             memory=ConversationBufferMemory(
-                memory_key="hsr", return_messages=True)
+                memory_key="hsr", return_messages=True),
+            timeout=-1
         )
         return agent
 
-    def remove(self, line_id: str) -> None:
-        self.pool.pop(line_id)
+    def remove(self, user_id: str) -> None:
+        self.pool.pop(user_id)
 
-    def get_session_id(self, line_id: str) -> UUID:
-        return self.sessions.get(line_id)
+    def get_session_id(self, user_id: str) -> UUID:
+        return self.sessions.get(user_id)
 
-    def set_session_id(self, line_id: str, session_id: UUID) -> None:
-        self.sessions[line_id] = session_id
+    def set_session_id(self, user_id: str, session_id: UUID) -> None:
+        self.sessions[user_id] = session_id
 
 
-hsr_agent_pool_instance = HsrAgentPool()
+__hsr_agent_pool_instance = HsrAgentPool()
+def get_agent_pool_instance():
+    return __hsr_agent_pool_instance

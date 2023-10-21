@@ -20,7 +20,7 @@ class DefaultTool(BaseTool):
 
 
 class LangChainAgent:
-    def __init__(self, tools: List[BaseModel] = [], memory: ConversationBufferMemory = None, openai_api_key=None) -> None:
+    def __init__(self, tools: List[BaseModel] = [], memory: ConversationBufferMemory = None, timeout = 20, openai_api_key=None) -> None:
         self.tools = tools.copy()
         if openai_api_key is None:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
@@ -35,6 +35,8 @@ class LangChainAgent:
         self.agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name=self.memory.memory_key)]
         } if self.memory is not None else None
+        
+        self.timeout = timeout
 
         self.agent = None
         self.__update_agent()
@@ -45,7 +47,7 @@ class LangChainAgent:
             self.llm,
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
-            max_execution_time=15,
+            max_execution_time=self.timeout if self.timeout > 0 else None,
             agent_kwargs=self.agent_kwargs,
             memory=self.memory
         )
@@ -59,6 +61,7 @@ class LangChainAgent:
         self.__update_agent()
 
     def run(self, message) -> str:
+        print('agent.run')
         return self.agent.run('#zh_tw\n'+message)
 
 
