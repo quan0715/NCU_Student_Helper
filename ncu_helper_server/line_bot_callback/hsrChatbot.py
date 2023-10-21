@@ -122,13 +122,18 @@ def getHsrBookTool(user_id: str):
         # def _run(self, index: int, session_id: UUID) -> Any:
         def _run(self, index: int) -> Any:
             session_id = get_agent_pool_instance().get_session_id(user_id)
+            from backenddb.appModel import find_hsr_data
+            hsr_data, founded = find_hsr_data(user_id)
+            if not founded:
+                set_exit_state(user_id)
+                return "user hasn't set hsr booking data yet, ask user to fill in required message"
             request = requests.post(
                 f"https://api.squidspirit.com/hsr/book/{session_id}",
                 json={
                     "selected_index": index,
-                    "id_card_number": "id_card_number",
-                    "phone": "phone",
-                    "email": "email",
+                    "id_card_number": hsr_data.id_card_number,
+                    "phone": hsr_data.phone_number,
+                    "email": hsr_data.email,
                     "debug": True,
                 }
             )
