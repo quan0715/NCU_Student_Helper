@@ -6,7 +6,7 @@ from langchain.tools import BaseTool
 
 from pydantic import BaseModel
 
-load_dotenv()
+# load_dotenv()
 
 class DefaultTool(BaseTool):
     name = "DefaultTool"
@@ -21,9 +21,9 @@ class LangChainAgent:
     def __init__(self, tools:List[BaseModel] = [], openai_api_key=None) -> None:
         self.tools = tools.copy()
         if openai_api_key is None:
-            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613")
+            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key="123")
         else:
-            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key=openai_api_key)
+            self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key="123")
         if len(tools)==0: 
             self.tools.append(DefaultTool())
         self.agent = None

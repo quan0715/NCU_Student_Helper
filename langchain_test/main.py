@@ -34,13 +34,5 @@ agent = initialize_agent(
     memory=memory,
 )
 
-<<<<<<< HEAD
-# ai = agent.run("我要訂高鐵")
-ai = agent.run("zh_tw\n你好")
-while True:
-    instruction = input(ai + "\n> ")
-    ai = agent.run(instruction)
-=======
 while True:
     agent.run(input())
->>>>>>> cabc971 (langchangAgent class)
