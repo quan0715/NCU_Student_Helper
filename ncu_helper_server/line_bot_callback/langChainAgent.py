@@ -24,7 +24,7 @@ class LangChainAgent:
         self.tools = tools.copy()
         if openai_api_key is None:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
-                                  openai_api_key=settings.OPENAI_API_KEY)
+                                  openai_api_key=settings.OPEN_AI_API_KEY)
         else:
             self.llm = ChatOpenAI(model="gpt-3.5-turbo-0613",
                                   openai_api_key=openai_api_key)
