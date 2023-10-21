@@ -18,7 +18,7 @@ class LineBotCallbackView(View):
     line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
     parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
     handler = WebhookHandler(settings.LINE_CHANNEL_SECRET)
-    # server_url = "https://quan.squidspirit.com"
+    # server_url = "https://api.squidspirit.com/ncuhelper"
     threadPoolExecutor = ThreadPoolExecutor()
 
     @csrf_exempt
@@ -27,7 +27,8 @@ class LineBotCallbackView(View):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        import line_bot_callback.chatBotModel # this is necessary since otherwise function in chatBotModel will not be loaded
+        # this is necessary since otherwise function in chatBotModel will not be loaded
+        import line_bot_callback.chatBotModel
         # you have to import this inside post method otherwise cycle import might happened
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
@@ -48,15 +49,14 @@ class LineBotCallbackView(View):
     @handler.add(MessageEvent, message=TextSendMessage)
     def message_handler(self, event):
         def reply(event):
-            replies=handle(event)
+            replies = handle(event)
             self.line_bot_api.reply_message(event.reply_token, replies)
             # from chatBotExtension import jump_to
             # from chatBotModel import default_message
             # jump_to(default_message, event.source.user_id, False)
-            
+
         self.threadPoolExecutor.submit(reply, event)
-    
+
     @classmethod
     def push_message(cls, user_id, messages):
         cls.line_bot_api.push_message(user_id, messages)
-
