@@ -39,6 +39,7 @@ def main_menu(event, aiAgent: LangChainAgent):
             try:
                 msg = aiAgent.run(event.message.text)
                 jump_to(default_message, event.source.user_id, True)
+                # if you update aiAgent and method changed, update code here
                 return msg
             except:
                 import traceback
