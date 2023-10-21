@@ -69,7 +69,10 @@ def traffic_menu(event):
             return "請問你想要查什麼公車呢？"
         case '高鐵查詢/訂票':
             jump_to(hsr_util, event.source.user_id, False)
-            return "請問您想要訂哪一天什麼時間的高鐵票呢？"
+            from backenddb.appModel import find_hsr_data
+            hsr_data, founded = find_hsr_data(event.source.user_id)
+            warning_msg = "" if founded else "（您還沒設定高鐵訂票所需的個人資訊喔！）"
+            return "請問您想要訂哪一天什麼時間的高鐵票呢？" + warning_msg
         case '返回':
             jump_to(default_message, event.source.user_id, True)
             return

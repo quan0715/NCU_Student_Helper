@@ -131,7 +131,7 @@ def getHsrBookTool(user_id: str):
             hsr_data, founded = find_hsr_data(user_id)
             if not founded:
                 set_exit_state(user_id)
-                return "user hasn't set hsr booking data yet, ask user to fill in required message"
+                return "User hasn't set hsr booking data yet, ask user to fill in required message"
             request = requests.post(
                 f"https://api.squidspirit.com/hsr/book/{session_id}",
                 json={

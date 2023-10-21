@@ -92,8 +92,8 @@ class BusAgentPool(BasePool):
         return agent
 
 
-__hsr_agent_pool_instance = BusAgentPool()
+__bus_agent_pool_instance = BusAgentPool()
 
 
 def get_agent_pool_instance():
-    return __hsr_agent_pool_instance
+    return __bus_agent_pool_instance
