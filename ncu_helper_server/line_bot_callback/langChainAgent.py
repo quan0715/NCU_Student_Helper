@@ -45,6 +45,7 @@ class LangChainAgent:
             self.llm,
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
+            max_execution_time=15,
             agent_kwargs=self.agent_kwargs,
             memory=self.memory
         )
@@ -58,7 +59,7 @@ class LangChainAgent:
         self.__update_agent()
 
     def run(self, message) -> str:
-        return self.agent.run(message)
+        return self.agent.run('#zh_tw\n'+message)
 
 
 __agent = LangChainAgent()
