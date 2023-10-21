@@ -145,7 +145,7 @@ from .langChainAgent import LangChainAgent
 class HsrAgentPool:
     def __init__(self) -> None:
         self.pool: dict[str, LangChainAgent] = {}
-        self.sessions = dict[str, UUID] = {}
+        self.sessions: dict[str, UUID] = {}
 
     def get(self, line_id: str) -> LangChainAgent | None:
         return self.pool.get(line_id)
