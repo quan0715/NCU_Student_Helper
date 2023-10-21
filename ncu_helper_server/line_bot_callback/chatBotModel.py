@@ -1,4 +1,3 @@
-from .hsrChatbot import hsr_agent_pool_instance
 from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent
 from typing import Tuple
 from eeclass_setting.models import LineUser
@@ -32,8 +31,8 @@ def main_menu(event, aiAgent: LangChainAgent):
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case '高鐵查詢/訂票':
-            jump_to(hsr_util, event.source.user_id, event.message.text)
-            return
+            jump_to(hsr_util, event.source.user_id, False)
+            return "請問您想要訂哪一天什麼時間的高鐵票呢？"
         case _:
             jump_to(do_nothing, event.source.user_id)
             try:
@@ -80,9 +79,11 @@ def update_eeclass(event):
 
 @chat_status("hsr util")
 @text
-def hsr_util(line_id: str, message: str):
-    agent = hsr_agent_pool_instance.get(line_id)
+def hsr_util(event):
+    from . import hsrChatbot
+    hsr_agent_pool_instance = hsrChatbot.get_agent_pool_instance()
+    agent = hsr_agent_pool_instance.get(event.source.user_id)
     if agent is None:
-        agent = hsr_agent_pool_instance.add(line_id)
-
-    return agent.run(message)
+        agent = hsr_agent_pool_instance.add(event.source.user_id)
+        agent.run("我要訂高鐵票")
+    return agent.run(event.message.text)

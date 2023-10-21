@@ -48,12 +48,12 @@ class LineBotCallbackView(View):
 
     @handler.add(MessageEvent, message=TextSendMessage)
     def message_handler(self, event):
+        # from .chatBotExtension import jump_to
+        # from .chatBotModel import default_message
+        # jump_to(default_message, event.source.user_id, False)
         def reply(event):
             replies = handle(event)
             self.line_bot_api.reply_message(event.reply_token, replies)
-            # from chatBotExtension import jump_to
-            # from chatBotModel import default_message
-            # jump_to(default_message, event.source.user_id, False)
 
         self.threadPoolExecutor.submit(reply, event)
 

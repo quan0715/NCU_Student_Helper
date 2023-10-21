@@ -91,6 +91,8 @@ def handle(event)->list:
                 reply = __statuses.get(status, __statuses[__default_status])(event)
             except Exception as e:
                 reply = __statuses[__default_status](event)
+                import traceback
+                traceback.print_exc()
             if reply: replies.append(reply)
             if not ChatStatus.objects.get(line_user_id=user_id).propagation:
                 break
