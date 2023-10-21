@@ -1,3 +1,6 @@
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
+
 from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing
 from typing import Tuple
 from eeclass_setting.models import LineUser
@@ -6,6 +9,7 @@ from eeclass_setting.appModel import check_eeclass_update_pipeline, check_login_
 from django.core.cache import cache
 from django.conf import settings
 from .views import LineBotCallbackView as cb
+from langchain.llms import OpenAI
 
 
 @chat_status("default", default=True)
@@ -29,9 +33,23 @@ def main_menu(event):
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case _:
-            jump_to(default_message, event.source.user_id, True)
-            return '沒有此項指令'
+            jump_to(langchain, event.source.user_id, True)
+            return
 
+
+
+@chat_status("langchain")
+@text
+def langchain(event):
+    llm = ChatOpenAI(model="gpt-3.5-turbo-0613", openai_api_key=settings.OPEN_AI_API_KEY)
+    print(event.message.text)
+    prompt = ChatPromptTemplate.from_template("你是一個中央大學的AI學生助理，專門幫助學生解決各種疑難雜症，以下需要你幫忙解決關於 {topic} 的疑問")
+    chain = prompt | llm
+    results = chain.invoke({"topic": event.message.text})
+    print(results.content)
+
+    jump_to(main_menu, event.source.user_id, False)
+    return results.content
 
 
 @chat_status("set_data")
