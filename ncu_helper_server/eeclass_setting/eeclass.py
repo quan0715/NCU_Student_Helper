@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 import aiohttp
 from NotionBot import *
 from NotionBot.base.Database import *
@@ -29,23 +29,27 @@ async def eeclass_pipeline(user: LineUser):
             return "login failed"
         reply_message: List[str] = []
         await bot.retrieve_all_course(check=True, refresh=True)
-        reply_message.append('\n'.join(str(c) for c in bot.courses_list))
+        # reply_message.append('\n'.join(str(c) for c in bot.courses_list))
         await bot.retrieve_all_bulletins()
         await bot.retrieve_all_bulletins_details()
-        reply_message.append('\n'.join(f'公告：{str(b)}' for b in bot.bulletins_list))
+        # reply_message.append('\n'.join(f'公告：{str(b)}' for b in bot.bulletins_list))
         await bot.retrieve_all_homeworks()
         await bot.retrieve_all_homeworks_details()
-        reply_message.append('\n'.join(f'作業：{str(h)}' for h in bot.homeworks_list))
+        # reply_message.append('\n'.join(f'作業：{str(h)}' for h in bot.homeworks_list))
         # await bot.retrieve_all_material()
         # await bot.retrieve_all_materials_details()
         # reply_message.append('\n'.join(f'教材：{str(m)}' for m in bot.material_list))
         notion_crawler = EEClassNotionDBCrawler(user.notion_token, user.notion_template_id)
+        newly_upload = []
+        # newly_upload.extend(await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list, notion_crawler.bulletinDB))
+        # newly_upload.extend(await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, notion_crawler.homeworkDB))
         await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list, notion_crawler.bulletinDB)
         await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, notion_crawler.homeworkDB)
+        # print("\n".join(newly_upload))
         # await update_all_material_info_to_notion_db(bot.materials_detail_list, notion_crawler.materialDB)
         # print('\n'.join(reply_message))
         notion_db_url = f"https://www.notion.so/{user.notion_template_id.replace('-', '')}"
-        notion_message = f"已更新到Notion DB\n{notion_db_url}\n---\n"
+        notion_message = f"已更新到Notion DB\n{notion_db_url}\n"
         return notion_message + '\n'.join(reply_message)
 
 

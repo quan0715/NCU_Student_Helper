@@ -17,11 +17,11 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   void _eeclassConnectionTest() async => await viewModel.eeclassConnectionTest();
   void _launchNotionOAuth() async => await viewModel.launchNotionOAuth();
-  void _onSchedulingSettingChange() async => await viewModel.onSchedulingSettingChange();
+  // void _onSchedulingSettingChange() async => await viewModel.onSchedulingSettingChange();
   void _launchNotionDBBrowser() async => await viewModel.launchNotionDB();
   void _onHSRDataSubmitted() async => await viewModel.onHSRDataSubmitted();
 
-  late final PageController _pageController = PageController();
+  late PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -160,7 +160,6 @@ class _SettingPageViewState extends State<SettingPageView> {
     TextStyle titleStyle =  AppText.headLineSmall(context).copyWith(color: AppColor.onSurface(context));
     TextStyle titleStyleStrong = AppText.headLineSmall(context).copyWith(color: AppColor.primary(context));
     TextStyle contentStyle = AppText.bodyLarge(context).copyWith(color: AppColor.secondary(context));
-    String name = viewModel.user.lineUserName;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -266,9 +265,9 @@ class _SettingPageViewState extends State<SettingPageView> {
                 activeColor: AppColor.onSuccessColor,
                 inactiveThumbColor: AppColor.onWarningColor,
                 value: viewModel.isSchedulingModeOpen,
-                onChanged: (value) => {
+                onChanged: (value) async => {
                   viewModel.isSchedulingModeOpen = value,
-                  _onSchedulingSettingChange()
+                  await viewModel.onSchedulingSettingChange()
                 }
               ),
             ),
@@ -286,9 +285,9 @@ class _SettingPageViewState extends State<SettingPageView> {
                         dropdownColor: AppColor.secondary(context),
                         focusColor: Colors.transparent,
                         icon: const Icon(Icons.arrow_drop_down, color: AppColor.surfaceColor,),
-                        onChanged: (value) => {
+                        onChanged: (value) async => {
                           viewModel.schedulingTimeOption = value!,
-                          _onSchedulingSettingChange()
+                          await viewModel.onSchedulingSettingChange()
                         },
                         underline: Container(),
                         value: viewModel.schedulingTimeOption,
@@ -344,7 +343,9 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   Widget pageBody(){
     return Consumer<SettingPageViewModel>(
-      builder: (context, viewModel, child) => Scaffold(
+      builder: (context, viewModel, child){
+        _pageController = PageController(initialPage: viewModel.currentPageIndex);
+      return Scaffold(
         resizeToAvoidBottomInset : false,
         body: viewModel.isLoading ? loadingWidget() :
         Padding(
@@ -363,9 +364,6 @@ class _SettingPageViewState extends State<SettingPageView> {
                     viewModel.currentPageIndex = index,
                   },
                   controller: _pageController,
-                  //   viewModel.currentPageIndex = _pageController.page!.round();
-                  //   _pageController.animateToPage(viewModel.currentPageIndex, duration: const Duration(microseconds: 1000), curve:  Curves.easeInOut);
-                  // }),
                   physics: const AlwaysScrollableScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -378,7 +376,8 @@ class _SettingPageViewState extends State<SettingPageView> {
             ],
             ),
         ),
-      ));
+      );
+      });
   }
 
   @override
