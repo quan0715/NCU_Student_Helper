@@ -22,4 +22,5 @@ agent = initialize_agent(
     verbose=True,
 )
 
-agent.run("幫我查詢下週三中午12點，從新竹到桃園的高鐵班次")
+while True:
+    agent.run(input())
