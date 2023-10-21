@@ -24,7 +24,7 @@ def chat_status(status_id:str, default=False):
         return func
     return wrapper
 
-def state_ai_agent(aiAgent:LangChainAgent):
+def state_ai_agent(aiAgent):
     """
     pass aiAgent into decorated function as the last positional argument
     """
