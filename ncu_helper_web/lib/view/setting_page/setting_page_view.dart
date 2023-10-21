@@ -25,7 +25,7 @@ class _SettingPageViewState extends State<SettingPageView> {
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 0);
+    _pageController = PageController();
     viewModel.showLogMessage = showLogMessage;
     super.initState();
   }
