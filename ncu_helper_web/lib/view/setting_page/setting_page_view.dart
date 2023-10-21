@@ -26,7 +26,17 @@ class _SettingPageViewState extends State<SettingPageView> {
   @override
   void initState() {
     _pageController = PageController(initialPage: 0);
+    viewModel.showLogMessage = showLogMessage;
     super.initState();
+  }
+  
+  Future<void> showLogMessage (String message) async{
+    var snackBar = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(20.0),
+      content: Text(message),
+    ); 
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Widget pageTextFormFieldDataFrame({

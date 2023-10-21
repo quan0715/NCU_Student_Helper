@@ -23,13 +23,17 @@ class SettingPageViewModel extends ChangeNotifier{
   String get hsrPhone => hsrUser.phone;
   bool get isSchedulingModeOpen => schedulingData.isAutoUpdate;
   int get schedulingTimeOption => schedulingData.schedulingTime;
+  
+  bool get lineLoginChecking => lineId.isNotEmpty && isLineLoggedIn;
+  
 
-
+  Future<void> Function(String)? showLogMessage;
   bool _isLoading = false;
   bool _isEEclassConnectionSuccess = false;
   List<int> schedulingTimeOptions = [10, 20 , 30, 60,];
   List<String> pageTitles = ["EECLASS", "Notion", "高鐵訂票"];
   int _currentPageIndex = 0;
+  List<String> messageQueue = [];
 
   bool isCurrentPageIndex(int index) => _currentPageIndex == index;
   int get currentPageIndex => _currentPageIndex;
@@ -215,18 +219,21 @@ class SettingPageViewModel extends ChangeNotifier{
   }
 
   Future<void> getHSRData() async {
-    if(!isLineLoggedIn || user.lineUserId.isEmpty){
-      debugPrint("line not logged in can't fetch user");
-      return;
+    if(lineLoginChecking){
+      var result = await UserRepository().getHSRData(user.lineUserId);
+      hsrUser = result;
+      await showLogMessage!("成功更新高鐵資料");
     }
-    var data = await UserRepository().getHSRData(user.lineUserId);
-    hsrUser = data;
+    else{
+      debugPrint("line not logged in can't fetch user");
+      await showLogMessage!("請先登入 line");
+    }
     notifyListeners();
   }
 
   Future<void> getSchedulingData() async {
     if(!isLineLoggedIn || user.lineUserId.isEmpty){
-      debugPrint("line not logged in can't fetch user");
+      await showLogMessage!("請先登入 line");
       return;
     }
     var data = await UserRepository().getSchedulingData(user.lineUserId);
@@ -242,6 +249,14 @@ class SettingPageViewModel extends ChangeNotifier{
     debugPrint("hsrEmail: $hsrEmail");
     debugPrint("hsrPhone: $hsrPhone");
     debugPrint("update data toServer");
+    final result = await UserRepository().updateHSRData(
+      // lineUserId: user.lineUserId,
+      lineUserId: "U9bb9c1cdc6beb4cd5dd4f871602a6b8b",
+      entity: hsrUser
+    );
+    result 
+      ? await showLogMessage!("成功更新高鐵資料")
+      : await showLogMessage!("上傳失敗");
   }
   
   Future<void> onSchedulingSettingChange() async{
@@ -257,8 +272,8 @@ class SettingPageViewModel extends ChangeNotifier{
           schedulingTime: schedulingTimeOption,
         ));
         result
-          ? debugPrint("update scheduling data success")
-          : debugPrint("update scheduling data fail");
+          ? await showLogMessage!("已更新排程 自動更新 $isSchedulingModeOpen, 排程時間 $schedulingTimeOption")
+          : await showLogMessage!("上傳失敗");
       }
       else{
         debugPrint("line not logged in can't fetch user");

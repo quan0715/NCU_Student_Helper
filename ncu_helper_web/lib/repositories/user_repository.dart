@@ -17,8 +17,15 @@ class HSRUserEntity {
     return HSRUserEntity(
       personId: json['id_card_number'],
       email: json['email'],
-      phone: json['phone'],
+      phone: json['phone_number'],
     );
+  }
+   Map<String, dynamic> toJson() {
+    return {
+      "id_card_number": personId,
+      "email": email,
+      "phone_number": phone,
+    };
   }
   factory HSRUserEntity.defaultData(){
     return HSRUserEntity(
@@ -232,28 +239,29 @@ class UserRepository{
     }
     return SchedulingDataEntity.defaultData();
   }
+  
   Future<HSRUserEntity> getHSRData(String lineUserId) async {
-    // debugPrint("get scheduling data from lineUserId: $lineUserId");
-    // try{
-    //   var result = await http.Client().get(
-    //     Uri.parse("${ServerConfig.serverBaseURL}/scheduling/api/get_data?user_id=$lineUserId"),
-    //     headers: {
-    //       'ngrok-skip-browser-warning' : '8000',
-    //     }
-    //   );
-    //   if(result.statusCode == 200){
-    //     debugPrint(result.body);
-    //     var data = jsonDecode(result.body);
-    //     return HSRUserEntity.fromJson(data);
-    //   }
-    //   else if(result.statusCode == 404){
-    //     debugPrint("data not found");
-    //     return HSRUserEntity.defaultData();
-    //   }
-    // } catch(e){
-    //   debugPrint(e.toString());
-    //   throw Exception("get scheduling data unknown error ${e.toString()}");
-    // }
+    debugPrint("get hsr data from lineUserId: $lineUserId");
+    try{
+      var result = await http.Client().get(
+        Uri.parse("${ServerConfig.serverBaseURL}/backenddb/HSR/get_data?user_id=$lineUserId"),
+        headers: {
+          'ngrok-skip-browser-warning' : '8000',
+        }
+      );
+      if(result.statusCode == 200){
+        debugPrint(result.body);
+        var data = jsonDecode(result.body);
+        return HSRUserEntity.fromJson(data);
+      }
+      else if(result.statusCode == 404){
+        debugPrint("data not found");
+        return HSRUserEntity.defaultData();
+      }
+    } catch(e){
+      debugPrint(e.toString());
+      throw Exception("get hsr data unknown error ${e.toString()}");
+    }
     return HSRUserEntity.defaultData();
   }
 
@@ -280,6 +288,28 @@ class UserRepository{
     }catch(e){
       debugPrint(e.toString());
       throw Exception("login validation unknown error ${e.toString()}");
+    }
+  }
+
+  Future<bool> updateHSRData({required String lineUserId,required HSRUserEntity entity}) async {
+    try{
+      var result = await http.Client().post(
+        Uri.parse("${ServerConfig.serverBaseURL}/backenddb/HSR/save_data"),
+        encoding: Encoding.getByName("utf-8"),
+        body: jsonEncode(entity.toJson()..addEntries({'user_id': lineUserId}.entries))
+      );
+      if (result.statusCode == 200){
+        return true;
+      }
+      else if(result.statusCode == 401){
+        return false;
+      }
+      else{
+        throw Exception("update HSR unknown error ${result.statusCode}");
+      }
+    }catch(e){
+      debugPrint(e.toString());
+      throw Exception("update HSR unknown error ${e.toString()}");
     }
   }
 }
