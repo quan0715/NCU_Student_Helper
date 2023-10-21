@@ -1,7 +1,7 @@
 from NotionBot import Notion
 from NotionBot.base import Database
 
-from line_bot_callback.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
+from ncu_helper_server.line_bot_callback.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
 
 
 class EEClassNotionDBCrawler:
