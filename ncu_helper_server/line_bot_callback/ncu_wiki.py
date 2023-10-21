@@ -61,7 +61,7 @@ def load_all_documents():
         elif file.endswith('.json'):
             json_path = 'line_bot_callback/docs/' + file
             loader = JSONLoader(json_path)
-            documents.extend(loader)
+            documents.extend(loader.load())
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000, chunk_overlap=10)
     chunked_documents = text_splitter.split_documents(documents)
