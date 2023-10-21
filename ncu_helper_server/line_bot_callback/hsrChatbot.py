@@ -7,9 +7,6 @@ from typing import Coroutine, Optional, Type, Any
 from uuid import UUID
 import requests
 
-from .chatBotModel import default_message
-from .chatBotExtension import jump_to
-from .langChainAgent import LangChainAgent
 
 
 class ExitTool(BaseTool):
@@ -21,6 +18,8 @@ class ExitTool(BaseTool):
         self.line_id = line_id
 
     def _run(self, *args: Any, **kwargs: Any) -> str:
+        from .chatBotModel import default_message
+        from .chatBotExtension import jump_to
         jump_to(default_message, self.line_id)
         hsr_agent_pool_instance.remove(self.line_id)
         return "The process exited successfully."
@@ -140,6 +139,8 @@ class HsrBookTool(BaseTool):
     def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
         raise Exception()
 
+
+from .langChainAgent import LangChainAgent
 
 class HsrAgentPool:
     def __init__(self) -> None:
