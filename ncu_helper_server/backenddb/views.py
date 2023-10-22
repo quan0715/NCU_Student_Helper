@@ -10,7 +10,6 @@ from fastapi import status
 
 @csrf_exempt
 def get_hsr_data(request, *args, **kwargs):
-    print('get_hsr_data')
     if request.method != 'GET':
         return HttpResponse(status=status.HTTP_405_METHOD_NOT_ALLOWED)
     user, founded = appModel.find_hsr_data(request.GET.get('user_id'))
