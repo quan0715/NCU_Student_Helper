@@ -16,7 +16,8 @@ def default_message(event):
     return [
         '資料設定',
         'EECLASS更新',
-        '交通查詢'
+        '交通查詢',
+        'EECLASS查詢'
     ]
 
 
@@ -36,6 +37,8 @@ def main_menu(event, aiAgent):
         case '交通查詢':
             jump_to(traffic_message, event.source.user_id, True)
             return
+        case 'EECLASS查詢':
+            jump_to(ee_query_message, event.source.user_id, True)
         case _:
             jump_to(do_nothing, event.source.user_id)
             try:
@@ -122,4 +125,42 @@ def bus_util(event):
     if agent is None:
         agent = bus_agent_pool_instance.add(event.source.user_id)
         agent.run("我要查詢公車")
+    return agent.run(event.message.text)
+
+@chat_status("ee_query_message")
+@button_group("EECLASS查詢項目", "請選擇要查詢的項目", "項目選單")
+def ee_query_message(event):
+    jump_to(kind_menu, event.source.user_id)
+    return [
+        '課程',
+        '作業',
+        '公告',
+        '教材',
+        '返回'
+    ]
+
+@chat_status("kind_menu")
+@text
+def kind_menu(event):
+    match event.message.text:
+        case '課程':
+            jump_to(about_course, event.source.user_id, False)
+            return "請問你想要查什麼哪門課程呢？"
+        case '作業' | '公告' | '教材':
+            jump_to(about_course, event.source.user_id, False)
+            return f"請問您想要查詢關於哪一門課程相關的{event.message.text}呢？"
+        case '返回':
+            jump_to(default_message, event.source.user_id, True)
+            return
+        case _:
+            return '無此指令'
+
+@chat_status("about_kind")
+@text
+def about_course(event):
+    from . import eeclassBotTool
+    hsr_agent_pool_instance = eeclassBotTool.get_agent_pool_instance()
+    agent = hsr_agent_pool_instance.get()
+    if agent is None:
+        agent.run("我要查詢EECLASS資料")
     return agent.run(event.message.text)
