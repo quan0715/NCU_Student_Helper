@@ -7,7 +7,7 @@ from eeclass_setting.models import LineUser
 from .eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
 
 from langchain.memory import ConversationBufferMemory
-from typing import Any, Coroutine, Optional, Type
+from typing import Any, Optional, Type
 from pydantic import BaseModel, Field
 from datetime import date, timedelta, timezone
 import enum, random
@@ -167,7 +167,7 @@ def getHomeworkAlertTool(user_id):
             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
             alert_list = []
             for h in get_agent_pool_instance().get_db(user_id).get_homework():
-                end_date = datetime(*time.strptime(h.deadline['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
+                end_date = datetime(*time.strptime(h.deadline.end, "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
                 submission_status = h.status
                 course = h.course
                 homework_title = h.title
@@ -194,27 +194,6 @@ def getHomeworkAlertTool(user_id):
     # open_ai_agent.run("請問跟Linux最有關的是哪一門課?")
 from .langChainAgent import LangChainAgent
 
-def getEETool(user_id: str):
-    class eeAgentPool(BaseTool):
-        name = "EECLASS_query_system"
-        description = "Useful to get EECLASS data by using it"
-
-        def _run(self) -> Any:
-            request = requests.get(
-                f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
-            )
-            if request.status_code != 200:
-                return request.json()
-            set_exit_state(user_id)
-
-            get_agent_pool_instance().set_db(user_id, request.json()['data']['notion_token'], request.json()['data']['notion_template_id'])
-
-            return f"The notion_token is {request.json()['data']['notion_token']}, and notion_template_id is {request.json()['data']['notion_template_id']}. Please remember it."
-
-        def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
-            raise Exception()
-    return eeAgentPool()
-
 class eeAgentPool:
     def __init__(self) -> None:
         self.pool: dict[str, LangChainAgent] = {}
@@ -235,7 +214,6 @@ class eeAgentPool:
         self.db[user_id] = dbc
         agent = self.pool[user_id] = LangChainAgent(
             tools=[
-                    # getEETool(user_id),
                     getHomeworkRetrieve(user_id),
                     getBulletinRetrieve(user_id),
                     getCoursetoHomework(user_id),
