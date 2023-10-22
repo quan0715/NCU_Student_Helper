@@ -121,7 +121,7 @@ def getCoursetoHomework(user_id: str):
 def getBulletinRetrieve(user_id):
     class BulletinRetrieve(BaseTool):
         name="search_all_bulletin"
-        description=f"這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
+        description=f"如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
         @staticmethod
         def get_bulletin_db():
             dbc = get_agent_pool_instance().get_db(user_id)
@@ -144,7 +144,7 @@ def getHomeworkRetrieve(user_id: str):
         # name = "Homework_Content_Recommendation_system"
         # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
         name = "search_all_homework"
-        description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
+        description = f"如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
         @staticmethod
         def get_homework_db():
             dbc = get_agent_pool_instance().get_db(user_id)
