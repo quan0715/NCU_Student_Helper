@@ -1,3 +1,4 @@
+from line_bot_callback.ncu_wiki import getWikiChainLLM
 from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply
 from typing import Tuple
 from eeclass_setting.models import LineUser
