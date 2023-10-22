@@ -137,48 +137,42 @@ class BulletinRetrieve(BaseTool):
         result = BulletinRetrieve.get_bulletin_db()
         return result
 
-def get_HomeworkRetrieve(user_id: str):
-    class HomeworkRetrieve(BaseTool):
-        # name = "Homework_Content_Recommendation_system"
-        # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
-        name = "search_all_homework"
-        description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
-        @staticmethod
-        def get_homework_db(user_id: str):
-            homeworks = []
-            for hw in dbc.get_homework()[:10]:
-                homeworks.append(dict(
-                        title=hw.title,
-                        homework_type=hw.homework_type,
-                        deadline=hw.deadline,
-                        content=hw.content
-                    ))
-            return homeworks
 
-        def _run(self, *args, **kargs):
-            result = self.get_homework_db()
-            return result
-    return HomeworkRetrieve
+class HomeworkRetrieve(BaseTool):
+    # name = "Homework_Content_Recommendation_system"
+    # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
+    name = "search_all_homework"
+    description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
+    @staticmethod
+    def get_homework_db():
+        homeworks = []
+        for hw in dbc.get_homework()[:10]:
+            homeworks.append(dict(
+                    title=hw.title,
+                    homework_type=hw.homework_type,
+                    deadline=hw.deadline,
+                    content=hw.content
+                ))
+        return homeworks
 
-def get_HomeworkAlertTool(user_id: str):
+    def _run(self, *args, **kargs):
+        result = self.get_homework_db()
+        return result
+
+def getHomeworkAlertTool(user_id):
     class HomeworkAlertTool(BaseTool):
         name = "Homework_alert_submission_system"
         description = "這是一個EECLASS搜尋. Check whether there are any homeworks that is close to end date but not submitted."
 
         @staticmethod
-        def get_alert_homework(days_left: int=1000, user_id: str) -> List[str]:
+        def get_alert_homework(days_left: int=1000) -> List[str]:
             if days_left == 1000:
                 return ["我也不知道誒"]
-            dbc = EEClassNotionDBCrawler(
-                auth=AUTH,
-                page_id=PAGE_ID
-            )
+            dbc = get_agent_pool_instance().get_db(user_id)
             course = dbc.get_all_courses()
             homework = dbc.get_homework()
-            load_dotenv()
-            auth = os.getenv("NOTION_AUTH")
-            notion_bot = Notion(auth)
-            homework_db: Database = notion_bot.get_database(os.getenv("HOMEWORK_DB"))
+            notion_bot = Notion(get_agent_pool_instance().get_auth(user_id))
+            homework_db: Database = notion_bot.get_database(notion_bot)
             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
             alert_list = []
             for h in homework_db.query():
@@ -195,7 +189,7 @@ def get_HomeworkAlertTool(user_id: str):
             return "--------split--------\n".join(result)
         
         args_schema: Optional[Type[BaseModel]] = HomeworkAlertInput
-    return HomeworkAlertTool
+    return HomeworkAlertTool()
         
     # open_ai_agent.run("請問10天內有作業要交嗎?")
     # open_ai_agent.run("請問什麼是作業?")
@@ -212,7 +206,7 @@ from .langChainAgent import LangChainAgent
 def getEETool(user_id: str):
     class eeAgentPool(BaseTool):
         name = "EECLASS_query_system"
-        description = "Useful to get EECLASS data by using it."
+        description = "Useful to get EECLASS data by using it"
 
         def _run(self) -> Any:
             request = requests.get(
@@ -221,6 +215,9 @@ def getEETool(user_id: str):
             if request.status_code != 200:
                 return request.json()
             set_exit_state(user_id)
+
+            get_agent_pool_instance().set_db(user_id, request.json()['data']['notion_token'], request.json()['data']['notion_template_id'])
+
             return f"The notion_token is {request.json()['data']['notion_token']}, and notion_template_id is {request.json()['data']['notion_template_id']}. Please remember it."
 
         def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
@@ -230,31 +227,47 @@ def getEETool(user_id: str):
 class eeAgentPool:
     def __init__(self) -> None:
         self.pool: dict[str, LangChainAgent] = {}
-        self.sessions: dict[str, UUID] = {}
+        self.db: dict[str, EEClassNotionDBCrawler] = {}
+        self.auth = {}
+
 
     def get(self, user_id: str) -> LangChainAgent | None:
         return self.pool.get(user_id)
 
     def add(self, user_id: str) -> LangChainAgent:
-        agent = LangChainAgent(
+        agent = self.pool[user_id] = LangChainAgent(
             tools=[
                     getEETool(user_id),
-                    get_HomeworkRetrieve(user_id),
-                    get_BulletinRetrieve(user_id),
-                    get_CoursetoHomework(user_id),
-                    get_HomeworkContent(user_id),
-                    get_SearchNearestCourseTitle(user_id),
-                    get_HomeworkAlertTool(user_id),
-                    get_ExitTool(user_id)
+                    # HomeworkRetrieve(),
+                    # BulletinRetrieve(),
+                    # CoursetoHomework(),
+                    # HomeworkContent(),
+                    # SearchNearestCourseTitle(),
+                    getHomeworkAlertTool(user_id),
+                    ExitTool()
                 ],
                 memory=ConversationBufferMemory(
                 memory_key="ee", return_messages=True),
             timeout=-1
         )
+        
         return agent
 
     def remove(self, user_id: str) -> None:
         self.pool.pop(user_id)
+
+    def set_db(self, user_id, AUTH, PAGE_ID):
+        self.auth[user_id] = AUTH
+        self.db[user_id] = EEClassNotionDBCrawler(
+            auth=AUTH,
+            page_id=PAGE_ID
+        )
+
+    def get_db(self, user_id: str) -> EEClassNotionDBCrawler:
+        return self.db[user_id]
+    
+    def get_auth(self, user_id):
+        return self.auth[user_id]
 
 
 __ee_agent_pool_instance = eeAgentPool()
