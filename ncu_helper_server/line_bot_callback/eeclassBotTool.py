@@ -13,11 +13,11 @@ from datetime import date, timedelta, timezone
 import enum, random
 
 
-def set_exit_state() -> None:
+def set_exit_state(user_id: str) -> None:
     from .chatBotModel import default_message
     from .chatBotExtension import jump_to
     jump_to(default_message, True)
-    get_agent_pool_instance().remove()
+    get_agent_pool_instance().remove(user_id)
 
 class ExitTool(BaseTool):
     name = "ExitTool"
@@ -186,7 +186,7 @@ def getHomeworkAlertTool(user_id):
             
             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
             alert_list = []
-            for h in get_agent_pool_instance().get_homework(user_id).query():
+            for h in get_agent_pool_instance().get_db(user_id).get_homework():
                 end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
                 submission_status = h['properties']['Status']['select']['name']
                 course = h['properties']['Course']['select']['name']
@@ -242,8 +242,6 @@ class eeAgentPool:
         self.auth = {}
         self.course = {}
         self.homework = {}
-        
-
 
     def get(self, user_id: str) -> LangChainAgent | None:
         return self.pool.get(user_id)
@@ -280,6 +278,8 @@ class eeAgentPool:
         homework = self.db.get_homework()
         self.homeworkType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
         
+    def add_db(self, user_id: str, db):
+        self.db[user_id] = db
 
     def get_db(self, user_id: str) -> EEClassNotionDBCrawler:
         return self.db[user_id]
