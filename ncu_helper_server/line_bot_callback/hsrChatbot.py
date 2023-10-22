@@ -155,6 +155,7 @@ def getHsrBookTool(user_id: str):
 
 class HsrAgentPool(BasePool):
     def __init__(self) -> None:
+        super().__init__()
         self.sessions: dict[str, UUID] = {}
 
     def add(self, user_id: str) -> LangChainAgent:
