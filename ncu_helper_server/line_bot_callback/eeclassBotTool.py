@@ -183,13 +183,10 @@ def getHomeworkAlertTool(user_id):
         def get_alert_homework(days_left: int=1000) -> List[str]:
             if days_left == 1000:
                 return ["我也不知道誒"]
-            dbc = get_agent_pool_instance().get_db(user_id)
             
-            notion_bot = Notion(get_agent_pool_instance().get_auth(user_id))
-            homework_db: Database = notion_bot.get_database(notion_bot)
             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
             alert_list = []
-            for h in homework_db.query():
+            for h in get_agent_pool_instance().get_homework(user_id).query():
                 end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
                 submission_status = h['properties']['Status']['select']['name']
                 course = h['properties']['Course']['select']['name']
