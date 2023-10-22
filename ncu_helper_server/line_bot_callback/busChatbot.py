@@ -9,6 +9,7 @@ from typing import Optional, Type, Any
 from uuid import uuid4
 from .bus_api.api import BusAPI
 from .bus_api.stop_data import StopData
+from datetime import datetime
 
 
 def set_exit_state(user_id: str) -> None:
@@ -45,41 +46,38 @@ class BusLine(str, Enum):
 
 class BusInfoInput(BaseModel):
     direction: int = Field(
-        description="If the bus is going to NCU(中央大學 or 中央), it should be 1; if the bus is leaving from NCU(中央大學 or 中央), it should be 0.")
+        description="If the user want to go to NCU(中央大學 or 中央), it should be 1; else, it should be 0.")
     destination: int = Field(
-        description="Whether the bus is going to (leaving from) 火車站 (1) or 高鐵站 (0).")
+        description="If the user want to go to or leave from '火車站', it should be 1; if the user want to go to or leave from '高鐵站', it should be 0.")
 
-    @field_validator("line", mode="before")
-    def station_validator(cls, value):
-        if value not in list(map(lambda x: x.value, BusLine)):
-            value = BusLine.other
-        return value
+    # @field_validator("line", mode="before")
+    # def station_validator(cls, value):
+    #     if value not in list(map(lambda x: x.value, BusLine)):
+    #         value = BusLine.other
+    #     return value
 
 
 class BusInfoTool(BaseTool):
     name = "BusInfoTool"
-    description = "Useful to get when the bus will arrive the bus stop."
+    description = f"Useful to get when the bus will arrive the bus stop. You have to ask user '請問您想要回中央、去高鐵站，還是去火車站？'. Current time is {datetime.now().strftime('%c')}"
 
     args_schema: Optional[Type[BaseModel]] = BusInfoInput
 
     def _run(self, direction: int, destination: str) -> str:
 
-        stop = "中央大學正門"
+        stop = "中央大學警衛室"
         if destination == 1:
-            line_coll = ["172", "173"]
-            stop_list = list(BusAPI.get_all_stops("172"))
-            if direction == 1:
-                stop = "中壢火車站"
-        else:
             line_coll = ["132", "133"]
-            stop_list = list(BusAPI.get_all_stops("132"))
+            if direction == 1:
+                stop = "中壢公車站"
+        else:
+            line_coll = ["172", "173"]
             if direction == 1:
                 stop = "高鐵桃園站"
 
-        print(stop_list)
-
         stop_info_coll = list(
             map(lambda x: BusAPI.get_bus_data(x, direction), line_coll))
+        
         result_coll: list[StopData] = []
         for infos in stop_info_coll:
             for info in infos:
@@ -87,7 +85,7 @@ class BusInfoTool(BaseTool):
                     result_coll.append(info)
         sorted(result_coll, key=lambda x: x.next_bus_time)
         result = result_coll[0]
-        return f"[System] The next bus is arriving at {result.next_bus_time} and the status is {result.stop_status} at Station {result.stop_name}"
+        return str({'data': result})
 
 
 class BusAgentPool(BasePool):

@@ -139,7 +139,7 @@ def getHsrBookTool(user_id: str):
                     "id_card_number": hsr_data.id_card_number,
                     "phone": hsr_data.phone_number,
                     "email": hsr_data.email,
-                    "debug": True,
+                    # "debug": True,
                 }
             )
 

@@ -39,7 +39,7 @@ async def eeclass_pipeline(user: LineUser):
         # await bot.retrieve_all_material()
         # await bot.retrieve_all_materials_details()
         # reply_message.append('\n'.join(f'教材：{str(m)}' for m in bot.material_list))
-        notion_crawler = EEClassNotionDBCrawler(user.notion_token, user.notion_template_id)
+        notion_crawler = EEClassNotionDBCrawler.EEClassNotionDBCrawler(user.notion_token, user.notion_template_id)
         newly_upload = []
         # newly_upload.extend(await update_all_bulletin_info_to_notion_db(bot.bulletins_detail_list, notion_crawler.bulletinDB))
         # newly_upload.extend(await update_all_homework_info_to_notion_db(bot.homeworks_detail_list, notion_crawler.homeworkDB))

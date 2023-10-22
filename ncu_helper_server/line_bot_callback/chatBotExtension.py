@@ -67,6 +67,23 @@ def quick_reply(text=""):
         return wrapper
     return outer
 
+def text_with_leave(func):
+    """
+    wrap a function returning a string as legal chatBot returned message
+    """
+    def wrapper(*a, **b):
+        text = func(*a, **b)
+        return TextSendMessage(
+            text=text,
+            quick_reply=QuickReply(
+                items=[QuickReplyButton(
+                    image_url='https://scontent.xx.fbcdn.net/v/t1.15752-9/387560636_1364784567461116_3708224130470311929_n.png?stp=cp0_dst-png&_nc_cat=108&ccb=1-7&_nc_sid=510075&_nc_ohc=S5L-rQ1y9RcAX9PYIpB&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQKnpWq0ikfumqNYbstXppxcr2WW48UmGkQgabRCkjJow&oe=655C13D9',
+                    action=MessageAction('離開', '離開'))]
+            )
+        ) if text else None
+    return wrapper
+
+
 def button_group(title="", text="", default_text='default alt text'):
     """
     wrap a function returning a list of string as the button group text of chatbot

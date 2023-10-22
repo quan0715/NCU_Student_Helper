@@ -1,5 +1,5 @@
 from line_bot_callback.ncu_wiki import getWikiChainLLM
-from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply, text_with_leave
 from typing import Tuple
 from eeclass_setting.models import LineUser
 from eeclass_setting.appModel import check_eeclass_update_pipeline, find_user_by_user_id
@@ -17,7 +17,6 @@ def default_message(event, agent):
     jump_to(main_menu, event.source.user_id)
     return [
         (dog_icon_url, '資料設定', '資料設定'),
-        (dog_icon_url, '課程查詢', '課程查詢'),
         (dog_icon_url, '跟我閒聊', agent.run('請給我一個很白癡的問題')),
         (dog_icon_url, 'EECLASS查詢', 'EECLASS查詢'),
         (dog_icon_url, '交通查詢', '交通查詢')
@@ -34,7 +33,7 @@ def main_menu(event, aiAgent):
         case '資料設定':
             jump_to(default_message, event.source.user_id, propagation=True)
             return settings.FRONT_END_WEB_URL
-        case 'EECLASS查詢':
+        case 'EECLASS更新':
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case '交通查詢':
@@ -73,7 +72,7 @@ def traffic_menu(event):
     match event.message.text:
         case '公車查詢':
             jump_to(bus_util, event.source.user_id, False)
-            return "請問你想要查什麼公車呢？"
+            return "請問您想要回中央、去高鐵站，還是去火車站？"
         case '高鐵查詢/訂票':
             jump_to(hsr_util, event.source.user_id, False)
             from backenddb.appModel import find_hsr_data
@@ -99,15 +98,18 @@ def update_eeclass(event):
     cb.push_message(event.source.user_id, text(lambda ev: '獲取資料中')(event))
     try:
         result = check_eeclass_update_pipeline(user)
+        print("a")
         jump_to(eeclass_util, event.source.user_id, True)
         return result
     except Exception as e:
         jump_to(default_message, event.source.user_id, True)
+        import traceback
+        traceback.print_exception(e)
         return f'獲取失敗, 錯誤訊息:\n{e}'
 
 
 @chat_status("hsr util")
-@text
+@text_with_leave
 def hsr_util(event):
     from . import hsrChatbot
     hsr_agent_pool_instance = hsrChatbot.get_agent_pool_instance()
@@ -129,7 +131,7 @@ def eeclass_util(event):
     #     agent.run("我要知道eeclass更新了啥")
     # return agent.run(event.message.text)
     jump_to(default_message, event.source.user_id, True)
-    return '請實作eeclassChatBot'
+    return '更新完成！'
 
 @chat_status("bus util")
 @text
@@ -179,3 +181,44 @@ def about_course(event):
         agent = ee_agent_pool_instance.add(event.source.user_id)
         agent.run("我要查詢EECLASS資料")
     return agent.run(event.message.text)
+
+@chat_status("debug_about_kind")
+@text
+def debug_about_course(event):
+    # from . import eeclassBotTool
+    # ee_agent_pool_instance = eeclassBotTool.get_agent_pool_instance()
+    # agent = ee_agent_pool_instance.get(event.source.user_id)
+    # if agent is None:
+    #     agent = ee_agent_pool_instance.add(event.source.user_id)
+    #     agent.run("我要查詢EECLASS資料")
+    # return agent.run(event.message.text)
+    jump_to(default_message, event.source.user_id, True)
+    return """以下是最近的新公告：
+
+1. 軟體工程實務 Software engineering practices：
+   - 標題：Week4 lab3 補交相關事項
+   - 內容：助教已經將各位的學習狀況以及建議看完了，補交期限為10/15 23:59，成績將會乘上75%。
+   - 發布日期：2023-10-09
+
+2. 軟體工程實務 Software engineering practices：
+   - 標題：Term project現場demo取消，改為繳交影片
+   - 內容：Term project實體demo取消，改為繳交demo影片，影片繳交deadline為10/29 23:59。
+   - 發布日期：2023-10-12
+
+3. 電腦攻擊與防禦 The Attack and Defense of Computers：
+   - 標題：10/17 重要提醒
+   - 內容：明天請在家看影片，學校 web server 目前有問題，老師的網頁無法正常更新。
+   - 發布日期：2023-10-16
+
+4. Linux作業系統 Linux Operating System：
+   - 標題：Linux Project 1
+   - 內容：Linux Project 1已發布在課程網頁上。
+   - 發布日期：2023-10-09
+
+5. 軟體工程實務 Software engineering practices：
+   - 標題：Week4 lab3 會議連結
+   - 內容：因為沒有同學反應設備問題，所以採用全線上模式，會議連結在公告中。
+   - 發布日期：2023-10-02
+
+以上是最近的新公告，詳細內容請參閱課程網頁或公告。
+"""
