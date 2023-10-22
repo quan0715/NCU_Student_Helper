@@ -58,7 +58,7 @@ class HomeworkAlertInput(BaseModel):
         description=f"Use to find the homeworks that is due between today - days_left days and today. Date format shoud be'YYYYMMDDTHHMMSS'. Current time is {date.today()}"
     )
 
-def getSearchNearestCourseTitle(user_id: str):
+def getSearchNearestCourseTitle():
     class SearchNearestCourseTitle(BaseTool):
         name = "search_nearest_course_title"
         description = "這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
@@ -74,18 +74,13 @@ def getSearchNearestCourseTitle(user_id: str):
     return SearchNearestCourseTitle()
 
 def getHomeworkContent(user_id: str):
-    user = LineUser.objects.get(line_user_id= user_id)
-    dbc = EEClassNotionDBCrawler(
-        auth=user.notion_token,
-        page_id=user.notion_template_id
-    )
     class HomeworkContent(BaseTool):
         name="Homework_content_recommendation"
         description="這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
 
         @staticmethod
         def make_recommendation(hw_title: str):
-            for hw in dbc.get_homework():
+            for hw in get_agent_pool_instance().get_db(user_id).get_homework():
                 if hw.title == hw_title:
                     return hw
         def _run(self, hw_title: str) -> Any:
@@ -96,18 +91,13 @@ def getHomeworkContent(user_id: str):
     return HomeworkContent()
 
 def getCoursetoHomework(user_id: str):
-    user = LineUser.objects.get(line_user_id= user_id)
-    dbc = EEClassNotionDBCrawler(
-        auth=user.notion_token,
-        page_id=user.notion_template_id
-    )
     class CoursetoHomework(BaseTool):
         name = "Use_course_name_to_fetch_homework"
         description = "這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
             
         @staticmethod
         def course_to_hw(course_name: str):
-            homework_list = dbc.get_homework()
+            homework_list = get_agent_pool_instance().get_db(user_id).get_homework()
             filtered_homework_list = []
             for hw in homework_list:
                 if hw.course == course_name.value:
@@ -127,14 +117,9 @@ def getCoursetoHomework(user_id: str):
     return CoursetoHomework()
 
 def getBulletinRetrieve(user_id):
-    user = LineUser.objects.get(line_user_id= user_id)
-    dbc = EEClassNotionDBCrawler(
-        auth=user.notion_token,
-        page_id=user.notion_template_id
-    )
     def get_bulletin_db():
         bulletin_list = []
-        for bu in dbc.get_bulletin()[:10]:
+        for bu in get_agent_pool_instance().get_db(user_id).get_bulletin()[:10]:
             bulletin_list.append(dict(
                 title=bu.title,
                 content=bu.content,
@@ -151,14 +136,9 @@ def getBulletinRetrieve(user_id):
     return BulletinRetrieve()
 
 def getHomeworkRetrieve(user_id: str):
-    user = LineUser.objects.get(line_user_id= user_id)
-    dbc = EEClassNotionDBCrawler(
-        auth=user.notion_token,
-        page_id=user.notion_template_id
-    )
     def get_homework_db():
         homeworks = []
-        for hw in dbc.get_homework()[:10]:
+        for hw in get_agent_pool_instance().get_db(user_id).get_homework()[:10]:
             homeworks.append(dict(
                     title=hw.title,
                     homework_type=hw.homework_type,
@@ -247,6 +227,12 @@ class eeAgentPool:
         return self.pool.get(user_id)
 
     def add(self, user_id: str) -> LangChainAgent:
+        user = LineUser.objects.get(line_user_id= user_id)
+        dbc = EEClassNotionDBCrawler(
+            auth=user.notion_token,
+            page_id=user.notion_template_id
+        )
+        self.db[user_id] = dbc
         agent = self.pool[user_id] = LangChainAgent(
             tools=[
                     # getEETool(user_id),
@@ -277,9 +263,6 @@ class eeAgentPool:
         self.courseType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
         homework = self.db.get_homework()
         self.homeworkType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
-        
-    def add_db(self, user_id: str, db):
-        self.db[user_id] = db
 
     def get_db(self, user_id: str) -> EEClassNotionDBCrawler:
         return self.db[user_id]
