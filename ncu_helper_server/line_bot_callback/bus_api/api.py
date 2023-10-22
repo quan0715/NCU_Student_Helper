@@ -9,7 +9,7 @@ class BusAPI:
     def _get_one_way_bus_data(bus: str, direction: int) -> list[StopData]:
         """
         取得單向公車站牌資訊
-        :param bus: 172, 173, 或 5035
+        :param bus: 172 或 173
         :param direction: 0-去程, 1-返程
         :return: 站牌資訊的串列
         """
@@ -46,7 +46,7 @@ class BusAPI:
     def get_bus_data(bus: str, direction: int = None) -> list[StopData]:
         """
         根據路線自動取得公車站牌資訊
-        :param bus: 132, 133, 172, 173, 或 5035
+        :param bus: 132, 133, 172, 或 173
         :param direction: 132 跟 133 不需要；其餘 0-去程, 1-返程
         :return: 站牌資訊的串列
         """

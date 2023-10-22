@@ -2,7 +2,7 @@ from NotionBot import Notion
 from NotionBot.base import Database
 from NotionBot.object import Query, SearchSort, SortObject
 
-from line_bot_callback.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
+from line_bot_callback.eeclass_notion_db_crawler.models import Bulletin, Homework, Material
 
 
 class EEClassNotionDBCrawler:

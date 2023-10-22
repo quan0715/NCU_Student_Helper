@@ -2,7 +2,7 @@ import NotionBot
 
 
 class Bulletin:
-    def __init__(self, announce_date: NotionBot.object.DateValue, content: str, course: str, id: str, link: str,
+    def __init__(self, announce_date: NotionBot.object.Date, content: str, course: str, id: str, link: str,
                  title: str, read_check: bool, created_time: str, last_edited_time: str, details: dict):
         self.announce_date = announce_date
         self.content = content
@@ -31,7 +31,7 @@ class Bulletin:
 
 
 class Homework:
-    def __init__(self, content: str, course: str, deadline: NotionBot.object.DateValue, homework_type: str, id: str,
+    def __init__(self, content: str, course: str, deadline: NotionBot.object.Date, homework_type: str, id: str,
                  link: str, status: str, submission: int, title: str, user_status: str, read_check: bool,
                  created_time: str, last_edited_time: str, details: dict):
         self.content = content
