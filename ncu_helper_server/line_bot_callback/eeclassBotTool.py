@@ -167,10 +167,10 @@ def getHomeworkAlertTool(user_id):
             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
             alert_list = []
             for h in get_agent_pool_instance().get_db(user_id).get_homework():
-                end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
-                submission_status = h['properties']['Status']['select']['name']
-                course = h['properties']['Course']['select']['name']
-                homework_title = h['properties']['Title']['title'][0]['plain_text']
+                end_date = datetime(*time.strptime(h.deadline['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
+                submission_status = h.status
+                course = h.course
+                homework_title = h.title
                 if submission_status == "未完成" and now <= end_date <= now+timedelta(days=days_left):
                     alert_list.append(f"課程: {course}\n作業: {homework_title}\n剩餘時間: {str(end_date-now)}\n")
             return alert_list
