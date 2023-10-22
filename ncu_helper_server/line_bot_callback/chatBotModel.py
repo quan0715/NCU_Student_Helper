@@ -1,5 +1,5 @@
 from line_bot_callback.ncu_wiki import getWikiChainLLM
-from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply, text_with_leave
 from typing import Tuple
 from eeclass_setting.models import LineUser
 from eeclass_setting.appModel import check_eeclass_update_pipeline, find_user_by_user_id
@@ -109,7 +109,7 @@ def update_eeclass(event):
 
 
 @chat_status("hsr util")
-@text
+@text_with_leave
 def hsr_util(event):
     from . import hsrChatbot
     hsr_agent_pool_instance = hsrChatbot.get_agent_pool_instance()
@@ -163,7 +163,7 @@ def kind_menu(event):
             jump_to(about_course, event.source.user_id, False)
             return "請問你想要查什麼哪門課程呢？"
         case '作業' | '公告' | '教材':
-            jump_to(debug_about_course, event.source.user_id, False)
+            jump_to(about_course, event.source.user_id, False)
             return f"請問您想要查詢關於哪一門課程相關的{event.message.text}呢？"
         case '返回':
             jump_to(default_message, event.source.user_id, True)

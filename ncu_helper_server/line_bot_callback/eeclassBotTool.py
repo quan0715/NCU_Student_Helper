@@ -2,6 +2,8 @@ import time
 from langchain.tools import BaseTool
 from NotionBot import *
 from NotionBot.base.Database import *
+
+from eeclass_setting.models import LineUser
 from .eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
 
 from langchain.memory import ConversationBufferMemory
@@ -33,127 +35,123 @@ class ExitTool(BaseTool):
         return "The process exited successfully."
 
 
-class HomeworkTitleInput(BaseModel):
-    """Input for homework title"""
-    course_title: str = Field(
-        ...,
-        description=f"It's a college course that the user takes in this semester. If user doesn't offer this, please return empty string."
-    )
-    homework_title_input: str = Field(
-        ...,
-        description="It's a homework title that is assigned in a college course."
-    )
+# class HomeworkTitleInput(BaseModel):
+#     """Input for homework title"""
+#     course_title: str = Field(
+#         ...,
+#         description=f"It's a college course that the user takes in this semester. If user doesn't offer this, please return empty string."
+#     )
+#     homework_title_input: str = Field(
+#         ...,
+#         description="It's a homework title that is assigned in a college course."
+#     )
 
 
-class SpecificCourseName(BaseModel):
-    course_name: str = Field(description=f"This course name must be one of the course. It must be completely the same string.")
+# class SpecificCourseName(BaseModel):
+#     course_name: str = Field(description=f"This course name must be one of the course. It must be completely the same string.")
 
-class SpecificHomeworkName(BaseModel):
-    homework_title: str = Field(description=f"This homework name must be one of the homework. It must be completely the same string.")
+# class SpecificHomeworkName(BaseModel):
+#     homework_title: str = Field(description=f"This homework name must be one of the homework. It must be completely the same string.")
 
-class HomeworkAlertInput(BaseModel):
-    """Input for homework alert"""
-    days_left: int = Field(
-        ...,
-        description=f"Use to find the homeworks that is due between today - days_left days and today. Date format shoud be'YYYYMMDDTHHMMSS'. Current time is {date.today()}"
-    )
+# class HomeworkAlertInput(BaseModel):
+#     """Input for homework alert"""
+#     days_left: int = Field(
+#         ...,
+#         description=f"Use to find the homeworks that is due between today - days_left days and today. Date format shoud be'YYYYMMDDTHHMMSS'. Current time is {date.today()}"
+#     )
 
-def getSearchNearestCourseTitle(user_id: str):
-    request = requests.get(
-        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
-    )
-    if request.status_code != 200:
-        return request.json()
-    dbc = EEClassNotionDBCrawler(
-        auth=request.json()['data']['notion_token'],
-        page_id=request.json()['data']['notion_template_id']
-    )
-    class SearchNearestCourseTitle(BaseTool):
-        name = "search_nearest_course_title"
-        description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
-        @staticmethod
-        def get_course_full_name(course_name: str):
-            return course_name
+# def getSearchNearestCourseTitle(user_id: str):
+#     request = requests.get(
+#         f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+#     )
+#     if request.status_code != 200:
+#         return request.json()
+#     dbc = EEClassNotionDBCrawler(
+#         auth=request.json()['data']['notion_token'],
+#         page_id=request.json()['data']['notion_template_id']
+#     )
+#     class SearchNearestCourseTitle(BaseTool):
+#         name = "search_nearest_course_title"
+#         description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
+#         @staticmethod
+#         def get_course_full_name(course_name: str):
+#             return course_name
         
-        def _run(self, course_name: str):
-            result = SearchNearestCourseTitle.get_course_full_name(course_name)
-            return result
+#         def _run(self, course_name: str):
+#             result = SearchNearestCourseTitle.get_course_full_name(course_name)
+#             return result
         
-        args_schema: Optional[Type[BaseModel]] = SpecificCourseName
-    return SearchNearestCourseTitle
+#         args_schema: Optional[Type[BaseModel]] = SpecificCourseName
+#     return SearchNearestCourseTitle
 
-def getHomeworkContent(user_id: str):
-    request = requests.get(
-        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
-    )
-    if request.status_code != 200:
-        return request.json()
-    dbc = EEClassNotionDBCrawler(
-        auth=request.json()['data']['notion_token'],
-        page_id=request.json()['data']['notion_template_id']
-    )
-    class HomeworkContent(BaseTool):
-        name="Homework_content_recommendation"
-        description="如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
+# def getHomeworkContent(user_id: str):
+#     request = requests.get(
+#         f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+#     )
+#     if request.status_code != 200:
+#         return request.json()
+#     dbc = EEClassNotionDBCrawler(
+#         auth=request.json()['data']['notion_token'],
+#         page_id=request.json()['data']['notion_template_id']
+#     )
+#     class HomeworkContent(BaseTool):
+#         name="Homework_content_recommendation"
+#         description="如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
 
-        @staticmethod
-        def make_recommendation(hw_title: str):
-            dbc = get_agent_pool_instance().get_db(user_id)
-            for hw in dbc.get_homework():
-                if hw.title == hw_title:
-                    return hw
-        def _run(self, hw_title: str) -> Any:
-            result = HomeworkContent.make_recommendation(hw_title)
-            return result
+#         @staticmethod
+#         def make_recommendation(hw_title: str):
+#             dbc = get_agent_pool_instance().get_db(user_id)
+#             for hw in dbc.get_homework():
+#                 if hw.title == hw_title:
+#                     return hw
+#         def _run(self, hw_title: str) -> Any:
+#             result = HomeworkContent.make_recommendation(hw_title)
+#             return result
         
-        args_schema: Optional[Type[BaseModel]] = SpecificHomeworkName
-    return HomeworkContent
+#         args_schema: Optional[Type[BaseModel]] = SpecificHomeworkName
+#     return HomeworkContent
 
-def getCoursetoHomework(user_id: str):
-    request = requests.get(
-        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
-    )
-    if request.status_code != 200:
-        return request.json()
-    dbc = EEClassNotionDBCrawler(
-        auth=request.json()['data']['notion_token'],
-        page_id=request.json()['data']['notion_template_id']
-    )
-    class CoursetoHomework(BaseTool):
-        name = "Use_course_name_to_fetch_homework"
-        description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
+# def getCoursetoHomework(user_id: str):
+#     request = requests.get(
+#         f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+#     )
+#     if request.status_code != 200:
+#         return request.json()
+#     dbc = EEClassNotionDBCrawler(
+#         auth=request.json()['data']['notion_token'],
+#         page_id=request.json()['data']['notion_template_id']
+#     )
+#     class CoursetoHomework(BaseTool):
+#         name = "Use_course_name_to_fetch_homework"
+#         description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
             
-        @staticmethod
-        def course_to_hw(course_name: str):
-            dbc = get_agent_pool_instance().get_db(user_id)
-            homework_list = dbc.get_homework()
-            filtered_homework_list = []
-            for hw in homework_list:
-                if hw.course == course_name.value:
-                    filtered_homework_list.append(dict(
-                        title=hw.title,
-                        homework_type=hw.homework_type,
-                        deadline=hw.deadline,
-                        content=hw.content
-                    ))
-            return filtered_homework_list
+#         @staticmethod
+#         def course_to_hw(course_name: str):
+#             dbc = get_agent_pool_instance().get_db(user_id)
+#             homework_list = dbc.get_homework()
+#             filtered_homework_list = []
+#             for hw in homework_list:
+#                 if hw.course == course_name.value:
+#                     filtered_homework_list.append(dict(
+#                         title=hw.title,
+#                         homework_type=hw.homework_type,
+#                         deadline=hw.deadline,
+#                         content=hw.content
+#                     ))
+#             return filtered_homework_list
 
-        def _run(self, course_name: str):
-            result = CoursetoHomework.course_to_hw(course_name)
-            return result
+#         def _run(self, course_name: str):
+#             result = CoursetoHomework.course_to_hw(course_name)
+#             return result
         
-        args_schema: Optional[Type[BaseModel]] = SpecificCourseName
-    return CoursetoHomework
+#         args_schema: Optional[Type[BaseModel]] = SpecificCourseName
+#     return CoursetoHomework
 
 def getBulletinRetrieve(user_id):
-    request = requests.get(
-        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
-    )
-    if request.status_code != 200:
-        return request.json()
+    user = LineUser.objects.get(line_user_id= user_id)
     dbc = EEClassNotionDBCrawler(
-        auth=request.json()['data']['notion_token'],
-        page_id=request.json()['data']['notion_template_id']
+        auth=user.notion_token,
+        page_id=user.notion_template_id
     )
     def get_bulletin_db():
         bulletin_list = []
@@ -168,20 +166,16 @@ def getBulletinRetrieve(user_id):
     class BulletinRetrieve(BaseTool):
         name="search_all_bulletin"
         description=f"這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
-        def _run(self, *argc, **kargs):
+        def _run(self, data: str) -> str:
             result = get_bulletin_db()
             return result
-    return BulletinRetrieve
+    return BulletinRetrieve()
 
 def getHomeworkRetrieve(user_id: str):
-    request = requests.get(
-        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
-    )
-    if request.status_code != 200:
-        return request.json()
+    user = LineUser.objects.get(line_user_id= user_id)
     dbc = EEClassNotionDBCrawler(
-        auth=request.json()['data']['notion_token'],
-        page_id=request.json()['data']['notion_template_id']
+        auth=user.notion_token,
+        page_id=user.notion_template_id
     )
     def get_homework_db():
         homeworks = []
@@ -198,41 +192,41 @@ def getHomeworkRetrieve(user_id: str):
         # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
         name = "search_all_homework"
         description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
-        def _run(self, *args, **kargs):
+        def _run(self, data: str) -> str:
             result = get_homework_db()
             return result
-    return HomeworkRetrieve
+    return HomeworkRetrieve()
 
-def getHomeworkAlertTool(user_id):
-    class HomeworkAlertTool(BaseTool):
-        name = "Homework_alert_submission_system"
-        description = "這是一個EECLASS搜尋. Check whether there are any homeworks that is close to end date but not submitted."
+# def getHomeworkAlertTool(user_id):
+#     class HomeworkAlertTool(BaseTool):
+#         name = "Homework_alert_submission_system"
+#         description = "這是一個EECLASS搜尋. Check whether there are any homeworks that is close to end date but not submitted."
 
-        @staticmethod
-        def get_alert_homework(days_left: int=1000) -> List[str]:
-            if days_left == 1000:
-                return ["我也不知道誒"]
-            dbc = get_agent_pool_instance().get_db(user_id)
+#         @staticmethod
+#         def get_alert_homework(days_left: int=1000) -> List[str]:
+#             if days_left == 1000:
+#                 return ["我也不知道誒"]
+#             dbc = get_agent_pool_instance().get_db(user_id)
             
-            notion_bot = Notion(get_agent_pool_instance().get_auth(user_id))
-            homework_db: Database = notion_bot.get_database(notion_bot)
-            now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
-            alert_list = []
-            for h in homework_db.query():
-                end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
-                submission_status = h['properties']['Status']['select']['name']
-                course = h['properties']['Course']['select']['name']
-                homework_title = h['properties']['Title']['title'][0]['plain_text']
-                if submission_status == "未完成" and now <= end_date <= now+timedelta(days=days_left):
-                    alert_list.append(f"課程: {course}\n作業: {homework_title}\n剩餘時間: {str(end_date-now)}\n")
-            return alert_list
+#             notion_bot = Notion(get_agent_pool_instance().get_auth(user_id))
+#             homework_db: Database = notion_bot.get_database(notion_bot)
+#             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
+#             alert_list = []
+#             for h in homework_db.query():
+#                 end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
+#                 submission_status = h['properties']['Status']['select']['name']
+#                 course = h['properties']['Course']['select']['name']
+#                 homework_title = h['properties']['Title']['title'][0]['plain_text']
+#                 if submission_status == "未完成" and now <= end_date <= now+timedelta(days=days_left):
+#                     alert_list.append(f"課程: {course}\n作業: {homework_title}\n剩餘時間: {str(end_date-now)}\n")
+#             return alert_list
 
-        def _run(self, days_left: int):
-            result = self.get_alert_homework(days_left)
-            return "--------split--------\n".join(result)
+#         def _run(self, days_left: int):
+#             result = self.get_alert_homework(days_left)
+#             return "--------split--------\n".join(result)
         
-        args_schema: Optional[Type[BaseModel]] = HomeworkAlertInput
-    return HomeworkAlertTool()
+#         args_schema: Optional[Type[BaseModel]] = HomeworkAlertInput
+#     return HomeworkAlertTool()
         
     # open_ai_agent.run("請問10天內有作業要交嗎?")
     # open_ai_agent.run("請問什麼是作業?")
@@ -296,7 +290,6 @@ class eeAgentPool:
                 memory_key="ee", return_messages=True),
             timeout=-1
         )
-        
         return agent
 
     def remove(self, user_id: str) -> None:
