@@ -61,7 +61,7 @@ class HomeworkAlertInput(BaseModel):
 def getSearchNearestCourseTitle(user_id: str):
     class SearchNearestCourseTitle(BaseTool):
         name = "search_nearest_course_title"
-        description = "這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
+        description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
         @staticmethod
         def get_course_full_name(course_name: str):
             return course_name
@@ -76,7 +76,7 @@ def getSearchNearestCourseTitle(user_id: str):
 def getHomeworkContent(user_id: str):
     class HomeworkContent(BaseTool):
         name="Homework_content_recommendation"
-        description="這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
+        description="如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
 
         @staticmethod
         def make_recommendation(hw_title: str):
@@ -94,7 +94,7 @@ def getHomeworkContent(user_id: str):
 def getCoursetoHomework(user_id: str):
     class CoursetoHomework(BaseTool):
         name = "Use_course_name_to_fetch_homework"
-        description = "這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
+        description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
             
         @staticmethod
         def course_to_hw(course_name: str):
@@ -119,6 +119,14 @@ def getCoursetoHomework(user_id: str):
     return CoursetoHomework
 
 def getBulletinRetrieve(user_id):
+    request = requests.get(
+        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+    )
+    if request.status_code != 200:
+        return request.json()
+    set_exit_state(user_id)
+
+    get_agent_pool_instance().set_db(user_id, request.json()['data']['notion_token'], request.json()['data']['notion_template_id'])
     class BulletinRetrieve(BaseTool):
         name="search_all_bulletin"
         description=f"如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
@@ -140,6 +148,14 @@ def getBulletinRetrieve(user_id):
     return BulletinRetrieve
 
 def getHomeworkRetrieve(user_id: str):
+    request = requests.get(
+        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+    )
+    if request.status_code != 200:
+        return request.json()
+    set_exit_state(user_id)
+
+    get_agent_pool_instance().set_db(user_id, request.json()['data']['notion_token'], request.json()['data']['notion_template_id'])
     class HomeworkRetrieve(BaseTool):
         # name = "Homework_Content_Recommendation_system"
         # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
@@ -243,7 +259,7 @@ class eeAgentPool:
     def add(self, user_id: str) -> LangChainAgent:
         agent = self.pool[user_id] = LangChainAgent(
             tools=[
-                    getEETool(user_id),
+                    # getEETool(user_id),
                     getHomeworkRetrieve(user_id),
                     getBulletinRetrieve(user_id),
                     # CoursetoHomework(),
