@@ -92,6 +92,15 @@ def getHomeworkContent(user_id: str):
     return HomeworkContent
 
 def getCoursetoHomework(user_id: str):
+    request = requests.get(
+        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+    )
+    if request.status_code != 200:
+        return request.json()
+    dbc = EEClassNotionDBCrawler(
+        auth=request.json()['data']['notion_token'],
+        page_id=request.json()['data']['notion_template_id']
+    )
     class CoursetoHomework(BaseTool):
         name = "Use_course_name_to_fetch_homework"
         description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
@@ -124,15 +133,15 @@ def getBulletinRetrieve(user_id):
     )
     if request.status_code != 200:
         return request.json()
-    set_exit_state(user_id)
-
-    get_agent_pool_instance().set_db(user_id, request.json()['data']['notion_token'], request.json()['data']['notion_template_id'])
+    dbc = EEClassNotionDBCrawler(
+        auth=request.json()['data']['notion_token'],
+        page_id=request.json()['data']['notion_template_id']
+    )
     class BulletinRetrieve(BaseTool):
         name="search_all_bulletin"
-        description=f"如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
+        description=f"這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
         @staticmethod
         def get_bulletin_db():
-            dbc = get_agent_pool_instance().get_db(user_id)
             bulletin_list = []
             for bu in dbc.get_bulletin()[:10]:
                 bulletin_list.append(dict(
@@ -153,17 +162,17 @@ def getHomeworkRetrieve(user_id: str):
     )
     if request.status_code != 200:
         return request.json()
-    set_exit_state(user_id)
-
-    get_agent_pool_instance().set_db(user_id, request.json()['data']['notion_token'], request.json()['data']['notion_template_id'])
+    dbc = EEClassNotionDBCrawler(
+        auth=request.json()['data']['notion_token'],
+        page_id=request.json()['data']['notion_template_id']
+    )
     class HomeworkRetrieve(BaseTool):
         # name = "Homework_Content_Recommendation_system"
         # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
         name = "search_all_homework"
-        description = f"如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
+        description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
         @staticmethod
         def get_homework_db():
-            dbc = get_agent_pool_instance().get_db(user_id)
             homeworks = []
             for hw in dbc.get_homework()[:10]:
                 homeworks.append(dict(
