@@ -5,7 +5,7 @@ __statuses:dict[str, callable]={}
 __default_status:str|None=None
 __invert_status_map:[callable, str]={}
 
-from linebot.models import TextSendMessage, TemplateSendMessage, ButtonsTemplate, MessageAction
+from linebot.models import TextSendMessage, TemplateSendMessage, ButtonsTemplate, MessageAction, QuickReply, QuickReplyButton
 from .langChainAgent import LangChainAgent
 
 def chat_status(status_id:str, default=False):
@@ -44,6 +44,28 @@ def text(func):
         text = func(*a, **b)
         return TextSendMessage(text) if text else None
     return wrapper
+
+
+def quick_reply(text=""):
+    """
+    wrap a function returning a list of (string, string, string) as the quick reply (imgurl, label, reply) group text of chatbot
+    \ttext: text of the button group
+    warning: text is required to be not empty
+    """
+    def outer(func):
+        def wrapper(*a, **b):
+            quick_replies = func(*a, **b)
+            if not quick_replies: return None
+            items = [QuickReplyButton(image_url=image_url, action=MessageAction(label, text)) 
+                     for (image_url, label, text) in quick_replies]
+            return TextSendMessage(
+                text=text,
+                quick_reply=QuickReply(
+                    items=items
+                )
+            )
+        return wrapper
+    return outer
 
 def button_group(title="", text="", default_text='default alt text'):
     """

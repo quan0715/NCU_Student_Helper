@@ -1,5 +1,5 @@
-from .ncu_wiki import getWikiChainLLM
-from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent
+from line_bot_callback.ncu_wiki import getWikiChainLLM
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply
 from typing import Tuple
 from eeclass_setting.models import LineUser
 from eeclass_setting.appModel import check_eeclass_update_pipeline, find_user_by_user_id
@@ -8,16 +8,19 @@ from django.conf import settings
 from .views import LineBotCallbackView as cb
 from .langChainAgent import LangChainAgent
 
+dog_icon_url = 'https://scontent.xx.fbcdn.net/v/t1.15752-9/387560636_1364784567461116_3708224130470311929_n.png?stp=cp0_dst-png&_nc_cat=108&ccb=1-7&_nc_sid=510075&_nc_ohc=S5L-rQ1y9RcAX9PYIpB&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQKnpWq0ikfumqNYbstXppxcr2WW48UmGkQgabRCkjJow&oe=655C13D9'
 
 @chat_status("default", default=True)
-@button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')
-def default_message(event):
+@quick_reply('選擇指令開啟下一步')
+@state_ai_agent(LangChainAgent())
+def default_message(event, agent):
     jump_to(main_menu, event.source.user_id)
     return [
-        '資料設定',
-        'EECLASS更新',
-        '交通查詢',
-        'EECLASS查詢'
+        (dog_icon_url, '資料設定', '資料設定'),
+        (dog_icon_url, '課程查詢', '課程查詢'),
+        (dog_icon_url, '跟我閒聊', agent.run('請給我一個很白癡的問題')),
+        (dog_icon_url, 'EECLASS查詢', 'EECLASS查詢'),
+        (dog_icon_url, '交通查詢', '交通查詢')
     ]
 
 
@@ -31,7 +34,7 @@ def main_menu(event, aiAgent):
         case '資料設定':
             jump_to(default_message, event.source.user_id, propagation=True)
             return settings.FRONT_END_WEB_URL
-        case 'EECLASS更新':
+        case 'EECLASS查詢':
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case '交通查詢':
@@ -54,13 +57,13 @@ def main_menu(event, aiAgent):
 
 
 @chat_status("traffic message")
-@button_group("通勤項目", "請選擇通勤項目", "通勤項目選單")
+@quick_reply("請選擇通勤項目")
 def traffic_message(event):
     jump_to(traffic_menu, event.source.user_id)
     return [
-        '公車查詢',
-        '高鐵查詢/訂票',
-        '返回'
+        (dog_icon_url, '公車查詢', '公車查詢'),
+        (dog_icon_url, '高鐵查詢/訂票', '高鐵查詢/訂票'),
+        (dog_icon_url, '返回', '返回')
     ]
 
 
@@ -87,7 +90,6 @@ def traffic_menu(event):
 @chat_status("update eeclass")
 @text
 def update_eeclass(event):
-    print('update_eeclass')
     search_result:  Tuple[LineUser | None,
                           bool] = find_user_by_user_id(event.source.user_id)
     user, founded = search_result
@@ -97,7 +99,7 @@ def update_eeclass(event):
     cb.push_message(event.source.user_id, text(lambda ev: '獲取資料中')(event))
     try:
         result = check_eeclass_update_pipeline(user)
-        jump_to(default_message, event.source.user_id, True)
+        jump_to(eeclass_util, event.source.user_id, True)
         return result
     except Exception as e:
         jump_to(default_message, event.source.user_id, True)
@@ -115,6 +117,19 @@ def hsr_util(event):
         agent.run("我要訂高鐵票")
     return agent.run(event.message.text)
 
+
+@chat_status("eeclass util")
+@text
+def eeclass_util(event):
+    # from . import eeclassChatbot
+    # eeclass_agent_pool_instance = eeclassChatbot.get_agent_pool_instance()
+    # agent = eeclass_agent_pool_instance.get(event.source.user_id)
+    # if agent is None:
+    #     agent = eeclass_agent_pool_instance.add(event.source.user_id)
+    #     agent.run("我要知道eeclass更新了啥")
+    # return agent.run(event.message.text)
+    jump_to(default_message, event.source.user_id, True)
+    return '請實作eeclassChatBot'
 
 @chat_status("bus util")
 @text
