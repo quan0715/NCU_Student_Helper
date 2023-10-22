@@ -7,10 +7,9 @@ from .eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCra
 from langchain.memory import ConversationBufferMemory
 from typing import Any, Coroutine, Optional, Type
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import os
 from datetime import date, timedelta, timezone
-from dotenv import load_dotenv
 import enum, random
 
 
@@ -46,11 +45,11 @@ class HomeworkTitleInput(BaseModel):
     )
 
 
-# class SpecificCourseName(BaseModel):
-#     course_name:  = Field(description=f"This course name must be one of the {course}. It must be completely the same string.")
+class SpecificCourseName(BaseModel):
+    course_name: str = Field(description=f"This course name must be one of the course. It must be completely the same string.")
 
-# class SpecificHomeworkName(BaseModel):
-#     homework_title: HomeworkName = Field(description=f"This homework name must be one of the {homework}. It must be completely the same string.")
+class SpecificHomeworkName(BaseModel):
+    homework_title: str = Field(description=f"This homework name must be one of the homework. It must be completely the same string.")
 
 class HomeworkAlertInput(BaseModel):
     """Input for homework alert"""
@@ -291,8 +290,6 @@ class eeAgentPool:
     
     def get_courseType(self):
         return self.homeworkType
-    
-class 
 
 
 __ee_agent_pool_instance = eeAgentPool()
