@@ -218,7 +218,7 @@ class eeAgentPool:
                     getBulletinRetrieve(user_id),
                     getCoursetoHomework(user_id),
                     getHomeworkContent(user_id),
-                    getSearchNearestCourseTitle(user_id),
+                    getSearchNearestCourseTitle(),
                     getHomeworkAlertTool(user_id),
                     ExitTool()
                 ],

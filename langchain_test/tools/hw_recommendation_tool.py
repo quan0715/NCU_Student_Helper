@@ -1,17 +1,7 @@
-from langchain.tools import BaseTool
 from NotionBot import *
 from NotionBot.base.Database import *
 # from ncu_helper_server.eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
 
-from typing import Any, Optional, Type
-from pydantic import BaseModel, Field
-from langchain.prompts import PromptTemplate
-from langchain.output_parsers import PydanticOutputParser
-import datetime
-import os
-from fuzzywuzzy import fuzz
-import aiohttp
-from datetime import datetime, timezone, timedelta, date
 from dotenv import load_dotenv
 
 from NotionBot import Notion
@@ -19,7 +9,6 @@ from NotionBot.base import Database
 
 from NotionBot import Notion
 from NotionBot.base import Database
-import enum, random
 # from ncu_helper_server.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
 
 import NotionBot
