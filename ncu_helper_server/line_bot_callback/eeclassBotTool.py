@@ -59,6 +59,15 @@ class HomeworkAlertInput(BaseModel):
     )
 
 def getSearchNearestCourseTitle(user_id: str):
+    request = requests.get(
+        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+    )
+    if request.status_code != 200:
+        return request.json()
+    dbc = EEClassNotionDBCrawler(
+        auth=request.json()['data']['notion_token'],
+        page_id=request.json()['data']['notion_template_id']
+    )
     class SearchNearestCourseTitle(BaseTool):
         name = "search_nearest_course_title"
         description = "如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
@@ -74,6 +83,15 @@ def getSearchNearestCourseTitle(user_id: str):
     return SearchNearestCourseTitle
 
 def getHomeworkContent(user_id: str):
+    request = requests.get(
+        f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+    )
+    if request.status_code != 200:
+        return request.json()
+    dbc = EEClassNotionDBCrawler(
+        auth=request.json()['data']['notion_token'],
+        page_id=request.json()['data']['notion_template_id']
+    )
     class HomeworkContent(BaseTool):
         name="Homework_content_recommendation"
         description="如果你還不知道課程資訊，請先執行EECLASS_query_system. 這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
@@ -184,7 +202,7 @@ def getHomeworkRetrieve(user_id: str):
             return homeworks
 
         def _run(self, *args, **kargs):
-            result = self.get_homework_db()
+            result = HomeworkRetrieve.get_homework_db()
             return result
     return HomeworkRetrieve
 
