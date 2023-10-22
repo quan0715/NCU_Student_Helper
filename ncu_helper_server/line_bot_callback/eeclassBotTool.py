@@ -234,10 +234,7 @@ class eeAgentPool:
         self.auth = {}
         self.course = {}
         self.homework = {}
-        course = self.db.get_all_courses()
-        self.courseType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
-        homework = self.db.get_homework()
-        self.homeworkType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
+        
 
 
     def get(self, user_id: str) -> LangChainAgent | None:
@@ -271,6 +268,10 @@ class eeAgentPool:
             auth=AUTH,
             page_id=PAGE_ID
         )
+        course = self.db.get_all_courses()
+        self.courseType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
+        homework = self.db.get_homework()
+        self.homeworkType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
         
 
     def get_db(self, user_id: str) -> EEClassNotionDBCrawler:
