@@ -70,7 +70,7 @@ def traffic_menu(event):
     match event.message.text:
         case '公車查詢':
             jump_to(bus_util, event.source.user_id, False)
-            return "請問你想要查什麼公車呢？"
+            return "請問您想要回中央、去高鐵站，還是去火車站？"
         case '高鐵查詢/訂票':
             jump_to(hsr_util, event.source.user_id, False)
             from backenddb.appModel import find_hsr_data
