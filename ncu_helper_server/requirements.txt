@@ -77,6 +77,7 @@ pydantic==2.4.2
 pydantic_core==2.10.1
 pynvim==0.4.3
 pyOpenSSL==23.2.0
+pypdf==3.16.4
 PyPika==0.48.9
 pyreadline3==3.4.1
 PySocks==1.7.1
