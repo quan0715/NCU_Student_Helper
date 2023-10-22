@@ -71,7 +71,7 @@ def getSearchNearestCourseTitle(user_id: str):
             return result
         
         args_schema: Optional[Type[BaseModel]] = SpecificCourseName
-    return SearchNearestCourseTitle
+    return SearchNearestCourseTitle()
 
 def getHomeworkContent(user_id: str):
     user = LineUser.objects.get(line_user_id= user_id)
@@ -93,7 +93,7 @@ def getHomeworkContent(user_id: str):
             return result
         
         args_schema: Optional[Type[BaseModel]] = SpecificHomeworkName
-    return HomeworkContent
+    return HomeworkContent()
 
 def getCoursetoHomework(user_id: str):
     user = LineUser.objects.get(line_user_id= user_id)
@@ -124,7 +124,7 @@ def getCoursetoHomework(user_id: str):
             return result
         
         args_schema: Optional[Type[BaseModel]] = SpecificCourseName
-    return CoursetoHomework
+    return CoursetoHomework()
 
 def getBulletinRetrieve(user_id):
     user = LineUser.objects.get(line_user_id= user_id)
