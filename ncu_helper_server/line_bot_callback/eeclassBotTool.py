@@ -155,22 +155,21 @@ def getBulletinRetrieve(user_id):
         auth=request.json()['data']['notion_token'],
         page_id=request.json()['data']['notion_template_id']
     )
+    def get_bulletin_db():
+        bulletin_list = []
+        for bu in dbc.get_bulletin()[:10]:
+            bulletin_list.append(dict(
+                title=bu.title,
+                content=bu.content,
+                announce_date=bu.announce_date,
+                course=bu.course
+            ))
+        return bulletin_list
     class BulletinRetrieve(BaseTool):
         name="search_all_bulletin"
         description=f"這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
-        @staticmethod
-        def get_bulletin_db():
-            bulletin_list = []
-            for bu in dbc.get_bulletin()[:10]:
-                bulletin_list.append(dict(
-                    title=bu.title,
-                    content=bu.content,
-                    announce_date=bu.announce_date,
-                    course=bu.course
-                ))
-            return bulletin_list
         def _run(self, *argc, **kargs):
-            result = BulletinRetrieve.get_bulletin_db()
+            result = get_bulletin_db()
             return result
     return BulletinRetrieve
 
@@ -184,25 +183,23 @@ def getHomeworkRetrieve(user_id: str):
         auth=request.json()['data']['notion_token'],
         page_id=request.json()['data']['notion_template_id']
     )
+    def get_homework_db():
+        homeworks = []
+        for hw in dbc.get_homework()[:10]:
+            homeworks.append(dict(
+                    title=hw.title,
+                    homework_type=hw.homework_type,
+                    deadline=hw.deadline,
+                    content=hw.content
+                ))
+        return homeworks
     class HomeworkRetrieve(BaseTool):
         # name = "Homework_Content_Recommendation_system"
         # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
         name = "search_all_homework"
         description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
-        @staticmethod
-        def get_homework_db():
-            homeworks = []
-            for hw in dbc.get_homework()[:10]:
-                homeworks.append(dict(
-                        title=hw.title,
-                        homework_type=hw.homework_type,
-                        deadline=hw.deadline,
-                        content=hw.content
-                    ))
-            return homeworks
-
         def _run(self, *args, **kargs):
-            result = HomeworkRetrieve.get_homework_db()
+            result = get_homework_db()
             return result
     return HomeworkRetrieve
 
