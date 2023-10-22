@@ -2,10 +2,10 @@ import time
 from langchain.tools import BaseTool
 from NotionBot import *
 from NotionBot.base.Database import *
-from eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
+from .eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
 
 from langchain.memory import ConversationBufferMemory
-from typing import Any, Optional, Type
+from typing import Any, Coroutine, Optional, Type
 from uuid import UUID
 from pydantic import BaseModel, Field
 import os
@@ -208,17 +208,36 @@ class HomeworkAlertTool(BaseTool):
     # open_ai_agent.run("請問跟Linux最有關的是哪一門課?")
 from .langChainAgent import LangChainAgent
 
+def getEETool(user_id: str):
+    class eeAgentPool(BaseTool):
+        name = "EECLASS_query_system"
+        description = "Useful to get EECLASS data by using "
+
+        def _run(self) -> Any:
+            request = requests.get(
+                f"https://api.squidspirit.com/eeclass_api/get_data?user_id=${user_id}"
+            )
+            if request.status_code != 200:
+                return request.json()
+            set_exit_state(user_id)
+            return f"The notion_token is {request.json()['data']['notion_token']}, and notion_template_id is {request.json()['data']['notion_template_id']}. Please remember it."
+
+        def _arun(self, *args: Any, **kwargs: Any) -> Coroutine[Any, Any, Any]:
+            raise Exception()
+    return eeAgentPool()
+
 class eeAgentPool:
     def __init__(self) -> None:
         self.pool: dict[str, LangChainAgent] = {}
         self.sessions: dict[str, UUID] = {}
 
-    def get(self) -> LangChainAgent | None:
-        return self.pool.get()
+    def get(self, user_id: str) -> LangChainAgent | None:
+        return self.pool.get(user_id)
 
-    def add(self) -> LangChainAgent:
+    def add(self, user_id: str) -> LangChainAgent:
         agent = LangChainAgent(
             tools=[
+                    getEETool(user_id),
                     HomeworkRetrieve(),
                     BulletinRetrieve(),
                     CoursetoHomework(),

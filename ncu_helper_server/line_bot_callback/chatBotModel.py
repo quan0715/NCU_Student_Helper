@@ -173,8 +173,9 @@ def kind_menu(event):
 @text
 def about_course(event):
     from . import eeclassBotTool
-    hsr_agent_pool_instance = eeclassBotTool.get_agent_pool_instance()
-    agent = hsr_agent_pool_instance.get()
+    ee_agent_pool_instance = eeclassBotTool.get_agent_pool_instance()
+    agent = ee_agent_pool_instance.get(event.source.user_id)
     if agent is None:
+        agent = ee_agent_pool_instance.add(event.source.user_id)
         agent.run("我要查詢EECLASS資料")
     return agent.run(event.message.text)
