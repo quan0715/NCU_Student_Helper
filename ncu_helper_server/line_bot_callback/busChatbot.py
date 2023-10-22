@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Type, Any
 from uuid import uuid4
 from .bus_api.api import BusAPI
+from .bus_api.stop_data import StopData
 
 
 def set_exit_state(user_id: str) -> None:
@@ -43,12 +44,10 @@ class BusLine(str, Enum):
 
 
 class BusInfoInput(BaseModel):
-    line: BusLine = Field(
-        description="The bus line to search. must be in ['132', '133', '172', '173'].")
-    stop: str = Field(
-        description="The bus stop name to search.")
     direction: int = Field(
         description="If the bus is going to NCU(中央大學 or 中央), it should be 1; if the bus is leaving from NCU(中央大學 or 中央), it should be 0.")
+    destination: int = Field(
+        description="Whether the bus is going to (leaving from) 火車站 (1) or 高鐵站 (0).")
 
     @field_validator("line", mode="before")
     def station_validator(cls, value):
@@ -59,31 +58,36 @@ class BusInfoInput(BaseModel):
 
 class BusInfoTool(BaseTool):
     name = "BusInfoTool"
-    description = "Useful to get when the bus will arrive the bus stop. You have to ask the user '要搭哪條路線的哪個車站？' and '要前往中央大學還是離開？'."
+    description = "Useful to get when the bus will arrive the bus stop."
 
     args_schema: Optional[Type[BaseModel]] = BusInfoInput
 
-    def _run(self, line: BusLine, stop: str, direction: int) -> str:
-        if line == BusLine.other:
-            return f"Error! The `line` is not found, it should be in {list(map(lambda x: x.value, BusLine))}"
-        stop_list = list(BusAPI.get_all_stops(line))
+    def _run(self, direction: int, destination: str) -> str:
+
+        stop = "中央大學正門"
+        if destination == 1:
+            line_coll = ["172", "173"]
+            stop_list = list(BusAPI.get_all_stops("172"))
+            if direction == 1:
+                stop = "中壢火車站"
+        else:
+            line_coll = ["132", "133"]
+            stop_list = list(BusAPI.get_all_stops("132"))
+            if direction == 1:
+                stop = "高鐵桃園站"
 
         print(stop_list)
 
-        parser = EnumOutputParser(
-            enum=Enum("StopEnum", {"u_" + str(i): stop_list[i] for i in range(len(stop_list))}),
-            extra_prompts=["Precise matching is not required"])
-        try:
-            stop = parser.parse(stop).value
-        except:
-            return f"Error! The `stop` is not exist in `line`, it should be in {stop_list}"
-
-        infos = BusAPI.get_bus_data(line, direction)
-        for info in infos:
-            if info.stop_name == stop:
-                return f"The bus will arrive at {info.next_bus_time} (convert to human language), and the satus is {info.stop_status}."
-
-        return "Error! Cannot find the bus info."
+        stop_info_coll = list(
+            map(lambda x: BusAPI.get_bus_data(x, direction), line_coll))
+        result_coll: list[StopData] = []
+        for infos in stop_info_coll:
+            for info in infos:
+                if info.stop_name == stop:
+                    result_coll.append(info)
+        sorted(result_coll, key=lambda x: x.next_bus_time)
+        result = result_coll[0]
+        return f"[System] The next bus is arriving at {result.next_bus_time} and the status is {result.stop_status} at Station {result.stop_name}"
 
 
 class BusAgentPool(BasePool):
