@@ -135,8 +135,7 @@ def ee_query_message(event):
         '課程',
         '作業',
         '公告',
-        '教材',
-        '返回'
+        '教材'
     ]
 
 @chat_status("kind_menu")
