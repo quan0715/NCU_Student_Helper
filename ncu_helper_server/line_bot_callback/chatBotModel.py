@@ -163,7 +163,7 @@ def kind_menu(event):
             jump_to(about_course, event.source.user_id, False)
             return "請問你想要查什麼哪門課程呢？"
         case '作業' | '公告' | '教材':
-            jump_to(about_course, event.source.user_id, False)
+            jump_to(debug_about_course, event.source.user_id, False)
             return f"請問您想要查詢關於哪一門課程相關的{event.message.text}呢？"
         case '返回':
             jump_to(default_message, event.source.user_id, True)
@@ -181,3 +181,44 @@ def about_course(event):
         agent = ee_agent_pool_instance.add(event.source.user_id)
         agent.run("我要查詢EECLASS資料")
     return agent.run(event.message.text)
+
+@chat_status("debug_about_kind")
+@text
+def debug_about_course(event):
+    # from . import eeclassBotTool
+    # ee_agent_pool_instance = eeclassBotTool.get_agent_pool_instance()
+    # agent = ee_agent_pool_instance.get(event.source.user_id)
+    # if agent is None:
+    #     agent = ee_agent_pool_instance.add(event.source.user_id)
+    #     agent.run("我要查詢EECLASS資料")
+    # return agent.run(event.message.text)
+    jump_to(default_message, event.source.user_id, True)
+    return """以下是最近的新公告：
+
+1. 軟體工程實務 Software engineering practices：
+   - 標題：Week4 lab3 補交相關事項
+   - 內容：助教已經將各位的學習狀況以及建議看完了，補交期限為10/15 23:59，成績將會乘上75%。
+   - 發布日期：2023-10-09
+
+2. 軟體工程實務 Software engineering practices：
+   - 標題：Term project現場demo取消，改為繳交影片
+   - 內容：Term project實體demo取消，改為繳交demo影片，影片繳交deadline為10/29 23:59。
+   - 發布日期：2023-10-12
+
+3. 電腦攻擊與防禦 The Attack and Defense of Computers：
+   - 標題：10/17 重要提醒
+   - 內容：明天請在家看影片，學校 web server 目前有問題，老師的網頁無法正常更新。
+   - 發布日期：2023-10-16
+
+4. Linux作業系統 Linux Operating System：
+   - 標題：Linux Project 1
+   - 內容：Linux Project 1已發布在課程網頁上。
+   - 發布日期：2023-10-09
+
+5. 軟體工程實務 Software engineering practices：
+   - 標題：Week4 lab3 會議連結
+   - 內容：因為沒有同學反應設備問題，所以採用全線上模式，會議連結在公告中。
+   - 發布日期：2023-10-02
+
+以上是最近的新公告，詳細內容請參閱課程網頁或公告。
+"""
