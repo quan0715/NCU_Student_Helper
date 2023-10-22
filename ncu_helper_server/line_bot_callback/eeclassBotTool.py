@@ -290,8 +290,6 @@ class eeAgentPool:
     def get_courseType(self):
         return self.homeworkType
     
-class 
-
 
 __ee_agent_pool_instance = eeAgentPool()
 def get_agent_pool_instance():

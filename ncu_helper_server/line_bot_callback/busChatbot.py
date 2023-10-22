@@ -85,7 +85,7 @@ class BusInfoTool(BaseTool):
                     result_coll.append(info)
         sorted(result_coll, key=lambda x: x.next_bus_time)
         result = result_coll[0]
-        return {'data': result, 'message': '可以的話使用相對時間回覆'}
+        return str({'data': result})
 
 
 class BusAgentPool(BasePool):

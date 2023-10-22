@@ -17,7 +17,6 @@ def default_message(event, agent):
     jump_to(main_menu, event.source.user_id)
     return [
         (dog_icon_url, '資料設定', '資料設定'),
-        (dog_icon_url, '課程查詢', '課程查詢'),
         (dog_icon_url, '跟我閒聊', agent.run('請給我一個很白癡的問題')),
         (dog_icon_url, 'EECLASS查詢', 'EECLASS查詢'),
         (dog_icon_url, '交通查詢', '交通查詢')
@@ -34,7 +33,7 @@ def main_menu(event, aiAgent):
         case '資料設定':
             jump_to(default_message, event.source.user_id, propagation=True)
             return settings.FRONT_END_WEB_URL
-        case 'EECLASS查詢':
+        case 'EECLASS更新':
             jump_to(update_eeclass, event.source.user_id, True)
             return
         case '交通查詢':
@@ -99,10 +98,13 @@ def update_eeclass(event):
     cb.push_message(event.source.user_id, text(lambda ev: '獲取資料中')(event))
     try:
         result = check_eeclass_update_pipeline(user)
+        print("a")
         jump_to(eeclass_util, event.source.user_id, True)
         return result
     except Exception as e:
         jump_to(default_message, event.source.user_id, True)
+        import traceback
+        traceback.print_exception(e)
         return f'獲取失敗, 錯誤訊息:\n{e}'
 
 
@@ -129,7 +131,7 @@ def eeclass_util(event):
     #     agent.run("我要知道eeclass更新了啥")
     # return agent.run(event.message.text)
     jump_to(default_message, event.source.user_id, True)
-    return '請實作eeclassChatBot'
+    return '更新完成！'
 
 @chat_status("bus util")
 @text
