@@ -47,7 +47,7 @@ class HomeworkTitleInput(BaseModel):
 
 
 class SpecificCourseName(BaseModel):
-    course_name: CourseName = Field(description=f"This course name must be one of the {course}. It must be completely the same string.")
+    course_name:  = Field(description=f"This course name must be one of the {course}. It must be completely the same string.")
 
 class SpecificHomeworkName(BaseModel):
     homework_title: HomeworkName = Field(description=f"This homework name must be one of the {homework}. It must be completely the same string.")
@@ -117,45 +117,50 @@ class CoursetoHomework(BaseTool):
     
     args_schema: Optional[Type[BaseModel]] = SpecificCourseName
 
-class BulletinRetrieve(BaseTool):
-    name="search_all_bulletin"
-    description=f"這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
-    @staticmethod
-    def get_bulletin_db():
-        bulletin_list = []
-        for bu in dbc.get_bulletin()[:10]:
-            bulletin_list.append(dict(
-                title=bu.title,
-                content=bu.content,
-                announce_date=bu.announce_date,
-                course=bu.course
-            ))
-        return bulletin_list
-    def _run(self, *argc, **kargs):
-        result = BulletinRetrieve.get_bulletin_db()
-        return result
-
-
-class HomeworkRetrieve(BaseTool):
-    # name = "Homework_Content_Recommendation_system"
-    # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
-    name = "search_all_homework"
-    description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
-    @staticmethod
-    def get_homework_db():
-        homeworks = []
-        for hw in dbc.get_homework()[:10]:
-            homeworks.append(dict(
-                    title=hw.title,
-                    homework_type=hw.homework_type,
-                    deadline=hw.deadline,
-                    content=hw.content
+def getBulletinRetrieve(user_id):
+    class BulletinRetrieve(BaseTool):
+        name="search_all_bulletin"
+        description=f"這是一個EECLASS搜尋. 請條列式地將所有公告列出來. By the way, current time is {date.today()}"
+        @staticmethod
+        def get_bulletin_db():
+            dbc = get_agent_pool_instance().get_db(user_id)
+            bulletin_list = []
+            for bu in dbc.get_bulletin()[:10]:
+                bulletin_list.append(dict(
+                    title=bu.title,
+                    content=bu.content,
+                    announce_date=bu.announce_date,
+                    course=bu.course
                 ))
-        return homeworks
+            return bulletin_list
+        def _run(self, *argc, **kargs):
+            result = BulletinRetrieve.get_bulletin_db()
+            return result
+    return BulletinRetrieve
 
-    def _run(self, *args, **kargs):
-        result = self.get_homework_db()
-        return result
+def getHomeworkRetrieve(user_id: str):
+    class HomeworkRetrieve(BaseTool):
+        # name = "Homework_Content_Recommendation_system"
+        # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
+        name = "search_all_homework"
+        description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
+        @staticmethod
+        def get_homework_db():
+            dbc = get_agent_pool_instance().get_db(user_id)
+            homeworks = []
+            for hw in dbc.get_homework()[:10]:
+                homeworks.append(dict(
+                        title=hw.title,
+                        homework_type=hw.homework_type,
+                        deadline=hw.deadline,
+                        content=hw.content
+                    ))
+            return homeworks
+
+        def _run(self, *args, **kargs):
+            result = self.get_homework_db()
+            return result
+    return HomeworkRetrieve
 
 def getHomeworkAlertTool(user_id):
     class HomeworkAlertTool(BaseTool):
@@ -228,6 +233,10 @@ class eeAgentPool:
         self.auth = {}
         self.course = {}
         self.homework = {}
+        course = self.db.get_all_courses()
+        self.courseType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
+        homework = self.db.get_homework()
+        self.homeworkType = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
 
 
     def get(self, user_id: str) -> LangChainAgent | None:
@@ -237,12 +246,12 @@ class eeAgentPool:
         agent = self.pool[user_id] = LangChainAgent(
             tools=[
                     getEETool(user_id),
-                    # HomeworkRetrieve(),
-                    # BulletinRetrieve(),
+                    HomeworkRetrieve(),
+                    BulletinRetrieve(),
                     # CoursetoHomework(),
                     # HomeworkContent(),
                     # SearchNearestCourseTitle(),
-                    getHomeworkAlertTool(user_id),
+                    # getHomeworkAlertTool(user_id),
                     ExitTool()
                 ],
                 memory=ConversationBufferMemory(
@@ -261,10 +270,7 @@ class eeAgentPool:
             auth=AUTH,
             page_id=PAGE_ID
         )
-        course = self.db.get_all_courses()
-        homework = self.db.get_homework()
-        self.course = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
-        self.homework = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
+        
 
     def get_db(self, user_id: str) -> EEClassNotionDBCrawler:
         return self.db[user_id]
@@ -277,6 +283,14 @@ class eeAgentPool:
     
     def get_homework(self, user_id):
         return self.homework[user_id]
+    
+    def get_homeworkType(self):
+        return self.homeworkType
+    
+    def get_courseType(self):
+        return self.homeworkType
+    
+class 
 
 
 __ee_agent_pool_instance = eeAgentPool()
