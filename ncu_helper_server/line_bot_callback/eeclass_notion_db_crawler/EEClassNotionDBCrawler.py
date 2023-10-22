@@ -1,5 +1,6 @@
 from NotionBot import Notion
 from NotionBot.base import Database
+from NotionBot.object import Query, SearchSort, SortObject
 
 from line_bot_callback.eeclass_notion_db_crawler.Type import Bulletin, Homework, Material
 
@@ -45,7 +46,12 @@ class EEClassNotionDBCrawler:
 
     def get_bulletin(self) -> list[Bulletin]:
         bulletins = []
-        for data in self.bulletinDB.query():
+        for data in self.bulletinDB.query(Query(
+            sorts=[SortObject(
+                prop='Announced_Date',
+                direction=SearchSort.Direction.descending
+            )]
+        )):
             bulletins.append(Bulletin(
                 announce_date=data['properties']['Announced_Date'],
                 content=data['properties']['Content']['rich_text'][0]['plain_text'],
@@ -62,7 +68,12 @@ class EEClassNotionDBCrawler:
 
     def get_homework(self) -> list[Homework]:
         homeworks = []
-        for data in self.homeworkDB.query():
+        for data in self.homeworkDB.query(Query(
+            sorts=[SortObject(
+                prop='Deadline',
+                direction=SearchSort.Direction.descending
+            )]
+        )):
             homeworks.append(Homework(
                 content=data['properties']['Content']['rich_text'][0]['plain_text'],
                 course=data['properties']['Course']['select']['name'],
