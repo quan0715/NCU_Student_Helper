@@ -22,11 +22,12 @@ def default_message(event, agent):
         (dog_icon_url, '交通查詢', '交通查詢')
     ]
 
+
 @chat_status("main menu")
 @text
-@state_ai_agent(LangChainAgent())
+@state_ai_agent(getWikiChainLLM())
 # replace LangChainAgent by any agent you want to use
-def main_menu(event, aiAgent: LangChainAgent):
+def main_menu(event, aiAgent):
     # aiAgent equal to parameter in @state_ai_agent
     match event.message.text:
         case '資料設定':
@@ -38,10 +39,12 @@ def main_menu(event, aiAgent: LangChainAgent):
         case '交通查詢':
             jump_to(traffic_message, event.source.user_id, True)
             return
+        case 'EECLASS查詢':
+            jump_to(ee_query_message, event.source.user_id, True)
         case _:
             jump_to(do_nothing, event.source.user_id)
             try:
-                msg = aiAgent.run(event.message.text)
+                msg = aiAgent(event.message.text)['result']
                 jump_to(default_message, event.source.user_id, True)
                 # if you update aiAgent and method changed, update code here
                 return msg
@@ -50,6 +53,7 @@ def main_menu(event, aiAgent: LangChainAgent):
                 traceback.print_exc()
                 jump_to(default_message, event.source.user_id, True)
                 return 'error occur by chatbot ai'
+
 
 @chat_status("traffic message")
 @quick_reply("請選擇通勤項目")
@@ -61,6 +65,7 @@ def traffic_message(event):
         (dog_icon_url, '返回', '返回')
     ]
 
+
 @chat_status("traffic_menu")
 @text
 def traffic_menu(event):
@@ -70,12 +75,16 @@ def traffic_menu(event):
             return "請問你想要查什麼公車呢？"
         case '高鐵查詢/訂票':
             jump_to(hsr_util, event.source.user_id, False)
-            return "請問您想要訂哪一天什麼時間的高鐵票呢？"
+            from backenddb.appModel import find_hsr_data
+            hsr_data, founded = find_hsr_data(event.source.user_id)
+            warning_msg = "" if founded else "（您還沒設定高鐵訂票所需的個人資訊喔！）"
+            return "請問您想要訂哪一天什麼時間的高鐵票呢？" + warning_msg
         case '返回':
             jump_to(default_message, event.source.user_id, True)
             return
         case _:
             return '無此指令'
+
 
 @chat_status("update eeclass")
 @text
@@ -124,12 +133,47 @@ def eeclass_util(event):
 @chat_status("bus util")
 @text
 def bus_util(event):
-    # from . import busChatbot
-    # bus_agent_pool_instance = busChatbot.get_agent_pool_instance()
-    # agent = bus_agent_pool_instance.get(event.source.user_id)
-    # if agent is None:
-    #     agent = bus_agent_pool_instance.add(event.source.user_id)
-    #     agent.run("我要查詢公車")
-    # return agent.run(event.message.text)
-    jump_to(traffic_message, event.source.user_id, True)
-    return '請實作busChatbot功能'
+    from . import busChatbot
+    bus_agent_pool_instance = busChatbot.get_agent_pool_instance()
+    agent = bus_agent_pool_instance.get(event.source.user_id)
+    if agent is None:
+        agent = bus_agent_pool_instance.add(event.source.user_id)
+        agent.run("我要查詢公車")
+    return agent.run(event.message.text)
+
+@chat_status("ee_query_message")
+@button_group("EECLASS查詢項目", "請選擇要查詢的項目", "項目選單")
+def ee_query_message(event):
+    jump_to(kind_menu, event.source.user_id)
+    return [
+        '課程',
+        '作業',
+        '公告',
+        '教材'
+    ]
+
+@chat_status("kind_menu")
+@text
+def kind_menu(event):
+    match event.message.text:
+        case '課程':
+            jump_to(about_course, event.source.user_id, False)
+            return "請問你想要查什麼哪門課程呢？"
+        case '作業' | '公告' | '教材':
+            jump_to(about_course, event.source.user_id, False)
+            return f"請問您想要查詢關於哪一門課程相關的{event.message.text}呢？"
+        case '返回':
+            jump_to(default_message, event.source.user_id, True)
+            return
+        case _:
+            return '無此指令'
+
+@chat_status("about_kind")
+@text
+def about_course(event):
+    from . import eeclassBotTool
+    hsr_agent_pool_instance = eeclassBotTool.get_agent_pool_instance()
+    agent = hsr_agent_pool_instance.get()
+    if agent is None:
+        agent.run("我要查詢EECLASS資料")
+    return agent.run(event.message.text)
