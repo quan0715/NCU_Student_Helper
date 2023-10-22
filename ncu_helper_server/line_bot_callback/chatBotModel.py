@@ -1,4 +1,4 @@
-from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent
+from .chatBotExtension import chat_status, jump_to, text, button_group, do_nothing, state_ai_agent, quick_reply
 from typing import Tuple
 from eeclass_setting.models import LineUser
 from eeclass_setting.appModel import check_eeclass_update_pipeline, find_user_by_user_id
@@ -7,15 +7,19 @@ from django.conf import settings
 from .views import LineBotCallbackView as cb
 from .langChainAgent import LangChainAgent
 
+dog_icon_url = 'https://scontent.xx.fbcdn.net/v/t1.15752-9/387560636_1364784567461116_3708224130470311929_n.png?stp=cp0_dst-png&_nc_cat=108&ccb=1-7&_nc_sid=510075&_nc_ohc=S5L-rQ1y9RcAX9PYIpB&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQKnpWq0ikfumqNYbstXppxcr2WW48UmGkQgabRCkjJow&oe=655C13D9'
 
 @chat_status("default", default=True)
-@button_group('EECLASS HELPER', '輸入以下指令開啟下一步', '輸入以下指令開啟下一步')
-def default_message(event):
+@quick_reply('選擇指令開啟下一步')
+@state_ai_agent(LangChainAgent())
+def default_message(event, agent):
     jump_to(main_menu, event.source.user_id)
     return [
-        '資料設定',
-        'EECLASS查詢',
-        '交通查詢'
+        (dog_icon_url, '資料設定', '資料設定'),
+        (dog_icon_url, '課程查詢', '課程查詢'),
+        (dog_icon_url, '跟我閒聊', agent.run('請給我一個很白癡的問題')),
+        (dog_icon_url, 'EECLASS查詢', 'EECLASS查詢'),
+        (dog_icon_url, '交通查詢', '交通查詢')
     ]
 
 @chat_status("main menu")
@@ -48,13 +52,13 @@ def main_menu(event, aiAgent: LangChainAgent):
                 return 'error occur by chatbot ai'
 
 @chat_status("traffic message")
-@button_group("通勤項目", "請選擇通勤項目", "通勤項目選單")
+@quick_reply("請選擇通勤項目")
 def traffic_message(event):
     jump_to(traffic_menu, event.source.user_id)
     return [
-        '公車查詢',
-        '高鐵查詢/訂票',
-        '返回'
+        (dog_icon_url, '公車查詢', '公車查詢'),
+        (dog_icon_url, '高鐵查詢/訂票', '高鐵查詢/訂票'),
+        (dog_icon_url, '返回', '返回')
     ]
 
 @chat_status("traffic_menu")

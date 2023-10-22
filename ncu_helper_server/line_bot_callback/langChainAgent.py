@@ -11,11 +11,10 @@ from pydantic import BaseModel
 
 class DefaultTool(BaseTool):
     name = "DefaultTool"
-    description = "user this to response everything"
+    description = "you don't use this XD"
     return_direct = False
 
     def _run(self, *args: Any, **kwargs: Any) -> str:
-        print('你在使用白癡回答器')
         return '此問題不在我的能力範圍內'
 
 
@@ -61,7 +60,6 @@ class LangChainAgent:
         self.__update_agent()
 
     def run(self, message) -> str:
-        print('agent.run')
         return self.agent.run('#zh_tw\n'+message)
 
 
