@@ -7,10 +7,9 @@ from .eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCra
 from langchain.memory import ConversationBufferMemory
 from typing import Any, Coroutine, Optional, Type
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import os
 from datetime import date, timedelta, timezone
-from dotenv import load_dotenv
 import enum, random
 
 
@@ -47,10 +46,10 @@ class HomeworkTitleInput(BaseModel):
 
 
 class SpecificCourseName(BaseModel):
-    course_name:  = Field(description=f"This course name must be one of the {course}. It must be completely the same string.")
+    course_name: str = Field(description=f"This course name must be one of the course. It must be completely the same string.")
 
 class SpecificHomeworkName(BaseModel):
-    homework_title: HomeworkName = Field(description=f"This homework name must be one of the {homework}. It must be completely the same string.")
+    homework_title: str = Field(description=f"This homework name must be one of the homework. It must be completely the same string.")
 
 class HomeworkAlertInput(BaseModel):
     """Input for homework alert"""
@@ -59,63 +58,65 @@ class HomeworkAlertInput(BaseModel):
         description=f"Use to find the homeworks that is due between today - days_left days and today. Date format shoud be'YYYYMMDDTHHMMSS'. Current time is {date.today()}"
     )
 
-class SearchNearestCourseTitle(BaseTool):
-    name = "search_nearest_course_title"
-    description = "這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
-    @staticmethod
-    def get_course_full_name(course_name: str):
-        return course_name
-    
-    def _run(self, course_name: str):
-        result = SearchNearestCourseTitle.get_course_full_name(course_name)
-        return result
-    
-    args_schema: Optional[Type[BaseModel]] = SpecificCourseName
-
-class HomeworkContent(BaseTool):
-    name="Homework_content_recommendation"
-    description="這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
-
-    @staticmethod
-    def make_recommendation(hw_title: str):
-        for hw in dbc.get_homework():
-            if hw.title == hw_title:
-                return hw
-    def _run(self, hw_title: str) -> Any:
-        result = HomeworkContent.make_recommendation(hw_title)
-        return result
-    
-    args_schema: Optional[Type[BaseModel]] = SpecificHomeworkName
-
-class CoursetoHomework(BaseTool):
-    name = "Use_course_name_to_fetch_homework"
-    description = "這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
+def getSearchNearestCourseTitle(user_id: str):
+    class SearchNearestCourseTitle(BaseTool):
+        name = "search_nearest_course_title"
+        description = "這是一個EECLASS搜尋. 給定一個課程名稱，回傳與課程列表中最接近的一個字串"
+        @staticmethod
+        def get_course_full_name(course_name: str):
+            return course_name
         
-    @staticmethod
-    def course_to_hw(course_name: str):
-        dbc = EEClassNotionDBCrawler(
-            auth=AUTH,
-            page_id=PAGE_ID
-        )
-        course = dbc.get_all_courses()
-        homework = dbc.get_homework()
-        homework_list = dbc.get_homework()
-        filtered_homework_list = []
-        for hw in homework_list:
-            if hw.course == course_name.value:
-                filtered_homework_list.append(dict(
-                    title=hw.title,
-                    homework_type=hw.homework_type,
-                    deadline=hw.deadline,
-                    content=hw.content
-                ))
-        return filtered_homework_list
+        def _run(self, course_name: str):
+            result = SearchNearestCourseTitle.get_course_full_name(course_name)
+            return result
+        
+        args_schema: Optional[Type[BaseModel]] = SpecificCourseName
+    return SearchNearestCourseTitle
 
-    def _run(self, course_name: str):
-        result = CoursetoHomework.course_to_hw(course_name)
-        return result
-    
-    args_schema: Optional[Type[BaseModel]] = SpecificCourseName
+def getHomeworkContent(user_id: str):
+    class HomeworkContent(BaseTool):
+        name="Homework_content_recommendation"
+        description="這是一個EECLASS搜尋. Please give an idea from the homework content and summarize all the detail."
+
+        @staticmethod
+        def make_recommendation(hw_title: str):
+            dbc = get_agent_pool_instance().get_db(user_id)
+            for hw in dbc.get_homework():
+                if hw.title == hw_title:
+                    return hw
+        def _run(self, hw_title: str) -> Any:
+            result = HomeworkContent.make_recommendation(hw_title)
+            return result
+        
+        args_schema: Optional[Type[BaseModel]] = SpecificHomeworkName
+    return HomeworkContent
+
+def getCoursetoHomework(user_id: str):
+    class CoursetoHomework(BaseTool):
+        name = "Use_course_name_to_fetch_homework"
+        description = "這是一個EECLASS搜尋. User will input a course name, and please return all the homework in that course."
+            
+        @staticmethod
+        def course_to_hw(course_name: str):
+            dbc = get_agent_pool_instance().get_db(user_id)
+            homework_list = dbc.get_homework()
+            filtered_homework_list = []
+            for hw in homework_list:
+                if hw.course == course_name.value:
+                    filtered_homework_list.append(dict(
+                        title=hw.title,
+                        homework_type=hw.homework_type,
+                        deadline=hw.deadline,
+                        content=hw.content
+                    ))
+            return filtered_homework_list
+
+        def _run(self, course_name: str):
+            result = CoursetoHomework.course_to_hw(course_name)
+            return result
+        
+        args_schema: Optional[Type[BaseModel]] = SpecificCourseName
+    return CoursetoHomework
 
 def getBulletinRetrieve(user_id):
     class BulletinRetrieve(BaseTool):
@@ -246,8 +247,8 @@ class eeAgentPool:
         agent = self.pool[user_id] = LangChainAgent(
             tools=[
                     getEETool(user_id),
-                    HomeworkRetrieve(),
-                    BulletinRetrieve(),
+                    getHomeworkRetrieve(user_id),
+                    getBulletinRetrieve(user_id),
                     # CoursetoHomework(),
                     # HomeworkContent(),
                     # SearchNearestCourseTitle(),
@@ -289,7 +290,11 @@ class eeAgentPool:
     
     def get_courseType(self):
         return self.homeworkType
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 2e653a6db0dfe811e134bf65e3830fac8c602b25
 
 __ee_agent_pool_instance = eeAgentPool()
 def get_agent_pool_instance():
