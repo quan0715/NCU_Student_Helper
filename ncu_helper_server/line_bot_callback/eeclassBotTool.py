@@ -2,7 +2,7 @@ import time
 from langchain.tools import BaseTool
 from NotionBot import *
 from NotionBot.base.Database import *
-from .eeclass_notion_db_crawler.EEClassNotionDBCrawler import EEClassNotionDBCrawler
+from .eeclass_notion_db_crawler.eeclass_notion_db_crawler import EEClassNotionDBCrawler
 
 from langchain.memory import ConversationBufferMemory
 from typing import Any, Coroutine, Optional, Type
