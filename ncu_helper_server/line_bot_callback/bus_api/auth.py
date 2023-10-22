@@ -1,6 +1,6 @@
 import os
-
 import requests
+from django.conf import settings
 
 
 class Auth:
@@ -12,8 +12,8 @@ class Auth:
         auth_header = {'content-type': 'application/x-www-form-urlencoded'}
         auth_data = {
             'grant_type': 'client_credentials',
-            'client_id': os.getenv('CLIENT_ID'),
-            'client_secret': os.getenv('CLIENT_SECRET')
+            'client_id': settings.BUS_CLIENT_ID,
+            'client_secret': settings.BUS_CLIENT_SECRET
         }
         Auth.access_token = requests.post(auth_url, data=auth_data, headers=auth_header).json()['access_token']
 

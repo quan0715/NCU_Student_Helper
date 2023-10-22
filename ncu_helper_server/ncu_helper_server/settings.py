@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'line_bot_callback',
+    'line_bot_callback.bus_api',
     'notion_auth',
     'eeclass_setting',
     'scheduling',
@@ -141,6 +142,8 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 FRONT_END_WEB_URL = os.getenv("FRONT_END_WEB_URL")
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
+BUS_CLIENT_ID = os.getenv("BUS_CLIENT_ID")
+BUS_CLIENT_SECRET = os.getenv("BUS_CLIENT_SECRET")
 
 SERVER = os.getenv("SERVER")
 WEB_SERVER = os.getenv("WEB_SERVER")

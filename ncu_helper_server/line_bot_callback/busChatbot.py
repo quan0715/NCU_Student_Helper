@@ -7,7 +7,7 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Type, Any
 from uuid import uuid4
-from bus_api.api import BusAPI
+from .bus_api.api import BusAPI
 
 
 def set_exit_state(user_id: str) -> None:
@@ -59,25 +59,29 @@ class BusInfoInput(BaseModel):
 
 class BusInfoTool(BaseTool):
     name = "BusInfoTool"
-    description = "Useful to get when the bus will arrive the bus stop. You have to ask the user '要搭哪條路線？', '要查哪個車站？', '是要前往中央大學還是離開？'."
+    description = "Useful to get when the bus will arrive the bus stop. You have to ask the user '要搭哪條路線的哪個車站？' and '要前往中央大學還是離開？'."
+
     args_schema: Optional[Type[BaseModel]] = BusInfoInput
 
     def _run(self, line: BusLine, stop: str, direction: int) -> str:
         if line == BusLine.other:
             return f"Error! The `line` is not found, it should be in {list(map(lambda x: x.value, BusLine))}"
-        stop_list = BusAPI.get_all_stops(line)
+        stop_list = list(BusAPI.get_all_stops(line))
+
+        print(stop_list)
 
         parser = EnumOutputParser(
-            enum=Enum("StopEnum", {"u_" + str(uuid4()): x for x in stop_list}))
+            enum=Enum("StopEnum", {"u_" + str(i): stop_list[i] for i in range(len(stop_list))}),
+            extra_prompts=["Precise matching is not required"])
         try:
             stop = parser.parse(stop).value
         except:
-            return "Error! The `stop` is not exist in `line`"
+            return f"Error! The `stop` is not exist in `line`, it should be in {stop_list}"
 
         infos = BusAPI.get_bus_data(line, direction)
         for info in infos:
             if info.stop_name == stop:
-                return f"The bus will arrive at {info.next_bus_time}, and the satus is {info.stop_status}"
+                return f"The bus will arrive at {info.next_bus_time} (convert to human language), and the satus is {info.stop_status}."
 
         return "Error! Cannot find the bus info."
 
