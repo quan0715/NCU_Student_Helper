@@ -13,8 +13,6 @@ from datetime import date, timedelta, timezone
 from dotenv import load_dotenv
 import enum, random
 
-CourseName = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
-HomeworkName = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
 
 def set_exit_state() -> None:
     from .chatBotModel import default_message
@@ -169,8 +167,7 @@ def getHomeworkAlertTool(user_id):
             if days_left == 1000:
                 return ["我也不知道誒"]
             dbc = get_agent_pool_instance().get_db(user_id)
-            course = dbc.get_all_courses()
-            homework = dbc.get_homework()
+            
             notion_bot = Notion(get_agent_pool_instance().get_auth(user_id))
             homework_db: Database = notion_bot.get_database(notion_bot)
             now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
@@ -229,6 +226,8 @@ class eeAgentPool:
         self.pool: dict[str, LangChainAgent] = {}
         self.db: dict[str, EEClassNotionDBCrawler] = {}
         self.auth = {}
+        self.course = {}
+        self.homework = {}
 
 
     def get(self, user_id: str) -> LangChainAgent | None:
@@ -262,12 +261,22 @@ class eeAgentPool:
             auth=AUTH,
             page_id=PAGE_ID
         )
+        course = self.db.get_all_courses()
+        homework = self.db.get_homework()
+        self.course = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
+        self.homework = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
 
     def get_db(self, user_id: str) -> EEClassNotionDBCrawler:
         return self.db[user_id]
     
     def get_auth(self, user_id):
         return self.auth[user_id]
+    
+    def get_course(self, user_id):
+        return self.course[user_id]
+    
+    def get_homework(self, user_id):
+        return self.homework[user_id]
 
 
 __ee_agent_pool_instance = eeAgentPool()
