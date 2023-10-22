@@ -12,16 +12,6 @@ import os
 from datetime import date, timedelta, timezone
 from dotenv import load_dotenv
 import enum, random
-load_dotenv()
-AUTH=os.getenv("NOTION_AUTH")
-PAGE_ID=os.getenv("PAGE_ID")
-
-dbc = EEClassNotionDBCrawler(
-    auth=AUTH,
-    page_id=PAGE_ID
-)
-course = dbc.get_all_courses()
-homework = dbc.get_homework()
 
 CourseName = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in course})
 HomeworkName = enum.Enum('a', {'a'+str(random.randint(0,10000000)): c for c in homework})
@@ -109,6 +99,8 @@ class CoursetoHomework(BaseTool):
             auth=AUTH,
             page_id=PAGE_ID
         )
+        course = dbc.get_all_courses()
+        homework = dbc.get_homework()
         homework_list = dbc.get_homework()
         filtered_homework_list = []
         for hw in homework_list:
@@ -145,56 +137,65 @@ class BulletinRetrieve(BaseTool):
         result = BulletinRetrieve.get_bulletin_db()
         return result
 
+def get_HomeworkRetrieve(user_id: str):
+    class HomeworkRetrieve(BaseTool):
+        # name = "Homework_Content_Recommendation_system"
+        # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
+        name = "search_all_homework"
+        description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
+        @staticmethod
+        def get_homework_db(user_id: str):
+            homeworks = []
+            for hw in dbc.get_homework()[:10]:
+                homeworks.append(dict(
+                        title=hw.title,
+                        homework_type=hw.homework_type,
+                        deadline=hw.deadline,
+                        content=hw.content
+                    ))
+            return homeworks
 
-class HomeworkRetrieve(BaseTool):
-    # name = "Homework_Content_Recommendation_system"
-    # description = f"User will give only homework name or course name with homework name. Please make some detail recommendation to each homework content. Or give some useful idea on each content. Or what it is about. You can summarize it. By the way, current time is {date.today()}"
-    name = "search_all_homework"
-    description = f"這是一個EECLASS搜尋. 請幫忙搜尋所有課程相關的作業，並回傳搜尋結果. By the way, current time is {date.today()}"
-    @staticmethod
-    def get_homework_db():
-        homeworks = []
-        for hw in dbc.get_homework()[:10]:
-            homeworks.append(dict(
-                    title=hw.title,
-                    homework_type=hw.homework_type,
-                    deadline=hw.deadline,
-                    content=hw.content
-                ))
-        return homeworks
+        def _run(self, *args, **kargs):
+            result = self.get_homework_db()
+            return result
+    return HomeworkRetrieve
 
-    def _run(self, *args, **kargs):
-        result = self.get_homework_db()
-        return result
-    
-class HomeworkAlertTool(BaseTool):
-    name = "Homework_alert_submission_system"
-    description = "這是一個EECLASS搜尋. Check whether there are any homeworks that is close to end date but not submitted."
+def get_HomeworkAlertTool(user_id: str):
+    class HomeworkAlertTool(BaseTool):
+        name = "Homework_alert_submission_system"
+        description = "這是一個EECLASS搜尋. Check whether there are any homeworks that is close to end date but not submitted."
 
-    @staticmethod
-    def get_alert_homework(days_left: int=1000) -> List[str]:
-        if days_left == 1000:
-            return ["我也不知道誒"]
-        load_dotenv()
-        auth = os.getenv("NOTION_AUTH")
-        notion_bot = Notion(auth)
-        homework_db: Database = notion_bot.get_database(os.getenv("HOMEWORK_DB"))
-        now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
-        alert_list = []
-        for h in homework_db.query():
-            end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
-            submission_status = h['properties']['Status']['select']['name']
-            course = h['properties']['Course']['select']['name']
-            homework_title = h['properties']['Title']['title'][0]['plain_text']
-            if submission_status == "未完成" and now <= end_date <= now+timedelta(days=days_left):
-                alert_list.append(f"課程: {course}\n作業: {homework_title}\n剩餘時間: {str(end_date-now)}\n")
-        return alert_list
+        @staticmethod
+        def get_alert_homework(days_left: int=1000, user_id: str) -> List[str]:
+            if days_left == 1000:
+                return ["我也不知道誒"]
+            dbc = EEClassNotionDBCrawler(
+                auth=AUTH,
+                page_id=PAGE_ID
+            )
+            course = dbc.get_all_courses()
+            homework = dbc.get_homework()
+            load_dotenv()
+            auth = os.getenv("NOTION_AUTH")
+            notion_bot = Notion(auth)
+            homework_db: Database = notion_bot.get_database(os.getenv("HOMEWORK_DB"))
+            now = datetime.strptime(datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M"), "%Y-%m-%d %H:%M")
+            alert_list = []
+            for h in homework_db.query():
+                end_date = datetime(*time.strptime(h['properties']['Deadline']['date']['end'], "%Y-%m-%dT%H:%M:%S.000+00:00")[:6])
+                submission_status = h['properties']['Status']['select']['name']
+                course = h['properties']['Course']['select']['name']
+                homework_title = h['properties']['Title']['title'][0]['plain_text']
+                if submission_status == "未完成" and now <= end_date <= now+timedelta(days=days_left):
+                    alert_list.append(f"課程: {course}\n作業: {homework_title}\n剩餘時間: {str(end_date-now)}\n")
+            return alert_list
 
-    def _run(self, days_left: int):
-        result = self.get_alert_homework(days_left)
-        return "--------split--------\n".join(result)
-    
-    args_schema: Optional[Type[BaseModel]] = HomeworkAlertInput
+        def _run(self, days_left: int):
+            result = self.get_alert_homework(days_left)
+            return "--------split--------\n".join(result)
+        
+        args_schema: Optional[Type[BaseModel]] = HomeworkAlertInput
+    return HomeworkAlertTool
         
     # open_ai_agent.run("請問10天內有作業要交嗎?")
     # open_ai_agent.run("請問什麼是作業?")
@@ -211,7 +212,7 @@ from .langChainAgent import LangChainAgent
 def getEETool(user_id: str):
     class eeAgentPool(BaseTool):
         name = "EECLASS_query_system"
-        description = "Useful to get EECLASS data by using "
+        description = "Useful to get EECLASS data by using it."
 
         def _run(self) -> Any:
             request = requests.get(
@@ -238,13 +239,13 @@ class eeAgentPool:
         agent = LangChainAgent(
             tools=[
                     getEETool(user_id),
-                    HomeworkRetrieve(),
-                    BulletinRetrieve(),
-                    CoursetoHomework(),
-                    HomeworkContent(),
-                    SearchNearestCourseTitle(),
-                    HomeworkAlertTool(),
-                    ExitTool()
+                    get_HomeworkRetrieve(user_id),
+                    get_BulletinRetrieve(user_id),
+                    get_CoursetoHomework(user_id),
+                    get_HomeworkContent(user_id),
+                    get_SearchNearestCourseTitle(user_id),
+                    get_HomeworkAlertTool(user_id),
+                    get_ExitTool(user_id)
                 ],
                 memory=ConversationBufferMemory(
                 memory_key="ee", return_messages=True),
